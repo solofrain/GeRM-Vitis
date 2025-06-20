@@ -1,8 +1,8 @@
-#include "GeRM.hpp"
+#include "GermaniumDetector.hpp"
 
 int main()
 {
-    GeRM det;
+    GermaniumDetector det;
 
     det.network_init();
     det.queue_init();

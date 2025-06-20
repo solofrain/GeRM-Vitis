@@ -1,6 +1,8 @@
 *
 
 !*.py
+vitis_journal.py
+
 !README.md
 !/.gitignore
 

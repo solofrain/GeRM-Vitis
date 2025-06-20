@@ -1,8 +1,10 @@
+import os
 import vitis
 
-client = vitis.create_client()
+pwd = os.getcwd()
 
-client.set_workspace(path="/data/work/fpga/prj/germ-vitis")
+client = vitis.create_client()
+client.set_workspace(path=pwd)
 
 #platform = client.get_component(name="GeRM-192-384")
 
