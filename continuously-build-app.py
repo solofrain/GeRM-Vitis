@@ -1,6 +1,16 @@
-import time
 import os
+import time
 from pathlib import Path
+
+import vitis
+
+pwd = os.getcwd()
+
+client = vitis.create_client()
+client.set_workspace(path=pwd)
+
+app = client.get_component(name="ZynqDetector")
+
 
 # === Config ===
 
@@ -11,8 +21,12 @@ directories_to_watch = [
 ]
 
 discrete_files = [
-    "./ZynqDetector/src/detector_main.cpp",
-    "./ZynqDetector/src/UserConfig.cmake"
+	"./ZynqDetector/src/app.yaml",
+	"./ZynqDetector/src/CMakeLists.txt",
+	"./ZynqDetector/src/compile_commands.json",
+	"./ZynqDetector/src/lscript.ld",
+    "./ZynqDetector/src/UserConfig.cmake",
+    "./ZynqDetector/src/detector_main.cpp"
 ]
 
 POLL_INTERVAL = 1  # seconds
@@ -21,13 +35,18 @@ POLL_INTERVAL = 1  # seconds
 
 def get_all_files( directories_to_watch, discrete_files ):
     from pathlib import Path
+
+    allowed_extensions = {".cpp", ".hpp", ".tpp"}
     all_files = set()
+
     for d in directories_to_watch:
         for f in Path(d).rglob("*"):
-            if f.is_file():
+            if f.is_file() and f.suffix in allowed_extensions:
                 all_files.add(str(f.resolve()))
+
     for f in discrete_files:
         all_files.add(str(Path(f).resolve()))
+
     return all_files
 
 # === Track last modification times ===
@@ -37,8 +56,17 @@ def build_mtime_map(files):
 
 # === Your action on change ===
 
-def on_change():
-    print( "Rebuilding ZynqDetector..." )
+def on_change( app ):
+    
+    from datetime import datetime
+
+    print( "\n\n\n\n\n\n\n\n" )
+    print("\033c", end="")
+    print( "========================================================================" )
+    print( f"==  ZynqDetector source file(s) changed  @ {datetime.now()} ==" )
+    print( "==                          Rebuilding...                             ==" )
+    print( "========================================================================" )
+    #app.clean()  # enable if platform updated
     app.build()
 
 # === Poll loop ===
@@ -57,7 +85,7 @@ try:
             print("📁 File added or removed.")
             watched_files = current_files
             last_mtimes = build_mtime_map(watched_files)
-            on_change()
+            on_change( app )
             continue
 
         # Check for modified files
@@ -72,7 +100,7 @@ try:
                 break
 
         if changed:
-            on_change()
+            on_change( app )
             last_mtimes = build_mtime_map(watched_files)
 
 except KeyboardInterrupt:

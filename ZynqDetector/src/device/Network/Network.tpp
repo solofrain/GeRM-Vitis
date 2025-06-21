@@ -1,43 +1,83 @@
-#include "FreeRTOS.h"
+#pragma once
 
-#include "Network.hpp"
+extern "C" {
+#include "lwip/tcpip.h"
+#include "lwip/sockets.h"
+#include "lwip/netif.h"
+#include "lwip/ip_addr.h"
+#include "lwip/inet.h"
+}
+
 #include "Logger.hpp"
 
-Network::Network
-	( uint32_t udp_port
-	)
-    : udp_port_ ( udp_port )
+template <typename Owner>
+Network<Owner>::Network( Owner* owner, uint32_t udp_port )
+	                   : owner_    ( owner )
+                       , udp_port_ ( udp_port )
 {}
 
 //===============================================================
 // Network initialization.
 //===============================================================
-Network::network_init()
+
+template <typename Owner>
+void Network<Owner>::tcpip_init_done(void *arg)
 {
+    if (arg)
+    {
+        *((char *)arg) = 1;
+    }
+}
+
+
+template <typename Owner>
+void Network<Owner>::network_init()
+{
+    int setup = 0;
+
+        // Initialize lwIP stack (TCP/IP thread + netif)
+
+    lwip_init();
+
+
+    /* Add network interface to the netif_list, and set it as default */
+    if (!xemac_add( &netif_,
+                    NULL,
+                    NULL,
+                    NULL,
+                    mac_addr_,
+                    PLATFORM_EMAC_BASEADDR) )
+    {
+        xil_printf("Error adding network interface\r\n");
+        return;
+    }
+
+    netif_set_default( &netif_ );
+
+    /* specify that the network if is up */
+    netif_set_up( &netif_ );
+
     read_network_config( "config" );
 
-    struct freertos_sockaddr sock_addr;
-    sock_addr.sin_port = FreeRTOS_htons( udp_port_ );
-    sock_addr.sin_addr = FreeRTOS_inet_addr( ip_addr_ );
 
-    // Initialize the FreeRTOS+TCP stack
-    FreeRTOS_IPInit( ip_addr_, netmask_, gateway_, dns_, mac_address_ );
-
-    // Create a UDP socket
-    udp_socket_ = FreeRTOS_socket( FREERTOS_AF_INET, FREERTOS_SOCK_DGRAM, FREERTOS_IPPROTO_UDP );
-
-    if ( socket < 0 )
+    if ( ( sock_ = socket( AF_INET, SOCK_DGRM, 0 ) ) < 0 )
     {
-        throw std::runtime_error( "Failed to create socket!" );
-        //std::cerr << "Failed to create socket (error )" << socket << '\n';
+        log_err( "Failed to create socket." );
+        return;
     }
 
-    // Bind the socket to the UDP port
-    if ( FreeRTOS_bind( socket, &sock_addr, sizeof( sock_addr ) ) < 0 )
+    memset( &sock_addr_, 0, sizeof(struct sockaddr_in) );
+    sock_addr_.sin_family      = AF_INET;
+    sock_addr_.sin_port        = htons(UDP_CONN_PORT);
+    sock_addr_.sin_addr.s_addr = htonl(INADDR_ANY);
+
+    if ( bind( sock_, (struct sockaddr *)&sock_addr_, sizeof(sock_addr_) != ERR_OK) )
     {
-        throw std::runtime_error( "Failed to bind the socket to the port!" );
-        //std::cerr << "Failed to bind the socket to the port (error )" << socket << '\n';
+        log_error( "Error on bind" );
+        close( sock_ );
+        return;
     }
+
 }
 //==============================================================
 
@@ -50,7 +90,8 @@ Network::network_init()
 // - DNS server
 // - MAC address
 //===============================================================
-void Network::read_network_config( const std::string& filename )
+template <typename Owner>
+void Network<Owner>::read_network_config( const std::string& filename )
 {
     FATFS fs;    // File system object
     FRESULT res; // Result code
@@ -98,26 +139,53 @@ void Network::read_network_config( const std::string& filename )
         std::string key, value;
 
         stream >> key >> value;
-        if ( key == "ip-address" && !string_to_addr(value, ip_addr.begin() ) )
-        {
-            throw NetException( "Invalid IP address format", value );
-        }
-        else if ( key == "netmask" && !string_to_addr( value, netmask.begin() ) )
-        {
-            throw NetException( "Invalid netmask format", value );
-        }
-        else if ( key == "gateway" && !string_to_addr( value, gateway.begin() ) )
-        {
-            throw NetException( "Invalid gateway format", value );
-        }
-        else if ( key == "dns" && !string_to_addr( value, dns.begin() ))
-        {
-            throw NetException( "Invalid DNS format", value );
-        }
-        else if ( key == "mac-address" && !string_to_addr( value, mac_addr.begin() ) )
-        {
-            throw NetException( "Invalid MAC address format", value );
-        }
+
+        //if ( key == "ip-address" && !string_to_addr(value, ip_addr.begin() ) )
+        //{
+        //    throw NetException( "Invalid IP address format", value );
+        //}
+        //else if ( key == "netmask" && !string_to_addr( value, netmask.begin() ) )
+        //{
+        //    throw NetException( "Invalid netmask format", value );
+        //}
+        //else if ( key == "gateway" && !string_to_addr( value, gateway.begin() ) )
+        //{
+        //    throw NetException( "Invalid gateway format", value );
+        //}
+        //else if ( key == "dns" && !string_to_addr( value, dns.begin() ))
+        //{
+        //    throw NetException( "Invalid DNS format", value );
+        //}
+        //else if ( key == "mac-address" && !string_to_addr( value, mac_addr.begin() ) )
+        //{
+        //    throw NetException( "Invalid MAC address format", value );
+        //}
+
+        if ( key == "ip-address" )
+            if ( !inet_aton(value, ip_addr_ ) )
+            {
+                throw NetException( "Invalid IP address format", value );
+            }
+        else if ( key == "netmask" )
+            if ( !inet_aton( value, netmask_ ) )
+            {
+                throw NetException( "Invalid netmask format", value );
+            }
+        else if ( key == "gateway" )
+            if ( !inet_aton( value, gateway_ ) )
+            {
+                throw NetException( "Invalid gateway format", value );
+            }
+        else if ( key == "dns" )
+            if ( !inet_aton( value, dns_ ) )
+            {
+                throw NetException( "Invalid DNS format", value );
+            }
+        else if ( key == "mac-address" )
+            if ( !string_to_addr( value, mac_addr.begin() ) )
+            {
+                throw NetException( "Invalid MAC address format", value );
+            }
 
         memset( buff, sizeof( buff ), 0 );
         buff_index = 0;
@@ -132,7 +200,11 @@ void Network::read_network_config( const std::string& filename )
 //===============================================================
 // Convert a string to an IP/MAC address.
 //===============================================================
-bool Network::string_to_addr( const std::string& addr_str, uint8_t* addr )
+template <typename Owner>
+bool Network<Owner>::string_to_addr(
+    const std::string& addr_str,
+    uint8_t* addr
+)
 {
     std::stringstream ss( addr_str );
 
@@ -186,9 +258,12 @@ bool Network::string_to_addr( const std::string& addr_str, uint8_t* addr )
 //===============================================================
 // Create Tx and Rx tasks
 //===============================================================
-void Network::create_network_tasks( TaskHandle_t udp_rx_task_handle,
-                                    TaskHandle_t udp_tx_task_handle
-							      )
+template <typename Owner>
+void Network<Owner>::create_network_tasks
+(
+    TaskHandle_t udp_rx_task_handle,
+    TaskHandle_t udp_tx_task_handle
+)
 {
     auto task_func = std::make_unique<std::function<void()>>([this]() { udp_rx_task(); });
     xTaskCreate( task_wrapper, "UDP Rx", 1000, &task_func, 1, udp_rx_task_handle );
@@ -201,7 +276,8 @@ void Network::create_network_tasks( TaskHandle_t udp_rx_task_handle,
 //===============================================================
 // UDP receive task.
 //===============================================================
-void Network::udp_rx_task()
+template <typename Owner>
+void Network<Owner>::udp_rx_task()
 {
     UDPRxMsg msg;
     uint32_t msg_leng;
@@ -243,7 +319,8 @@ void Network::udp_rx_task()
 //===============================================================
 // UDP transmit task.
 //===============================================================
-void Network::udp_tx_task()
+template <typename Owner>
+void Network<Owner>::udp_tx_task()
 {
     uint16_t msg_leng, tx_length;
     UDPTxMsg msg;
@@ -270,7 +347,8 @@ void Network::udp_tx_task()
 //===============================================================
 // UDP Rx message processing.
 //===============================================================
-void Network::rx_msg_proc( std::any& msg )
+template <typename Owner>
+void Network<Owner>::rx_msg_proc( std::any& msg )
 {
     //int instr = msg.op && 0x7FFF;
     auto it = rx_msg_map_.find(msg.op && 0x7FFF);

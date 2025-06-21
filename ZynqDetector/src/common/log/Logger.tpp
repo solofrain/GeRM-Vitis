@@ -1,0 +1,116 @@
+#pragma once
+
+#include "xil_printf.h"
+#include <cstdarg>
+#include <cstdio>
+
+
+template <typename Owner>
+Logger<Owner>::Logger( std::shared_ptr<Register<Owner>> reg )
+    : reg_(reg)
+    , control_word_(0x01)
+{
+    mutex_ = xSemaphoreCreateMutex();
+    
+    if ( mutex_ == NULL )
+    {
+        log_error("Failed to create Logger control mutex.\n");
+    }
+}
+
+template <typename Owner>
+void Logger<Owner>::set_log_control(uint8_t control)
+{
+    control_word_ = control | 0x01;
+}
+
+template <typename Owner>
+uint8_t Logger<Owner>::read_log_control()
+{
+    return control_word_;
+}
+
+template <typename Owner>
+void Logger<Owner>::log_error(uint32_t error_code, const char *format, ...)
+{
+    reg_->set_status(error_code);
+
+    va_list args;
+    va_start(args, format);
+    log_va(LOG_ERROR_TYPE, RED_TEXT, format, args);
+    va_end(args);
+}
+
+template <typename Owner>
+void Logger<Owner>::log_warn(const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    log_va(LOG_WARN_TYPE, YELLOW_TEXT, format, args);
+    va_end(args);
+}
+
+template <typename Owner>
+void Logger<Owner>::log_debug(const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    log_va(LOG_DEBUG_TYPE, RESET_TEXT, format, args);
+    va_end(args);
+}
+
+template <typename Owner>
+void Logger<Owner>::log(LogType type, const char *format, ...)
+{
+    if (type & control_word_)
+    {
+        va_list args;
+        va_start(args, format);
+        log_va(type, nullptr, format, args);
+        va_end(args);
+    }
+}
+
+template <typename Owner>
+void Logger<Owner>::log(LogType type, char* color, const char *format, ...)
+{
+    if (type & control_word_)
+    {
+        va_list args;
+        va_start(args, format);
+        log_va(type, color, format, args);
+        va_end(args);
+    }
+}
+
+template <typename Owner>
+void Logger<Owner>::xvprintf(const char* format, va_list args)
+{
+    char buf[256];
+    vsnprintf(buf, sizeof(buf), format, args);
+    xil_printf("%s", buf);
+}
+
+
+// Private helper method to centralize va_list handling and actual printing
+template <typename Owner>
+void Logger<Owner>::log_va(LogType type, const char* color, const char *format, va_list args)
+{
+    if ( type & control_word_ )
+    {
+        // Print color code if provided
+        if (color)
+            xil_printf("%s", color);
+
+        // Print prefix, e.g., "[ERROR] file.cpp:123: "
+        xil_printf(log_leaders_[log_type_to_index(type)], __FILE__, __LINE__);
+
+        // Print actual log message
+        xvprintf(format, args);
+
+        // Reset color if applied
+        if (color)
+            xil_printf("%s", RESET_TEXT);
+    }
+}
+

@@ -7,17 +7,40 @@
 #include <any>
 #include <map>
 
-#include "ZynqDetector.hpp"
+extern "C" {
+#include "netif/xadapter.h"
+#include "lwipopts.h"
+#include "lwip/err.h"
+#include "lwip/inet.h"
+#include "lwip/init.h"
+#include "lwip/ip_addr.h"
+#pragma message("sockaddr_in defined?")  // Add above the include
+#include "lwip/sockets.h"
+#pragma message("Size of sockaddr_in: " << sizeof(struct sockaddr_in))
+#include "lwip/sys.h"
+#include "lwip/udp.h"
+#include "errno.h"
+}
 
+//#include "ZynqDetector.hpp"
+
+template <typename Owner>
 class Network
 {
+private:
+    Owner* owner_;
+
 protected:
     uint32_t udp_port_;
 
-    uint8_t ip_addr_[4];
-    uint8_t netmask_[4];
-    uint8_t gateway_[4];
-    uint8_t dns_[4];
+    struct netif netif_;
+    int sock_;
+    struct sockaddr_in sock_addr_;
+
+    //uint8_t ip_addr_[4];
+    //uint8_t netmask_[4];
+    //uint8_t gateway_[4];
+    //uint8_t dns_[4];
     uint8_t mac_addr_[6];
 
 //    socket_t xUDPSocket;
@@ -33,6 +56,7 @@ protected:
     virtual void msg_map_init() = 0;
 
     void read_network_config( const std::string& filename );
+    static void tcpip_init_done( void *arg );
     bool string_to_addr( const std::string& addr_str, uint8_t* addr );
     
     virtual void udp_rx_task();
@@ -63,10 +87,11 @@ public:
         uint32_t data[MAX_UDP_MSG_DATA_LENG >> 2];
     } UDPTxMsg;
 
-    explicit Network( int udp_port );
+    explicit Network( Owner* owner, uint32_t udp_port );
     void network_init();
     void create_network_tasks( TaskHandle_t udp_rx_task_handle,
 	                           TaskHandle_t udp_tx_task_handle
 						     );
 };
  
+ #include "Network.tpp"

@@ -1,3 +1,5 @@
+#pragma once
+
 // C++ includes
 #include <cstddef>
 #include <iterator>
@@ -17,7 +19,7 @@
 #include "xparameters.h"
 
 // Project includes
-#include "ZynqDetector.hpp"
+//#include "ZynqDetector.hpp"
 //#include "pynq_ssd_msg.hpp"
 
 #define TIMER_ID	1
@@ -121,35 +123,35 @@ void ZynqDetector::register_single_access_request_process( udp_rx_msg_t& msg )
 //===============================================================
 
 
-//===============================================================
-// This task performs single register read/write operation.
-//===============================================================
-void ZynqDetector::reg_access_task( void *pvParameters )
-{
-    reg_access_req_t  req;
-    reg_access_resp_t resp;
-
-    auto param = static_cast<reg_access_task_param_t*>(pvParameters);
-
-    while(1)
-    {
-        xQueueReceive( 	static_cast<QueueHandle_t*>(pvParameters),
-						&req,
-						portMAX_DELAY );
-        
-        if ( req.read )
-        {
-            resp.op = req.op;
-            resp.data = reg_rd ( req );
-            xQueueSend( (QueueHandle_t*)resp,
-                        )
-        }
-        else
-        {
-            reg_wr( req.addr, req.data );
-        }
-    }
-}
+////===============================================================
+//// This task performs single register read/write operation.
+////===============================================================
+//void ZynqDetector::reg_access_task( void *pvParameters )
+//{
+//    reg_access_req_t  req;
+//    reg_access_resp_t resp;
+//
+//    auto param = static_cast<reg_access_task_param_t*>(pvParameters);
+//
+//    while(1)
+//    {
+//        xQueueReceive( 	static_cast<QueueHandle_t*>(pvParameters),
+//						&req,
+//						portMAX_DELAY );
+//        
+//        if ( req.read )
+//        {
+//            resp.op = req.op;
+//            resp.data = reg_rd ( req );
+//            xQueueSend( (QueueHandle_t*)resp,
+//                        )
+//        }
+//        else
+//        {
+//            reg_wr( req.addr, req.data );
+//        }
+//    }
+//}
 //===============================================================
 
 /*
