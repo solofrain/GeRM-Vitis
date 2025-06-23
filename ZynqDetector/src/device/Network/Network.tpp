@@ -8,7 +8,23 @@ extern "C" {
 #include "lwip/inet.h"
 }
 
+#include "ff.h"  // FatFS
+
+// To resolve the conflictions of read/write definition in socket.h and sstream
+#ifdef read
+#undef read
+#endif
+
+#ifdef write
+#undef write
+#endif
+
+#include <stdexcept>
+#include <sstream>
+#include <string>
+
 #include "Logger.hpp"
+#include "task_wrap.hpp"
 
 template <typename Owner>
 Network<Owner>::Network( Owner* owner, uint32_t udp_port )
@@ -46,7 +62,7 @@ void Network<Owner>::network_init()
                     NULL,
                     NULL,
                     mac_addr_,
-                    PLATFORM_EMAC_BASEADDR) )
+                    XPAR_XEMACPS_0_BASEADDR )) //PLATFORM_EMAC_BASEADDR) )
     {
         xil_printf("Error adding network interface\r\n");
         return;
@@ -60,20 +76,20 @@ void Network<Owner>::network_init()
     read_network_config( "config" );
 
 
-    if ( ( sock_ = socket( AF_INET, SOCK_DGRM, 0 ) ) < 0 )
+    if ( ( sock_ = socket( AF_INET, SOCK_DGRAM, 0 ) ) < 0 )
     {
-        log_err( "Failed to create socket." );
+        *owner_.logger.log_err( "Failed to create socket." );
         return;
     }
 
     memset( &sock_addr_, 0, sizeof(struct sockaddr_in) );
     sock_addr_.sin_family      = AF_INET;
-    sock_addr_.sin_port        = htons(UDP_CONN_PORT);
+    sock_addr_.sin_port        = htons(UDP_PORT);
     sock_addr_.sin_addr.s_addr = htonl(INADDR_ANY);
 
     if ( bind( sock_, (struct sockaddr *)&sock_addr_, sizeof(sock_addr_) != ERR_OK) )
     {
-        log_error( "Error on bind" );
+        *owner_.logger.log_error( "Error on bind" );
         close( sock_ );
         return;
     }
@@ -114,13 +130,13 @@ void Network<Owner>::read_network_config( const std::string& filename )
     }
 
 
-    std::ifstream file( filename );
-    if ( !file.is_open() )
-    {
-        throw std::runtime_error( "Failed to open config file" );
-        std::cerr << "Error: could not open " << filename << "!\n";
-        return;
-    }
+    //std::ifstream file( filename );
+    //if ( !file.is_open() )
+    //{
+    //    throw std::runtime_error( "Failed to open config file" );
+    //    std::cerr << "Error: could not open " << filename << "!\n";
+    //    return;
+    //}
 
     std::string line;
 
@@ -134,6 +150,7 @@ void Network<Owner>::read_network_config( const std::string& filename )
         }
         
         buff[buff_index] = '\0'; // Null-terminate the line
+        buff_index = 0;
 
         std::istringstream stream( buff );
         std::string key, value;
@@ -162,33 +179,48 @@ void Network<Owner>::read_network_config( const std::string& filename )
         //}
 
         if ( key == "ip-address" )
-            if ( !inet_aton(value, ip_addr_ ) )
+        {
+            if ( !inet_aton(value.c_str(), netif_.ip_addr ) )
             {
-                throw NetException( "Invalid IP address format", value );
+                owner_.logger.log_error( "Invalid IP address format", value );
+                break;
             }
-        else if ( key == "netmask" )
-            if ( !inet_aton( value, netmask_ ) )
+        }
+        else
+        {
+            if ( key == "netmask" )
             {
-                throw NetException( "Invalid netmask format", value );
+                if ( !inet_aton( value.c_str(), netif_.netmask ) )
+                {
+                    owner_.logger.log_error( "Invalid netmask format", value );
+                    break;
+                }
             }
-        else if ( key == "gateway" )
-            if ( !inet_aton( value, gateway_ ) )
+            else
             {
-                throw NetException( "Invalid gateway format", value );
+                if ( key == "gateway" )
+                {
+                    if ( !inet_aton( value.c_str(), netif_.gw ) )
+                    {
+                        owner_.logger.log_error( "Invalid gateway format", value );
+                        break;
+                    }
+                }
+                else
+                {
+                    if ( key == "mac-address" )
+                    {
+                        if ( !string_to_addr( value, mac_addr_ ) )
+                        {
+                            owner_( "Invalid MAC address format", value );
+                            break;
+                        }
+                    }
+                }
             }
-        else if ( key == "dns" )
-            if ( !inet_aton( value, dns_ ) )
-            {
-                throw NetException( "Invalid DNS format", value );
-            }
-        else if ( key == "mac-address" )
-            if ( !string_to_addr( value, mac_addr.begin() ) )
-            {
-                throw NetException( "Invalid MAC address format", value );
-            }
+        }
 
-        memset( buff, sizeof( buff ), 0 );
-        buff_index = 0;
+        memset( buff, 0, sizeof( buff ) );
     }
 
     f_close( &file );
@@ -213,7 +245,7 @@ bool Network<Owner>::string_to_addr(
     auto num_separator = std::count( addr_str.begin(), addr_str.end(), separator );
     if ( ( is_ip && num_separator != 3 ) || ( !is_ip && num_separator != 5 ) )
     {
-        std::cerr << "Wrong address string format" << addr_str << '\n';
+        owner_.logger.log_error( "Wrong address string format", addr_str );
         return false;
     }
 
@@ -268,7 +300,7 @@ void Network<Owner>::create_network_tasks
     auto task_func = std::make_unique<std::function<void()>>([this]() { udp_rx_task(); });
     xTaskCreate( task_wrapper, "UDP Rx", 1000, &task_func, 1, udp_rx_task_handle );
 
-    auto task_func = std::make_unique<std::function<void()>>([this]() { udp_tx_task(); });
+    task_func = std::make_unique<std::function<void()>>([this]() { udp_tx_task(); });
     xTaskCreate( task_wrapper, "UDP Tx", 1000, &task_func, 1, udp_tx_task_handle );
 }
 //===============================================================
@@ -289,11 +321,11 @@ void Network<Owner>::udp_rx_task()
 
     while(1)
     {
-        uint16_t msg_leng = FreeRTOS_recvfrom( udp_socket_
+        uint16_t msg_leng = lwip_recvfrom/*FreeRTOS_recvfrom*/( udp_socket_
                                              , &msg
                                              , sizeof( msg )
                                              , 0
-                                             , ( struct freertos_sockaddr * ) &src_sock_addr
+                                             , ( struct sockaddr * ) &src_sock_addr
                                              , &src_addr_leng );
 
         if ( (msg_leng <= 0) || (msg.id != UDP_MSG_ID) )
@@ -302,7 +334,7 @@ void Network<Owner>::udp_rx_task()
             continue;
         }
 
-        remote_ip_addr_tmp = FreeRTOS_ntohl(src_addr.sin_addr);
+        remote_ip_addr_tmp = FreeRTOS_ntohl(src_sock_addr.sin_addr);
         if ( remote_ip_addr_tmp != remote_ip_addr )
         {
             // update server IP address
@@ -322,6 +354,7 @@ void Network<Owner>::udp_rx_task()
 template <typename Owner>
 void Network<Owner>::udp_tx_task()
 {
+    struct freertos_sockaddr dst_sock_addr;
     uint16_t msg_leng, tx_length;
     UDPTxMsg msg;
 
@@ -332,12 +365,12 @@ void Network<Owner>::udp_tx_task()
                                    , msg
                                    , msg_leng
                                    , 0
-                                   , &dest_sock_addr
-                                   , sizeof(dest_sock_addr) );
+                                   , &dst_sock_addr
+                                   , sizeof(dst_sock_addr) );
 
         if (tx_length < 0)
         {
-            log_error( "Failed to send UDP message\n" );
+            owner_.logger.log_error( "Failed to send UDP message\n" );
         }
     }
 }
@@ -351,14 +384,14 @@ template <typename Owner>
 void Network<Owner>::rx_msg_proc( std::any& msg )
 {
     //int instr = msg.op && 0x7FFF;
-    auto it = rx_msg_map_.find(msg.op && 0x7FFF);
+    auto it = rx_msg_map_.find(((UDPRxMsg)msg).op && 0x7FFF);
     if (it != rx_msg_map_.end())
     {
         it->second(msg);  // Call the corresponding function
     }
     else
     {
-        std::cout << "Unknown instruction: " << instr << '\n';
+        owner_.logger.log_error( "Unknown instruction: ", ((UDPRxMsg)msg).op );
     }
 }
 //===============================================================

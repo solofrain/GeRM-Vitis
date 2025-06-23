@@ -8,18 +8,19 @@
 #include <map>
 
 extern "C" {
-#include "netif/xadapter.h"
+
 #include "lwipopts.h"
-#include "lwip/err.h"
-#include "lwip/inet.h"
-#include "lwip/init.h"
 #include "lwip/ip_addr.h"
-#pragma message("sockaddr_in defined?")  // Add above the include
-#include "lwip/sockets.h"
-#pragma message("Size of sockaddr_in: " << sizeof(struct sockaddr_in))
-#include "lwip/sys.h"
+#include "lwip/err.h"
 #include "lwip/udp.h"
+#include "lwip/inet.h"
+#include "lwip/sockets.h"
+#include "lwip/sys.h"
+#include "lwip/init.h"
+
+#include "netif/xadapter.h"
 #include "errno.h"
+#include "xparameters.h"
 }
 
 //#include "ZynqDetector.hpp"
@@ -62,12 +63,14 @@ protected:
     virtual void udp_rx_task();
     virtual void udp_tx_task();
 
-    virtual void rx_msg_proc();
+    virtual void rx_msg_proc( std::any& msg );
     virtual void tx_msg_proc() = 0;
     
 
 public:
 
+    static constexpr uint32_t UDP_PORT = 0x7000;
+    static constexpr uint32_t UDP_MSG_ID = 0xbeef;
     //------------------------------
     // UDP message
     //------------------------------

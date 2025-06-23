@@ -29,6 +29,7 @@ public:
     void set_log_control( uint8_t control );
     uint8_t read_log_control();
 
+    void log_error( const char *format, ... );
     void log_error( uint32_t error_code, const char *format, ... );
     void log_warn( const char *format, ... );
     void log_debug( const char *format, ... );

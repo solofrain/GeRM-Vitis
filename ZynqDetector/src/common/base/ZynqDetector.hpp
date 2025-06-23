@@ -18,6 +18,7 @@
 
 #include "Register.hpp"
 #include "Network.hpp"
+#include "Zynq.hpp"
 
 class Udp_Msg_Handler
 {
@@ -29,7 +30,7 @@ public:
 };
 
 
-template< typename Derived >
+template< typename Detector >
 class ZynqDetector
 {
 protected:
@@ -42,11 +43,8 @@ protected:
     // Queues
     //------------------------------
     static constexpr size_t REGISTER_SINGLE_ACCESS_REQ_QUEUE_LENG = 100;
-    static constexpr size_t REGISTER_SINGLE_ACCESS_REQ_QUEUE_SIZE = SINGLE_REGISTER_ACCESS_REQ_QUEUE_LENG
-                                                                    * sizeof( SingleRegisterAccessReq );
-
-    static constexpr size_t REGISTER_SINGLE_ACCESS_RESP_QUEUE_LENG = 100;
-    static constexpr size_t REGISTER_SINGLE_ACCESS_RESP_QUEUE_SIZE = SINGLE_REGISTER_ACCESS_RESP_QUEUE_LENG * sizeof( SingleRegisterAccessResp );
+    static constexpr size_t REGISTER_SINGLE_ACCESS_REQ_QUEUE_SIZE = Detector::REGISTER_SINGLE_ACCESS_REQ_QUEUE_LENG
+                                                                    * sizeof( Detector::RegisterSingleAccessReq );
 
     /*
     static constexpr size_t PL_INTERFACE_SINGLE_ACCESS_REQ_QUEUE_LENG = 10;

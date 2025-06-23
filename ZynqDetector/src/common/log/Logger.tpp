@@ -31,6 +31,15 @@ uint8_t Logger<Owner>::read_log_control()
 }
 
 template <typename Owner>
+void Logger<Owner>::log_error(const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    log_va(LOG_ERROR_TYPE, RED_TEXT, format, args);
+    va_end(args);
+}
+
+template <typename Owner>
 void Logger<Owner>::log_error(uint32_t error_code, const char *format, ...)
 {
     reg_->set_status(error_code);

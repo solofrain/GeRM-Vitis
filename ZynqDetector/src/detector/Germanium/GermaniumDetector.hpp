@@ -111,6 +111,14 @@ protected:
     void ps_xadc_access_task();
 
 public:
+    static constexpr size_t REGISTER_SINGLE_ACCESS_REQ_QUEUE_LENG = 100;
+
+    typedef struct
+    {
+        uint16_t op;
+        uint32_t reg_addr;
+    } RegisterSingleAccessReq;
+
     GermaniumDetector();
     void task_init() override;
 };

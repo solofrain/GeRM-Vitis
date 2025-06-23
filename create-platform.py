@@ -22,6 +22,13 @@ domain.set_lib(
     path = os.environ.get('XILINX_VITIS') + "/data/embeddedsw/ThirdParty/sw_services/lwip220_v1_1"
 )
 
+status = domain.set_config(option = "lib", param = "lwip220_api_mode", value = "SOCKET_API", lib_name="lwip220")
+
+status = domain.set_lib(lib_name="xilffs", path="/opt/Xilinx/Vitis/2024.2/data/embeddedsw/lib/sw_services/xilffs_v5_3")
+
+status = domain.set_config(option = "lib", param = "XILFFS_read_only", value = "true", lib_name="xilffs")
+
+
 #bsp_path = os.path.join(platform.directory, "freertos_ps7_cortexa9_0")
 #settings_mk = os.path.join(bsp_path, "settings.mk")
 #
