@@ -4,31 +4,39 @@
 
 #include "PSI2C.hpp"
 
-PSI2C::PSI2C( const int8_t       bus_index
-            , const std::string  name
-            , const ueueHandle_t req_queue
-            , const ueueHandle_t resp_queue );
+PSI2C::PSI2C
+    ( const int8_t       bus_index
+    , const std::string  name
+    , const uint32_t     device_id,
+    , const uint32_t     base_addr,
+    , const uint32_t     clk_freq,
+    , const ueueHandle_t req_queue
+    , const ueueHandle_t resp_queue
+    )
     : bus_index_  ( bus_index  )
     , name_       ( name       )
+    , device_id_  ( device_id  )
+    , base_addr_  ( base_addr  )
+    , clk_freq_   ( clk_freq   )
     , req_queue_  ( req_queue  )
     , resp_queue_ ( resp_queue )
 {
-    if ( bus_index == 0 )
-    {
-        base_address_ = I2C0_BASE_ADDRESS;
-    }
-    else if( bus_index == 1 )
-    {
-        base_address_ = I2C1_BASE_ADDRESS;
-    }
-    else
-    {
-        log_error( "Invalid I2C bus index: %d", bus_index );
-        return;
-    }
+    //if ( bus_index == 0 )
+    //{
+    //    base_address_ = I2C0_BASE_ADDRESS;
+    //}
+    //else if( bus_index == 1 )
+    //{
+    //    base_address_ = I2C1_BASE_ADDRESS;
+    //}
+    //else
+    //{
+    //    log_error( "Invalid I2C bus index: %d", bus_index );
+    //    return;
+    //}
 
     // Initialize I2C
-    i2cps_config_ptr_ = XIicPs_LookupConfig( base_address_ );
+    i2cps_config_ptr_ = XIicPs_LookupConfig( base_addr_ );
     if ( i2cps_config_ptr_ == NULL )
     {
         log_error("I2C %d: lookup config failed\n", bus_index_ );
@@ -54,7 +62,7 @@ PSI2C::PSI2C( const int8_t       bus_index
     }
 
     // Set clock frequency
-    XIicPs_SetSClk( &i2c_ps_, I2C_CLOCK_FREQUENCY );
+    XIicPs_SetSClk( &i2c_ps_, clk_freq_ );
 }
 
 //=========================================

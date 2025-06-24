@@ -1,3 +1,5 @@
+#pragma once
+
 #include <atomic>
 #include <chrono>
 #include <thread>
@@ -9,8 +11,6 @@
 #endif
 
 #include "Register.hpp"
-#include "Zynq.hpp"
-
 
 
 //###################################################
@@ -20,7 +20,11 @@
 
 
 //-----------------------------------------
-Zynq::Zynq( uintptr_t base_addr, ZynqDetector owner )
+template <typename Owner>
+Zynq<Owner>::Zynq
+    ( uintptr_t base_addr
+    , Owner& owner
+    )
     : reg_   ( base_addr )
     , owner_ ( owner     )
 {}
@@ -46,22 +50,40 @@ void Zynq::add_pl_spi( const std::string& name
                     , std::forward_as_tuple( reg_, instr_reg, wr_data_reg, rd_data_reg ) );
 }
 */
-auto Zynq::add_ps_i2c_interface( uint32_t bus_index )
+
+template <typename Owner>
+auto Zynq<Owner>::add_ps_i2c_interface
+    (
+        uint8_t       bus_index,
+        std::string   name,
+        uint32_t      device_id,
+        uint32_t      base_addr,
+        uint32_t      clk_freq,
+        QueueHandle_t req_queue,
+        QueueHandle_t resp_queue
+    )
 {
-    return ps_i2cs_.emplace_back( bus_index );
+    return ps_i2cs_.emplace_back(
+        bus_index,
+        name,
+        device_id,
+        base_addr,
+        clk_freq,
+        req_queue,
+        resp_queue );
 }
 
-I2CInterface* Zynq::get_pl_i2c_interface( const std::string& name )
-{
-    auto it = pl_i2c_interfaces_.find( name );
-    return ( it !=pl_ i2c_interfaces_.end() ) ? &(it->second) : nullptr;
-}
-
-SPIInterface* Zynq::get_pl_spi_interface(const std::string& name)
-{
-    auto it = pl_spi_interfaces_.find( name );
-    return ( it != pl_spi_interfaces_.end() ) ? &(it->second) : nullptr;
-}
+//I2CInterface* Zynq::get_pl_i2c_interface( const std::string& name )
+//{
+//    auto it = pl_i2c_interfaces_.find( name );
+//    return ( it !=pl_ i2c_interfaces_.end() ) ? &(it->second) : nullptr;
+//}
+//
+//SPIInterface* Zynq::get_pl_spi_interface(const std::string& name)
+//{
+//    auto it = pl_spi_interfaces_.find( name );
+//    return ( it != pl_spi_interfaces_.end() ) ? &(it->second) : nullptr;
+//}
 
 //=========================================
 #endif

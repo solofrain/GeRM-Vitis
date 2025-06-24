@@ -15,16 +15,15 @@
 #define YELLOW_TEXT "\x1b[33m"
 #define RESET_TEXT  "\x1b[0m"
 
-template <typename Owner>
 class Logger {
 public:
     enum LogType {
-        LOG_ERROR_TYPE = 0x01,
-        LOG_WARN_TYPE  = 0x02,
-        LOG_DEBUG_TYPE = 0x04
+        LOG_ERROR_TYPE = 0x0,
+        LOG_WARN_TYPE  = 0x1,
+        LOG_DEBUG_TYPE = 0x2
     };
 
-    Logger( std::shared_ptr<Register<Owner>> reg);
+    Logger( Register& reg );
 
     void set_log_control( uint8_t control );
     uint8_t read_log_control();
@@ -45,7 +44,7 @@ private:
         va_list args
     );
 
-    std::shared_ptr<Register<Owner>> reg_;
+    Register& reg_;
 
     uint8_t control_word_;
     xSemaphoreHandle mutex_;

@@ -5,33 +5,29 @@
 #include <cstdio>
 
 
-template <typename Owner>
-Logger<Owner>::Logger( std::shared_ptr<Register<Owner>> reg )
-    : reg_(reg)
+Logger::Logger( Register& reg )
+    : reg_ ( reg )
     , control_word_(0x01)
 {
     mutex_ = xSemaphoreCreateMutex();
     
     if ( mutex_ == NULL )
     {
-        log_error("Failed to create Logger control mutex.\n");
+        xil_printf( "Failed to create Logger control mutex.\n" );
     }
 }
 
-template <typename Owner>
-void Logger<Owner>::set_log_control(uint8_t control)
+void Logger::set_log_control(uint8_t control)
 {
     control_word_ = control | 0x01;
 }
 
-template <typename Owner>
-uint8_t Logger<Owner>::read_log_control()
+uint8_t Logger::read_log_control()
 {
     return control_word_;
 }
 
-template <typename Owner>
-void Logger<Owner>::log_error(const char *format, ...)
+void Logger::log_error(const char *format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -39,10 +35,9 @@ void Logger<Owner>::log_error(const char *format, ...)
     va_end(args);
 }
 
-template <typename Owner>
-void Logger<Owner>::log_error(uint32_t error_code, const char *format, ...)
+void Logger::log_error(uint32_t error_code, const char *format, ...)
 {
-    reg_->set_status(error_code);
+    reg_.set_status(error_code);
 
     va_list args;
     va_start(args, format);
@@ -50,8 +45,7 @@ void Logger<Owner>::log_error(uint32_t error_code, const char *format, ...)
     va_end(args);
 }
 
-template <typename Owner>
-void Logger<Owner>::log_warn(const char *format, ...)
+void Logger::log_warn(const char *format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -59,8 +53,7 @@ void Logger<Owner>::log_warn(const char *format, ...)
     va_end(args);
 }
 
-template <typename Owner>
-void Logger<Owner>::log_debug(const char *format, ...)
+void Logger::log_debug(const char *format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -68,8 +61,7 @@ void Logger<Owner>::log_debug(const char *format, ...)
     va_end(args);
 }
 
-template <typename Owner>
-void Logger<Owner>::log(LogType type, const char *format, ...)
+void Logger::log(LogType type, const char *format, ...)
 {
     if (type & control_word_)
     {
@@ -80,8 +72,7 @@ void Logger<Owner>::log(LogType type, const char *format, ...)
     }
 }
 
-template <typename Owner>
-void Logger<Owner>::log(LogType type, char* color, const char *format, ...)
+void Logger::log(LogType type, char* color, const char *format, ...)
 {
     if (type & control_word_)
     {
@@ -92,8 +83,7 @@ void Logger<Owner>::log(LogType type, char* color, const char *format, ...)
     }
 }
 
-template <typename Owner>
-void Logger<Owner>::xvprintf(const char* format, va_list args)
+void Logger::xvprintf(const char* format, va_list args)
 {
     char buf[256];
     vsnprintf(buf, sizeof(buf), format, args);
@@ -102,8 +92,7 @@ void Logger<Owner>::xvprintf(const char* format, va_list args)
 
 
 // Private helper method to centralize va_list handling and actual printing
-template <typename Owner>
-void Logger<Owner>::log_va(LogType type, const char* color, const char *format, va_list args)
+void Logger::log_va(LogType type, const char* color, const char *format, va_list args)
 {
     if ( type & control_word_ )
     {
@@ -112,7 +101,8 @@ void Logger<Owner>::log_va(LogType type, const char* color, const char *format, 
             xil_printf("%s", color);
 
         // Print prefix, e.g., "[ERROR] file.cpp:123: "
-        xil_printf(log_leaders_[log_type_to_index(type)], __FILE__, __LINE__);
+        //xil_printf(log_leaders_[log_type_to_index(type)], __FILE__, __LINE__);
+        xil_printf(log_leaders_[type], __FILE__, __LINE__);
 
         // Print actual log message
         xvprintf(format, args);

@@ -9,15 +9,18 @@
 //=========================================
 // Register class
 //=========================================
-template<typename Owner>
-Register<Owner>::Register( uintptr_t base_addr, Owner* owner  )
-{
-    base_addr_ = reinterpret_cast<volatile uint32_t*>( base_addr );
-    owner_ = owner;
-}
+Register::Register
+    (
+      uintptr_t base_addr
+    , QueueHandle_t& register_single_access_req_queue
+    , QueueHandle_t& register_single_access_resp_queue
+    )
+    : base_addr_ ( static_cast<uintptr_t>( base_addr ) )
+    , register_single_access_req_queue_ ( register_single_access_req_queue )
+    , register_single_access_resp_queue_ ( register_single_access_resp_queue )
+{}
 
-template<typename Owner>
-void Register<Owner>::write( uint32_t offset, uint32_t value )
+void Register::write( uint32_t offset, uint32_t value )
 {
     if ( xSemaphoreTake( mutex_, portMAX_DELAY ) == pdTRUE )
     {
@@ -26,8 +29,7 @@ void Register<Owner>::write( uint32_t offset, uint32_t value )
     }
 }
     
-template<typename Owner>
-uint32_t Register<Owner>::read( uint32_t offset )
+uint32_t Register::read( uint32_t offset )
 {
     uint32_t value = 0;
     if ( xSemaphoreTake( mutex_, portMAX_DELAY ) == pdTRUE )
@@ -38,33 +40,33 @@ uint32_t Register<Owner>::read( uint32_t offset )
     return value;
 }
 
-template<typename Owner>
-void Register<Owner>::multi_access_start()
+void Register::set_status( uint32_t status )
+{
+    write( 0xC, status );
+}
+
+void Register::multi_access_start()
 {
     while( xSemaphoreTake( mutex_, portMAX_DELAY ) == pdFALSE );
 }
 
-template<typename Owner>
-void Register<Owner>::multi_access_write( uint32_t offset, uint32_t value )
+void Register::multi_access_write( uint32_t offset, uint32_t value )
 {
     *(volatile uint32_t*)(base_addr_ + offset/4) = value;
 }
     
-template<typename Owner>
-uint32_t Register<Owner>::multi_access_read( uint32_t offset )
+uint32_t Register::multi_access_read( uint32_t offset )
 {
     return *(volatile uint32_t*)(base_addr_ + offset/4);
 }
 
-template<typename Owner>
-void Register<Owner>::multi_access_end()
+void Register::multi_access_end()
 {
     xSemaphoreGive( mutex_ );
 }
 
 
-template<typename Owner>
-void Register<Owner>::task()
+void Register::task()
 {
     RegisterSingleAccessReq  req;
     RegisterSingleAccessResp resp;
@@ -75,7 +77,7 @@ void Register<Owner>::task()
 
     while(1)
     {
-        xQueueReceive( owner_.register_single_access_request_queue
+        xQueueReceive( register_single_access_req_queue_
                      , &req
 					 , portMAX_DELAY );
         
@@ -85,8 +87,8 @@ void Register<Owner>::task()
         {
             resp.data = read( offset );
             resp.op = req.op;
-            xQueueSend( owner_.register_single_access_response_queue
-                      , resp
+            xQueueSend( register_single_access_resp_queue_
+                      , &resp
                       , 0UL
                       );
         }
@@ -97,8 +99,7 @@ void Register<Owner>::task()
     }
 }
 
-template<typename Owner>
-void Register<Owner>::create_register_single_access_task()
+void Register::create_register_single_access_task()
 {
     auto task_func = std::make_unique<std::function<void()>>([this]() { task(); });
     xTaskCreate( task_wrapper, "Register Single Access", 1000, &task_func, 1, NULL );

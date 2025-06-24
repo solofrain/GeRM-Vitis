@@ -8,6 +8,7 @@
 #include "FreeRTOS.h"
 #include "semphr.h"
 
+#include "PSI2C.hpp"
 #include "PLInterface.hpp"
 
 #define __FREERTOS__
@@ -20,27 +21,36 @@
 
 
 
-
-
 //=========================================
 // Zynq class
 //=========================================
+template <typename Owner>
 class Zynq
 {
 private:
     
-    Register reg_;
-    GermaniumDetector& owner_;
+    std::unique_ptr<Register>  reg_;
+    Owner&    owner_;
+    std::vector<PSI2C> ps_i2cs_;
 
 public:
-    Zynq( uintptr_t base_addr );
+    Zynq( uintptr_t base_addr, Owner& owner );
 
     //auto add_pl_i2c( const std::string& name, uint32_t instr_reg, uint32_t data_reg );
     //auto add_pl_spi( const std::string& name, uint32_t instr_reg, uint32_t data_reg );
 
-    auto add_psi2c( uint8_t bus_index );
+    auto add_ps_i2c_interface(
+        uint8_t       bus_index,
+        std::string   name,
+        uint32_t      device_id,
+        uint32_t      base_addr,
+        uint32_t      clk_freq,
+        QueueHandle_t req_queue,
+        QueueHandle_t resp_queue );
 
     //PLI2CInterface* get_pl_i2c_interface( const std::string& name );
     //PLSPIInterface* get_pl_spi_interface( const std::string& name );
 };
 //=========================================
+
+#include "Zynq.tpp"
