@@ -86,9 +86,9 @@ protected:
     std::unique_ptr<Network<Detector>> network_;
 
     //------------------------------
-    // ZYNQ
+    // Zynq
     //------------------------------
-    std::unique_ptr<ZYNQ<Detector>>    zynq_;
+    std::unique_ptr<Zynq<Detector>>    zynq_;
 
     TimerHandle_t xPollTimer_ = NULL;
     std::vector<uint16_t> poll_list_{};  // PVs to be polled
@@ -101,14 +101,14 @@ protected:
     //------------------------------
     // Interrupt
     //------------------------------
-    virtual static void ISR_wrapper(void* context) = 0;
+    //virtual static void ISR_wrapper(void* context) = 0;
 
 
     //------------------------------
     // Interrupt
     //------------------------------
-    virtual void initialize_instr_map() = 0;
-    virtual void isr_handler() = 0;
+    //virtual void initialize_instr_map() = 0;
+    //virtual void isr_handler() = 0;
 
 
     //------------------------------
@@ -147,7 +147,7 @@ public:
     ZynqDetector( uint32_t base_addr );
     ~ZynqDetector();
 
-    void DummyDetector::create_irq_task_map();
+    //void DummyDetector::create_irq_task_map();
     
     void network_init();
     virtual void queue_init() = 0;
