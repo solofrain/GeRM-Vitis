@@ -20,17 +20,9 @@
 #include "Network.hpp"
 #include "Zynq.hpp"
 
-class Udp_Msg_Handler
-{
-private:
-
-public:
-    Udp_Msg_Handler();
-
-};
 
 
-template< typename Detector >
+template< typename DerivedDetector, typename DerivedNetwork, typename DerivedZynq, typename DerivedRegister>
 class ZynqDetector
 {
 protected:
@@ -43,8 +35,8 @@ protected:
     // Queues
     //------------------------------
     static constexpr size_t REGISTER_SINGLE_ACCESS_REQ_QUEUE_LENG = 100;
-    static constexpr size_t REGISTER_SINGLE_ACCESS_REQ_QUEUE_SIZE = Detector::REGISTER_SINGLE_ACCESS_REQ_QUEUE_LENG
-                                                                    * sizeof( Detector::RegisterSingleAccessReq );
+    static constexpr size_t REGISTER_SINGLE_ACCESS_REQ_QUEUE_SIZE = DerivedDetector::REGISTER_SINGLE_ACCESS_REQ_QUEUE_LENG
+                                                                    * sizeof( DerivedDetector::RegisterSingleAccessReq );
 
     /*
     static constexpr size_t PL_INTERFACE_SINGLE_ACCESS_REQ_QUEUE_LENG = 10;
@@ -64,11 +56,11 @@ protected:
                                                                         * sizeof( PlInterfaceMultiAccessResp );
     */
     // Queue handlers
-    QueueHandle_t register_single_access_req_queue_  = NULL;
-    QueueHandle_t register_single_access_resp_queue_ = NULL;
+    QueueHandle_t  register_single_access_req_queue_  = NULL;
+    QueueHandle_t  register_single_access_resp_queue_ = NULL;
 
-    QueueSetMemberHandle_t active_resp_queue_;
-    QueueSetHandle_t       resp_queue_set_;
+    QueueSetMemberHandle_t  active_resp_queue_;
+    QueueSetHandle_t        resp_queue_set_;
         
     
     //------------------------------
@@ -83,12 +75,12 @@ protected:
     //------------------------------
     // Network
     //------------------------------
-    std::unique_ptr<Network<Detector>> network_;
+    std::unique_ptr<DerivedNetwork> network_;
 
     //------------------------------
     // Zynq
     //------------------------------
-    std::unique_ptr<Zynq<Detector>>    zynq_;
+    std::unique_ptr<DerivedZynq>    zynq_;
 
     TimerHandle_t xPollTimer_ = NULL;
     std::vector<uint16_t> poll_list_{};  // PVs to be polled
@@ -132,13 +124,12 @@ protected:
     //------------------------------
     // General
     //------------------------------
-    void must_override();
 
     // Write status code to register.
     void set_status( uint32_t status );
 
-    template <typename T>
-    void report_error( const std::string& s, T err_code, uint32_t fail_num );
+    //template <typename T>
+    //void report_error( const std::string& s, T err_code, uint32_t fail_num );
     //==================================================
     
 
@@ -150,9 +141,9 @@ public:
     //void DummyDetector::create_irq_task_map();
     
     void network_init();
-    virtual void queue_init() = 0;
-    virtual void interrupt_init() = 0;
-    virtual void task_init() = 0;
+    void queue_init();
+    void interrupt_init();
+    void task_init();
 };
 
 #include "ZynqDetector.tpp"

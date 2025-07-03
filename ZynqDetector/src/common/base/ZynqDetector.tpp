@@ -28,16 +28,10 @@
 #define TIMER_CHECK_THRESHOLD	9
 
 
-Udp_Msg_Handler::Udp_Msg_Handler()
-{
-    create_detector_instr_map();
-}
-
-/* The queue used by the Tx and Rx tasks, as described at the top of this
-file. */
-static TimerHandle_t xPollTimer = NULL;
-char HWstring[15] = "Hello World";
-long RxtaskCntr = 0;
+//Udp_Msg_Handler::Udp_Msg_Handler()
+//{
+//    create_detector_instr_map();
+//}
 
 #if (configSUPPORT_STATIC_ALLOCATION == 1)
 #define QUEUE_BUFFER_SIZE		100
@@ -53,8 +47,9 @@ static StaticQueue_t xStaticQueue;
 //===============================================================
 // Constructor.
 //===============================================================
-ZynqDetector::ZynqDetector( uint32_t base_addr
-                          , std::unique_ptr<Network> net )
+template <typename Detector>
+ZynqDetector<Detector>::ZynqDetector( uint32_t base_addr
+                                    , std::unique_ptr<Network> net )
     : zynq_    ( base_addr      )
     , network_ ( std::move(net) )
 {}
@@ -99,14 +94,6 @@ ZynqDetector::ZynqDetector( void )
 */
 
 
-void ZynqDetector::must_override()
-{
-    log_error("For reference only. Implement it for the specific detector.\n" );
-    exit();
-}
-
-
-
 //===============================================================
 //  Single register access.
 //  Assembles fast access request and sends it to the queue.
@@ -123,123 +110,6 @@ void ZynqDetector::register_single_access_request_process( udp_rx_msg_t& msg )
 //===============================================================
 
 
-////===============================================================
-//// This task performs single register read/write operation.
-////===============================================================
-//void ZynqDetector::reg_access_task( void *pvParameters )
-//{
-//    reg_access_req_t  req;
-//    reg_access_resp_t resp;
-//
-//    auto param = static_cast<reg_access_task_param_t*>(pvParameters);
-//
-//    while(1)
-//    {
-//        xQueueReceive( 	static_cast<QueueHandle_t*>(pvParameters),
-//						&req,
-//						portMAX_DELAY );
-//        
-//        if ( req.read )
-//        {
-//            resp.op = req.op;
-//            resp.data = reg_rd ( req );
-//            xQueueSend( (QueueHandle_t*)resp,
-//                        )
-//        }
-//        else
-//        {
-//            reg_wr( req.addr, req.data );
-//        }
-//    }
-//}
-//===============================================================
-
-/*
-//===============================================================
-// Wraps a task function for resource access.
-//===============================================================
-static void ZynqDetector::task_wrapper(void* param, void (Derived::*task)())
-{
-    auto obj = statid_cast<Derived*>(param);
-    if( obj )
-    {
-        obj->*task();
-    }
-    else
-    {
-        log_error("task_wrapper: Invalid cast\n");
-    }
-}
-
-//===============================================================
-*/
-
-/*
-//===============================================================
-// This task performs single register read/write operation.
-//===============================================================
-void ZynqDetector::register_single_access_task()
-{
-    SingleRegisterAccessReq  req;
-    SingleRegisterAccessResp resp;
-
-    xQueueReceive( (QueueHandle_t*)fast_access_req_queue_,
-				   &req,
-				   portMAX_DELAY );
-
-    if( req.op && 0x80 )
-    {
-        resp.op   = req.op;
-        resp.data = reg_rd( req.reg );
-        xQueueSend( fast_access_resp_queue_,
-        			resp,
-                    0UL );
-    }
-    else
-    {
-        reg_wr( msg.op && 0x3F, msg.data );
-    }
-
-}
-//===============================================================
-*/
-
-
-/*-----------------------------------------------------------*/
-static void prvTxTask( void *pvParameters )
-{
-const TickType_t x1second = pdMS_TO_TICKS( DELAY_1_SECOND );
-
-	for( ;; )
-	{
-		/* Delay for 1 second. */
-		vTaskDelay( x1second );
-
-		/* Send the next value on the queue.  The queue should always be
-		empty at this point so a block time of 0 is used. */
-		xQueueSend( xQueue,			/* The queue being written to. */
-					HWstring, /* The address of the data being sent. */
-					0UL );			/* The block time. */
-	}
-}
-
-
-/*-----------------------------------------------------------*/
-static void poll_timer_callback( TimerHandle_t pxTimer )
-{
-	long lTimerId;
-	configASSERT( pxTimer );
-
-	lTimerId = ( long ) pvTimerGetTimerID( pxTimer );
-
-	if (lTimerId != TIMER_ID) {
-		xil_printf("FreeRTOS Hello World Example FAILED");
-	}
-
-    if( std::size(poll_list) != 0 )
-    {}
-}
-
 
 //===============================================================
 // Write failure number to register.
@@ -249,14 +119,6 @@ void ZynqDetector:set_fail_num( uint32_t failure_num )
     reg_wr( REG_DEVICE_STATUS, failure_num );
 }
 
-
-//===============================================================
-void ZynqDetector::report_error( const std::string& s, T err_code, uint32_t fail_num )
-{
-    std::cout << s << ". Error code " << err_code << '\n';
-    ZynqDetector::set_fail_num( fail_num );
-}
-//===============================================================
 
 
 
