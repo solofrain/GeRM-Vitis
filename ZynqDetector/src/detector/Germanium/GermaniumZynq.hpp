@@ -40,14 +40,14 @@ protected:
     
 
 public:
-    GermaniumZynq<Owner>::GermaniumZynq( uintptr_t base_addr,
-                                       , const QueueHandle_t psi2c0_req_queue
-                                       , const QueueHandle_t psi2c0_resp_queue
-                                       , const QueueHandle_t psi2c1_req_queue
-                                       , const QueueHandle_t psi2c1_resp_queue
-                                       , const QueueHandle_t psxadc_req_queue
-                                       , const QueueHandle_t psxadc_resp_queue
-                                       );
+    GermaniumZynq( uintptr_t base_addr
+                 , const QueueHandle_t psi2c0_req_queue
+                 , const QueueHandle_t psi2c0_resp_queue
+                 , const QueueHandle_t psi2c1_req_queue
+                 , const QueueHandle_t psi2c1_resp_queue
+                 , const QueueHandle_t psxadc_req_queue
+                 , const QueueHandle_t psxadc_resp_queue
+                 );
 
 //    GermaniumZynq( uintptr_t base_addr );
 

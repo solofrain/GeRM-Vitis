@@ -6,10 +6,13 @@
 
 #include "ZynqDetector.hpp"
 #include "GermaniumNetwork.hpp"
-#include "GermaniumNetwork.hpp"
 #include "GermaniumZynq.hpp"
 #include "GermaniumRegister.hpp"
 
+#include "LTC2309.hpp"
+#include "PSI2C.hpp"
+#include "DAC7678.hpp"
+#include "TMP100.hpp"
 
 
 
@@ -23,8 +26,8 @@ struct germ_udp_msg_t
 };
 
 class GermaniumDetector : public ZynqDetector< GermaniumDetector
-                                             , GermaniumNetwork
-                                             , GermaniumZynq
+                                             , GermaniumNetwork<GermaniumDetector>
+                                             , GermaniumZynq<GermaniumDetector>
                                              , GermaniumRegister
                                              >
 {

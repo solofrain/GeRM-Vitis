@@ -51,41 +51,41 @@ GermaniumDetector::GermaniumDetector()
                     , psxadc_req_queue
                     , psxadc_resp_queue
                     )
-    , ltc2309_0_  ( std::make_shared<LTC2309<PSI2C>>( psi2c_1
-                                                    , LTC2309_0_I2C_ADDR
-                                                    , true
-                                                    , psi2c_1_req_queue
-                                                    , chan_assign
-                                                    )
-                  )
-    , ltc2309_1_  ( std::make_shared<LTC2309<PSI2C>>( psi2c_1
-                                                    , LTC2309_1_I2C_ADDR
-                                                    , true
-                                                    , psi2c_1_req_queue
-                                                    , chan_assign
-                                                    )
-                  )
-    , dac7678_    ( std::make_shared<DAC7678<PSI2C>>( psi2c_1
-                                                      , DAC7678_I2C_ADDR
-                                                      , psi2c_1_req_queue
-                                                      , chan_assign
-                                                      )
-                  )
-    , tmp100_0_   ( std::make_shared<TMP100<PSI2C>>( psi2c_0
-                                                   , TMP100_0_I2C_ADDR
-                                                   , psi2c_0_req_queue
+    , ltc2309_0_ ( std::make_shared<LTC2309<PSI2C, PSI2CAccessReq>>( psi2c_1
+                                                   , LTC2309_0_I2C_ADDR
+                                                   , true
+                                                   , psi2c_1_req_queue
+                                                   , chan_assign
                                                    )
-                  )
-    , tmp100_1_   ( std::make_shared<TMP100<PSI2C>>( psi2c_0
-                                                   , TMP100_1_I2C_ADDR
-                                                   , psi2c_0_req_queue
+                 )
+    , ltc2309_1_ ( std::make_shared<LTC2309<PSI2C, PSI2CAccessReq>>( psi2c_1
+                                                   , LTC2309_1_I2C_ADDR
+                                                   , true
+                                                   , psi2c_1_req_queue
+                                                   , chan_assign
                                                    )
-                  )
-    , tmp100_2_   ( std::make_shared<TMP100<PSI2C>>( psi2c_0
-                                                   , TMP100_2_I2C_ADDR
-                                                   , psi2c_0_req_queue
+                 )
+    , dac7678_   ( std::make_shared<DAC7678<PSI2C, PSI2CAccessReq>>( psi2c_1
+                                                   , DAC7678_I2C_ADDR
+                                                   , psi2c_1_req_queue
+                                                   , chan_assign
                                                    )
-                  )
+                 )
+    , tmp100_0_  ( std::make_shared<TMP100<PSI2C, PSI2CAccessReq>>( psi2c_0
+                                                  , TMP100_0_I2C_ADDR
+                                                  , psi2c_0_req_queue
+                                                  )
+                 )
+    , tmp100_1_  ( std::make_shared<TMP100<PSI2C, PSI2CAccessReq>>( psi2c_0
+                                                  , TMP100_1_I2C_ADDR
+                                                  , psi2c_0_req_queue
+                                                  )
+                 )
+    , tmp100_2_  ( std::make_shared<TMP100<PSI2C, PSI2CAccessReq>>( psi2c_0
+                                                  , TMP100_2_I2C_ADDR
+                                                  , psi2c_0_req_queue
+                                                  )
+                 )
 {
     network_init(std::make_unique<GermaniumNetwork>(this));
 

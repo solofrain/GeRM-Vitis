@@ -1,7 +1,10 @@
 #pragma once
 
 #include <cstdint>
+#include <type_traits>  // for std::is_same
 
+class PSI2C;
+class PLI2C;
 
 //====================================
 // Requests
@@ -10,7 +13,8 @@ struct AccessReq
 {
     uint16_t op;
 };
-
+const uint16_t WRITE = 0;
+const uint16_t READ  = 1;
 
 struct RegisterSingleAccessReqStruct : AccessReq
 {
@@ -62,6 +66,19 @@ struct PLInterfaceMultiAccessReqStruct : AccessReq
 };
 using PLInterfaceMultiAccessReq = PLInterfaceMultiAccessReqStruct;
 
+template<typename T>
+struct AccessReqTypeSelector;
+
+template<>
+struct AccessReqTypeSelector<PSI2C> {
+    using AccessReqType = PSI2CAccessReq;
+};
+
+//template<>
+//struct AccessReqTypeSelector<PLI2C> {
+//    using AccessReqType = PLI2CAccessReq;
+//};
+
 //====================================
 // Responses
 //====================================
@@ -108,3 +125,5 @@ struct PlInterfaceMultiAccessRespStruct : AccessResp
     uint32_t data[4096/4 - 1];
 };
 using PlInterfaceMultiAccessResp = PlInterfaceMultiAccessRespStruct;
+
+
