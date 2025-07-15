@@ -9,6 +9,8 @@
 #include "FreeRTOS.h"
 #include "semphr.h"
 
+#include "PSI2C.hpp"
+#include "PSXADC.hpp"
 #include "PLInterface.hpp"
 
 #define __FREERTOS__
@@ -26,7 +28,8 @@
 //=========================================
 // Zynq class
 //=========================================
-class GermaniumZynq : public Zynq
+template < typename Owner >
+class GermaniumZynq : public Zynq<Owner>
 {
 protected:
     //Register reg_;
@@ -37,7 +40,16 @@ protected:
     
 
 public:
-    Zynq( uintptr_t base_addr );
+    GermaniumZynq<Owner>::GermaniumZynq( uintptr_t base_addr,
+                                       , const QueueHandle_t psi2c0_req_queue
+                                       , const QueueHandle_t psi2c0_resp_queue
+                                       , const QueueHandle_t psi2c1_req_queue
+                                       , const QueueHandle_t psi2c1_resp_queue
+                                       , const QueueHandle_t psxadc_req_queue
+                                       , const QueueHandle_t psxadc_resp_queue
+                                       );
+
+//    GermaniumZynq( uintptr_t base_addr );
 
     //auto add_pl_i2c( const std::string& name, uint32_t instr_reg, uint32_t data_reg );
     //auto add_pl_spi( const std::string& name, uint32_t instr_reg, uint32_t data_reg );

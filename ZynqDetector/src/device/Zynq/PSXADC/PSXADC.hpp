@@ -37,5 +37,5 @@ public:
     PSXADC();
 
     // Task
-    void PSXADC::create_psxadc_task();
+    void create_psxadc_task();
 };

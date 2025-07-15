@@ -106,10 +106,10 @@ protected:
     //------------------------------
     // Task
     //------------------------------
-    void network_task_init();
-    virtual void create_detector_queues() = 0;
-    virtual void create_device_access_tasks() = 0;
-    virtual void polling_task_init() = 0;
+    void create_network_tasks();
+    void create_detector_queues();
+    void create_device_access_tasks();
+    void create_polling_tasks();
 
     virtual void register_single_access_task();
     //virtual void pl_if_single_access_task( void *pvParameters ) = 0;

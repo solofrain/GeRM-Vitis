@@ -1,43 +1,10 @@
 #pragma once
 
-#include <Network.hpp>
+#include "Network.hpp"
 
-class GermaniumNetwork : public Network
+template< typename Owner>
+class GermaniumNetwork : public Network<Owner>
 {
-protected:
-    void rx_msg_map_init() override;
-    void tx_msg_proc( const UDPTxMsg &msg ) override;
-
-    void proc_register_single_access_msg( const UDPRxMsg& msg );
-    void proc_register_multi_access_msg( const UDPRxMsg& msg );
-    void proc_update_loads_msg( const char* loads );
-
-    //======================================
-    // Instruction map
-    //======================================
-    const std::map<int, std::function<void()>> instruction_map {
-        { MARS_CONF_LOAD, [this]() { this->load_mars_conf(); } }
-        { LEDS, [this]() { this->load_mars_conf(); } }
-        { LEDS, [this]() { this->load_mars_conf(); } }
-        { LEDS, [this]() { this->load_mars_conf(); } }
-        { LEDS, [this]() { this->load_mars_conf(); } }
-        { LEDS, [this]() { this->load_mars_conf(); } }
-        { LEDS, [this]() { this->load_mars_conf(); } }
-        { LEDS, [this]() { this->load_mars_conf(); } }
-        { LEDS, [this]() { this->load_mars_conf(); } }
-        { LEDS, [this]() { this->load_mars_conf(); } }
-        { LEDS, [this]() { this->load_mars_conf(); } }
-        { LEDS, [this]() { this->load_mars_conf(); } }
-        { LEDS, [this]() { this->load_mars_conf(); } }
-        { LEDS, [this]() { this->load_mars_conf(); } }
-        { LEDS, [this]() { this->load_mars_conf(); } }
-        { LEDS, [this]() { this->load_mars_conf(); } }
-        { LEDS, [this]() { this->load_mars_conf(); } }
-        { LEDS, [this]() { this->load_mars_conf(); } }
-      };
-
-    friend Germanium
-
 public:
     //===============================================================
     // Message/operation IDs
@@ -98,27 +65,27 @@ public:
         uint32_t  data;
     } AD9252Cfg;
     //-----------------------------
-    typedef union
-    {
-        uint32_t      reg_single_acc_req_data;
-        unsigned int  loads[12][14];
-        ZDDDMArm      zddm_arm_data;
-        AD9252Cfg     ad9252_cfg_data;
-        uint32_t      i2c_acc_req_data;
-        uint32_t      xadc_acc_req_data;
-    } UDPRxMsgPayload;
-    //-----------------------------
     typedef struct
     {
         uint16_t  mode;
         uint16_t  val;
-    } ZDDDMArm;
+    } ZDDMArm;
+    //-----------------------------
+    typedef union
+    {
+        uint32_t   Reg_single_acc_req_data;
+        uint32_t   Loads[12][14];
+        ZDDMArm    Zddm_arm_data;
+        AD9252Cfg  Ad9252_cfg_data;
+        uint32_t   I2c_acc_req_data;
+        uint32_t   Xadc_acc_req_data;
+    } UDPRxMsgPayload;
     //-----------------------------
     typedef struct
     {
         uint16_t  id;
         uint16_t  op;
-        char      payload[ constexpr sizeof(UDPRxMsgPayload) ];
+        char      payload[sizeof(UDPRxMsgPayload)];
     } UDPRxMsg;
     //-----------------------------
     typedef union 
@@ -130,7 +97,7 @@ public:
     typedef struct
     {
         uint16_t  op;
-        char      data[constexpr sizeof(RegisterMultiAccessRequestData)];
+        char      data[sizeof(RegisterMultiAccessRequestData)];
     } RegisterMultiAccessRequest;
     //-----------------------------
     typedef union
@@ -144,8 +111,69 @@ public:
     {
         uint16_t  id;
         uint16_t  op;
-        char      payload[ constexpr sizeof(UDPTxMsgPayload) ];
+        char      payload[sizeof(UDPTxMsgPayload)];
     } UDPTxMsg;
     //===============================================================    
+
+protected:
+    void rx_msg_map_init();
+    void tx_msg_proc( const UDPTxMsg &msg );
+
+    void proc_register_single_access_msg( const UDPRxMsg& msg );
+    void proc_register_multi_access_msg( const UDPRxMsg& msg );
+    void proc_update_loads_msg( const char* loads );
+
+    //======================================
+    // Instruction map
+    //======================================
+    const std::map<int, std::function<void()>> instruction_map {
+        { MARS_CONF_LOAD   , [this]() { this->load_mars_conf(); } },
+        { LEDS             , [this]() { this->load_mars_conf(); } },
+        { MARS_CONFIG      , [this]() { this->load_mars_conf(); } },
+        { VERSIONREG       , [this]() { this->load_mars_conf(); } },
+        { MARS_CALPULSE    , [this]() { this->load_mars_conf(); } },
+        { MARS_PIPE_DELAY  , [this]() { this->load_mars_conf(); } },
+        { MARS_RDOUT_ENB   , [this]() { this->load_mars_conf(); } },
+        { EVENT_TIME_CNTR  , [this]() { this->load_mars_conf(); } },
+        { SIM_EVT_SEL      , [this]() { this->load_mars_conf(); } },
+        { SIM_EVENT_RATE   , [this]() { this->load_mars_conf(); } },
+        { ADC_SPI          , [this]() { this->load_mars_conf(); } },
+        { CALPULSE_CNT     , [this]() { this->load_mars_conf(); } },
+        { CALPULSE_RATE    , [this]() { this->load_mars_conf(); } },
+        { CALPULSE_WIDTH   , [this]() { this->load_mars_conf(); } },
+        { CALPULSE_MODE    , [this]() { this->load_mars_conf(); } },
+        { TD_CAL           , [this]() { this->load_mars_conf(); } },
+        { EVENT_FIFO_DATA  , [this]() { this->load_mars_conf(); } },
+        { EVENT_FIFO_CNT   , [this]() { this->load_mars_conf(); } },
+        { EVENT_FIFO_CNTRL , [this]() { this->load_mars_conf(); } },
+        { DMA_CONTROL      , [this]() { this->load_mars_conf(); } },
+        { DMA_STATUS       , [this]() { this->load_mars_conf(); } },
+        { DMA_BASEADDR     , [this]() { this->load_mars_conf(); } },
+        { DMA_BURSTLEN     , [this]() { this->load_mars_conf(); } },
+        { DMA_BUFLEN       , [this]() { this->load_mars_conf(); } },
+        { DMA_CURADDR      , [this]() { this->load_mars_conf(); } },
+        { DMA_THROTTLE     , [this]() { this->load_mars_conf(); } },
+        { UDP_IP_ADDR      , [this]() { this->load_mars_conf(); } },
+        { DMA_IRQ_THROTTLE , [this]() { this->load_mars_conf(); } },
+        { DMA_IRQ_ENABLE   , [this]() { this->load_mars_conf(); } },
+        { DMA_IRQ_COUNT    , [this]() { this->load_mars_conf(); } },
+        { TRIG             , [this]() { this->load_mars_conf(); } },
+        { COUNT_TIME       , [this]() { this->load_mars_conf(); } },
+        { FRAME_NO         , [this]() { this->load_mars_conf(); } },
+        { COUNT_MODE       , [this]() { this->load_mars_conf(); } },
+        { UPDATE_LOADS     , [this]() { this->load_mars_conf(); } },
+        { STUFF_MARS       , [this]() { this->load_mars_conf(); } },
+        { AD9252_CNFG      , [this]() { this->load_mars_conf(); } },
+        { ZDDM_ARM         , [this]() { this->load_mars_conf(); } },
+        { HV               , [this]() { this->load_mars_conf(); } },
+        { HV_CUR           , [this]() { this->load_mars_conf(); } },
+        { TEMP1            , [this]() { this->load_mars_conf(); } },
+        { TEMP2            , [this]() { this->load_mars_conf(); } },
+        { TEMP3            , [this]() { this->load_mars_conf(); } },
+        { ZTEP             , [this]() { this->load_mars_conf(); } },
+        { DAC_INT_REF      , [this]() { this->load_mars_conf(); } }
+      };
+
+    //friend Germanium
 
 };

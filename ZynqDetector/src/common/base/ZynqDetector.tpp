@@ -47,11 +47,20 @@ static StaticQueue_t xStaticQueue;
 //===============================================================
 // Constructor.
 //===============================================================
-template <typename Detector>
-ZynqDetector<Detector>::ZynqDetector( uint32_t base_addr
-                                    , std::unique_ptr<Network> net )
+template< typename DerivedDetector
+        , typename DerivedNetwork
+        , typename DerivedZynq
+        , typename DerivedRegister
+        >
+ZynqDetector< DerivedDetector
+            , DerivedNetwork
+            , DerivedZynq
+            , DerivedRegister
+            >::ZynqDetector( uint32_t base_addr
+//                        , std::unique_ptr<Network> net
+                          )
     : zynq_    ( base_addr      )
-    , network_ ( std::move(net) )
+//    , network_ ( std::move(net) )
 {}
 /*
 //===============================================================
@@ -98,15 +107,24 @@ ZynqDetector::ZynqDetector( void )
 //  Single register access.
 //  Assembles fast access request and sends it to the queue.
 //===============================================================
-void ZynqDetector::register_single_access_request_process( udp_rx_msg_t& msg )
-{
-    fast_access_req_t req;
-    req.op   = msg->op;
-    req.data = msg->data;
-    xQueueSend( single_register_access_request_queue,
-            	req,
-                0UL );
-}
+//template< typename DerivedDetector
+//        , typename DerivedNetwork
+//        , typename DerivedZynq
+//        , typename DerivedRegister
+//        >
+//void ZynqDetector< DerivedDetector
+//                 , DerivedNetwork
+//                 , DerivedZynq
+//                 , DerivedRegister
+//                 >::register_single_access_request_process( udp_rx_msg_t& msg )
+//{
+//    fast_access_req_t req;
+//    req.op   = msg->op;
+//    req.data = msg->data;
+//    xQueueSend( single_register_access_request_queue,
+//            	req,
+//                0UL );
+//}
 //===============================================================
 
 
@@ -114,31 +132,49 @@ void ZynqDetector::register_single_access_request_process( udp_rx_msg_t& msg )
 //===============================================================
 // Write failure number to register.
 //===============================================================
-void ZynqDetector:set_fail_num( uint32_t failure_num )
-{
-    reg_wr( REG_DEVICE_STATUS, failure_num );
-}
+//void ZynqDetector:set_fail_num( uint32_t failure_num )
+//{
+//    reg_wr( REG_DEVICE_STATUS, failure_num );
+//}
 
 
 
 
 //===============================================================
 //===============================================================
-void ZynqDetector::network_init( std::unique_ptr<Network> network )
-{
-    network_ = std::move( network );
-}
+//template< typename DerivedDetector
+//        , typename DerivedNetwork
+//        , typename DerivedZynq
+//        , typename DerivedRegister
+//        >
+//void ZynqDetector< DerivedDetector
+//                 , DerivedNetwork
+//                 , DerivedZynq
+//                 , DerivedRegister
+//                 >::network_init( std::unique_ptr<DerivedNetwork> network )
+//{
+//    network_ = std::move( network );
+//}
 //===============================================================
 
 
 
 //===============================================================
 //===============================================================
-void ZynqDetector::task_init()
+template< typename DerivedDetector
+        , typename DerivedNetwork
+        , typename DerivedZynq
+        , typename DerivedRegister
+        >
+void ZynqDetector< DerivedDetector
+                 , DerivedNetwork
+                 , DerivedZynq
+                 , DerivedRegister
+                 >::task_init()
 {
     create_network_tasks();
     create_detector_queues();
     create_device_access_tasks();
-    polling_task_init();
+    create_polling_tasks();
 }
 //===============================================================

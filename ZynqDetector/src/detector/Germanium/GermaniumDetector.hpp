@@ -5,6 +5,10 @@
 #include <utility>
 
 #include "ZynqDetector.hpp"
+#include "GermaniumNetwork.hpp"
+#include "GermaniumNetwork.hpp"
+#include "GermaniumZynq.hpp"
+#include "GermaniumRegister.hpp"
 
 
 
@@ -18,7 +22,11 @@ struct germ_udp_msg_t
     uint32_t data;
 };
 
-class GermaniumDetector : public ZynqDetector<GermaniumDetector>
+class GermaniumDetector : public ZynqDetector< GermaniumDetector
+                                             , GermaniumNetwork
+                                             , GermaniumZynq
+                                             , GermaniumRegister
+                                             >
 {
 
 protected:
