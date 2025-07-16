@@ -58,69 +58,78 @@ public:
     //===============================================================
     // Data types
     //===============================================================
-    typedef struct
+    struct Ad9252CfgStruct
     {
         uint16_t  chip_num;
         uint16_t  addr;
         uint32_t  data;
-    } AD9252Cfg;
+    };
+    using Ad9252Cfg = Ad9252CfgStruct;
     //-----------------------------
-    typedef struct
+    struct ZddmArmStruct
     {
         uint16_t  mode;
         uint16_t  val;
-    } ZDDMArm;
+    };
+    using ZddmArm = ZddmArmStruct;
     //-----------------------------
-    typedef union
+    union UdpRxMsgPayloadStruct
     {
         uint32_t   Reg_single_acc_req_data;
         uint32_t   Loads[12][14];
-        ZDDMArm    Zddm_arm_data;
-        AD9252Cfg  Ad9252_cfg_data;
+        ZddmArm    Zddm_arm_data;
+        Ad9252Cfg  Ad9252_cfg_data;
         uint32_t   I2c_acc_req_data;
         uint32_t   Xadc_acc_req_data;
-    } UDPRxMsgPayload;
+    };
+    using UdpRxMsgPayload = UdpRxMsgPayloadStruct;
     //-----------------------------
-    typedef struct
+    struct UdpRxMsgStruct
     {
         uint16_t  id;
         uint16_t  op;
-        char      payload[sizeof(UDPRxMsgPayload)];
-    } UDPRxMsg;
+        char      payload[sizeof(UdpRxMsgPayload)];
+    };
+    using UdpRxMsg = UdpRxMsgStruct;
     //-----------------------------
-    typedef union 
+    union RegisterMultiAccessRequestDataStruct
     {
-        ZDDMArm    zddm_arm_data;
-        AD9252Cfg  ad9252_cfg_data;
-    } RegisterMultiAccessRequestData;
+        ZddmArm    zddm_arm_data;
+        Ad9252Cfg  ad9252_cfg_data;
+    };
+    using RegisterMultiAccessRequestData = RegisterMultiAccessRequestDataStruct;
     //-----------------------------
-    typedef struct
+    struct RegisterMultiAccessRequestStruct
     {
         uint16_t  op;
         char      data[sizeof(RegisterMultiAccessRequestData)];
-    } RegisterMultiAccessRequest;
+    };
+    using RegisterMultiAccessRequest = RegisterMultiAccessRequestStruct;
     //-----------------------------
-    typedef union
+    union UdpTxMsgPayloadStruct
     {
         uint32_t  register_single_access_response_data;
         uint32_t  psi2c_access_response_data;
         uint32_t  psxadc_access_response_data;
-    } UDPTxMsgPayload;
+    };
+    using UdpTxMsgPayload = UdpTxMsgPayloadStruct;
+
     //-----------------------------
-    typedef struct
+    struct UdpTxMsgStruct
     {
         uint16_t  id;
         uint16_t  op;
-        char      payload[sizeof(UDPTxMsgPayload)];
-    } UDPTxMsg;
+        char      payload[sizeof(UdpTxMsgPayload)];
+    };
+    using UdpTxMsg = UdpTxMsgStruct;
     //===============================================================    
 
 protected:
     void rx_msg_map_init();
-    void tx_msg_proc( const UDPTxMsg &msg );
+    void tx_msg_proc( const UdpTxMsg &msg );
 
-    void proc_register_single_access_msg( const UDPRxMsg& msg );
-    void proc_register_multi_access_msg( const UDPRxMsg& msg );
+    void proc_register_single_access_msg( const UdpRxMsg& msg );
+    void proc_register_multi_access_msg( const UdpRxMsg& msg );
     void proc_update_loads_msg( const char* loads );
 
     //======================================

@@ -71,12 +71,12 @@ struct AccessReqTypeSelector;
 
 template<>
 struct AccessReqTypeSelector<PSI2C> {
-    using AccessReqType = PSI2CAccessReq;
+    using type = PSI2CAccessReq;
 };
 
 //template<>
 //struct AccessReqTypeSelector<PLI2C> {
-//    using AccessReqType = PLI2CAccessReq;
+//    using type = PLI2CAccessReq;
 //};
 
 //====================================

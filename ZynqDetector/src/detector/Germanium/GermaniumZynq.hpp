@@ -17,7 +17,7 @@
 //#define __LINUX__
 
 #define REG_BASE_ADDR  0x43C00000
-#define XADC_ADDR 0xF8007100
+#define XADC_ADDR      0xF8007100
 
 #define REG_VER        0x0
 

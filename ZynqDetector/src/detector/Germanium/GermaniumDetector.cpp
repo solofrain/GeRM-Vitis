@@ -150,21 +150,21 @@ void GermaniumDetector::task_init()
                 &udp_tx_task_handle_);
 
     xTaskCreate( psi2c_task,
-                 ( const char* ) "PSI2C0"),
+                 ( const char* ) "PSI2C0",
                  configMINIMAL_STACK_SIZE,
                  NULL,
                  tskIDLE_PRIORITY + 1,
                  &psi2c_0_task_handler_ );
 
     xTaskCreate( psi2c_task,
-                ( const char* ) "PSI2C1"),
+                ( const char* ) "PSI2C1",
                 configMINIMAL_STACK_SIZE,
                 NULL,
                 tskIDLE_PRIORITY + 1,
                 &psi2c_1_task_handler_ );
 
     xTaskCreate( psxadc_task,
-                ( const char* ) "PSXADC"),
+                ( const char* ) "PSXADC",
                 configMINIMAL_STACK_SIZE,
                 NULL,
                 tskIDLE_PRIORITY + 1,

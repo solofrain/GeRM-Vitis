@@ -73,35 +73,65 @@ protected:
     const uint8_t TMP100_1_I2C_ADDR = 0x49;
     const uint8_t TMP100_2_I2C_ADDR = 0x59;
 
+    const uint16_t VL0 = 0;
+    const uint16_t VL1 = 1;
+    const uint16_t VH1 = 2;
+    const uint16_t VL2 = 3;
+    const uint16_t VH2 = 4;
+    const uint16_t HV  = 5;
+    const uint16_t P1  = 6;
+    const uint16_t P2  = 7;
+
+    const uint16_t TEMP1   = 0;
+    const uint16_t TEMP2   = 1;
+    const uint16_t TEMP3   = 2;
+    const uint16_t TEMP4   = 3;
+    const uint16_t HV_RBV  = 4;
+    const uint16_t HV_CURR = 5;
+    //const uint16_t P1      = 
+    //const uint16_t P2      = 
+    const uint16_t ILEAK   = 8;
+    const uint16_t P_V     = 9;
+
+    //const uint16_t TEMP1 = 
+    //const uint16_t TEMP2 = 
+    //const uint16_t TEMP3 = 
+
     // DAC process map: <op, <device, channel>>
     const std::map<uint16_t, std::pair<std::shared_ptr<DAC7678<PSI2C>>, uint8_t>> dac_instr_map = 
-        { VL0, std::make_pair( dac7678_, 0 ) },
-        { VL1, std::make_pair( dac7678_, 1 ) },
-        { VH1, std::make_pair( dac7678_, 2 ) },
-        { VL2, std::make_pair( dac7678_, 3 ) },
-        { VH2, std::make_pair( dac7678_, 4 ) },
-        { HV,  std::make_pair( dac7678_, 5 ) },
-        { P1,  std::make_pair( dac7678_, 6 ) },
-        { P2,  std::make_pair( dac7678_, 7 ) };
+        {
+          { VL0, std::make_pair( dac7678_, 0 ) },
+          { VL1, std::make_pair( dac7678_, 1 ) },
+          { VH1, std::make_pair( dac7678_, 2 ) },
+          { VL2, std::make_pair( dac7678_, 3 ) },
+          { VH2, std::make_pair( dac7678_, 4 ) },
+          { HV,  std::make_pair( dac7678_, 5 ) },
+          { P1,  std::make_pair( dac7678_, 6 ) },
+          { P2,  std::make_pair( dac7678_, 7 ) }
+        };
 
     // ADC process map: <op, <device, channel>>
     const std::map<uint16_t, std::pair<std::shared_ptr<LTC2309<PSI2C>>, uint8_t>> adc_instr_map = 
-        { TEMP1,   std::make_pair( ltc2309_0, 0 ) },
-        { TEMP2,   std::make_pair( ltc2309_0, 1 ) },
-        { TEMP3,   std::make_pair( ltc2309_0, 2 ) },
-        { TEMP4,   std::make_pair( ltc2309_0, 3 ) },
-        { HV_RBV,  std::make_pair( ltc2309_0, 4 ) },
-        { HV_CURR, std::make_pair( ltc2309_0, 5 ) },
-        { P1,      std::make_pair( ltc2309_0, 6 ) },
-        { P2,      std::make_pair( ltc2309_0, 7 ) },
-        { ILEAK,   std::make_pair( ltc2309_1, 0 ) },
-        { P_V,     std::make_pair( ltc2309_1, 1 ) };
+        {
+          { TEMP1,   std::make_pair( ltc2309_0_, 0 ) },
+          { TEMP2,   std::make_pair( ltc2309_0_, 1 ) },
+          { TEMP3,   std::make_pair( ltc2309_0_, 2 ) },
+          { TEMP4,   std::make_pair( ltc2309_0_, 3 ) },
+          { HV_RBV,  std::make_pair( ltc2309_0_, 4 ) },
+          { HV_CURR, std::make_pair( ltc2309_0_, 5 ) },
+          { P1,      std::make_pair( ltc2309_0_, 6 ) },
+          { P2,      std::make_pair( ltc2309_0_, 7 ) },
+          { ILEAK,   std::make_pair( ltc2309_1_, 0 ) },
+          { P_V,     std::make_pair( ltc2309_1_, 1 ) }
+        };
 
     // Temperature process map: <op, <device, channel>>
-    const std::map<uint16_t, std::shared_ptr<TMP100<PSI2C> temp_instr_map = 
-        { TEMP1, tmp100_0_ },
-        { TEMP2, tmp100_1_ },
-        { TEMP3, tmp100_2_ };
+    const std::map<uint16_t, std::shared_ptr<TMP100<PSI2C>>> temp_instr_map = 
+        {
+          { TEMP1, tmp100_0_ },
+          { TEMP2, tmp100_1_ },
+          { TEMP3, tmp100_2_ }
+        };
 
 
     // QueueSetHandle_t resp_queue_set;
@@ -115,7 +145,7 @@ protected:
     int  ad9252_cfg( int chip_num, int addr, int data );
     void zddm_arm( int mode, int val );
 
-    void rx_msg_proc(const udt_msg_t &udp_msg);
+    void rx_msg_proc(const typename GermaniumNetwork<GermaniumDetector>::UDPRxMsg& udp_msg);
     void tx_msg_proc();
 
     void ps_i2c_access_task();
@@ -124,11 +154,12 @@ protected:
 public:
     static constexpr size_t REGISTER_SINGLE_ACCESS_REQ_QUEUE_LENG = 100;
 
-    typedef struct
+    struct RegisterSingleAccessReqStruct
     {
         uint16_t op;
         uint32_t reg_addr;
-    } RegisterSingleAccessReq;
+    };
+    using RegisterSingleAccessReq = RegisterSingleAccessReqStruct;
 
     GermaniumDetector();
     void task_init() override;
