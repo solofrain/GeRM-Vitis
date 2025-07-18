@@ -69,7 +69,7 @@ protected:
     TaskHandle_t  udp_rx_task_handle_;
     TaskHandle_t  udp_tx_task_handle_;
     TaskHandle_t  register_single_access_task_handle_;
-    TaskHandle_t  slow_access_task_handle_;
+    //TaskHandle_t  slow_access_task_handle_;
 
     
     //------------------------------
@@ -82,8 +82,8 @@ protected:
     //------------------------------
     std::unique_ptr<DerivedZynq>    zynq_;
 
-    TimerHandle_t xPollTimer_ = NULL;
-    std::vector<uint16_t> poll_list_{};  // PVs to be polled
+    //TimerHandle_t xPollTimer_ = NULL;
+    //std::vector<uint16_t> poll_list_{};  // PVs to be polled
 
     Logger logger;
 
@@ -106,12 +106,12 @@ protected:
     //------------------------------
     // Task
     //------------------------------
-    void create_network_tasks();
-    void create_detector_queues();
-    void create_device_access_tasks();
-    void create_polling_tasks();
+    //void create_network_tasks();
+    //void create_detector_queues();
+    //void create_device_access_tasks();
+    //void create_polling_tasks();
 
-    virtual void register_single_access_task();
+    //virtual void register_single_access_task();
     //virtual void pl_if_single_access_task( void *pvParameters ) = 0;
     //virtual void pl_if_multi_access_task()( void *pvParameters ) = 0;
 
@@ -126,7 +126,7 @@ protected:
     //------------------------------
 
     // Write status code to register.
-    void set_status( uint32_t status );
+    //void set_status( uint32_t status );
 
     //template <typename T>
     //void report_error( const std::string& s, T err_code, uint32_t fail_num );
@@ -135,14 +135,14 @@ protected:
 
 public:
 
-    ZynqDetector( uint32_t base_addr );
+    ZynqDetector();
     ~ZynqDetector();
 
     //void DummyDetector::create_irq_task_map();
     
     void network_init();
     void queue_init();
-    void interrupt_init();
+    //void interrupt_init();
     void task_init();
 };
 

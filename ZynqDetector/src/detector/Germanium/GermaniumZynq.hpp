@@ -23,18 +23,18 @@
 
 
 
-
+class GermaniumDetector;
 
 //=========================================
 // Zynq class
 //=========================================
-class GermaniumZynq : public Zynq<GermaniumZynq>
+class GermaniumZynq : public Zynq<GermaniumZynq, GermaniumDetector>
 {
 protected:
     //Register reg_;
-    std::shared_ptr<PsI2c>   psi2c0_;
-    std::shared_ptr<PsI2c>   psi2c1_;
-    std::shared_ptr<PsXadc>  psxadc_;
+    std::unique_ptr<PsI2c>   psi2c0_;
+    std::unique_ptr<PsI2c>   psi2c1_;
+    std::unique_ptr<PsXadc>  psxadc_;
 
     
 

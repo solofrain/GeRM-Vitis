@@ -20,7 +20,7 @@
 
 
 //-----------------------------------------
-GermaniumZynq<Owner>::GermaniumZynq
+GermaniumZynq::GermaniumZynq
     ( const uintptr_t base_addr
     , const QueueHandle_t psi2c0_req_queue
     , const QueueHandle_t psi2c0_resp_queue
@@ -56,7 +56,7 @@ void Zynq::add_pl_spi( const std::string& name
                     , std::forward_as_tuple( reg_, instr_reg, wr_data_reg, rd_data_reg ) );
 }
 */
-auto Zynq::add_psi2c_interface( uint32_t bus_index )
+auto GermaniumZynq::add_psi2c_interface( uint32_t bus_index )
 {
     return ps_i2cs_.emplace_back( bus_index );
 }

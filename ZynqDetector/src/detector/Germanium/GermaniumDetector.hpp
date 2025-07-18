@@ -27,7 +27,7 @@ struct germ_udp_msg_t
 
 class GermaniumDetector : public ZynqDetector< GermaniumDetector
                                              , GermaniumNetwork<GermaniumDetector>
-                                             , GermaniumZynq<GermaniumDetector>
+                                             , GermaniumZynq
                                              , GermaniumRegister
                                              >
 {
@@ -49,29 +49,24 @@ protected:
     QueueHandle_t register_multi_access_resp_queue;
 
 
+    std::unique_ptr<Ltc2309<PsI2c>> ltc2309_0_, ltc2309_1_;
+    std::unique_ptr<Dac7678<PsI2c>> dac7678_;
+    std::unique_ptr<Tmp100<PsI2c>>  tmp100_0_;
+    std::unique_ptr<Tmp100<PsI2c>>  tmp100_1_;
+    std::unique_ptr<Tmp100<PsI2c>>  tmp100_2_;
+
     int num_chips_;
     int nelm_;
 
     // ASIC configuration data
-    unsigned int loads[12][14];
+    uint16_t loads[12][14];
   
-    //PsI2c &psi2c_0_;
-    //PsI2c &psi2c_1_;
-    //PsXadc psxadc_;
-    std::shared_ptr<Ltc2309<PsI2c>> ltc2309_0_, ltc2309_1_;
-    std::shared_ptr<Dac7678<PsI2c>> dac7678_;
-    std::shared_ptr<Tmp100<PsI2c>>  tmp100_0_;
-    std::shared_ptr<Tmp100<PsI2c>>  tmp100_1_;
-    std::shared_ptr<Tmp100<PsI2c>>  tmp100_2_;
-
-    unsigned int loads_[12][14];
-
-    const uint8_t Ltc2309_0_I2C_ADDR = 0x08;
-    const uint8_t Ltc2309_1_I2C_ADDR = 0x0A;
-    const uint8_t Dac7678_I2C_ADDR = 0x1A;
-    const uint8_t Tmp100_0_I2C_ADDR = 0x48;
-    const uint8_t Tmp100_1_I2C_ADDR = 0x49;
-    const uint8_t Tmp100_2_I2C_ADDR = 0x59;
+    const uint8_t LTC2309_0_I2C_ADDR = 0x08;
+    const uint8_t LTC2309_1_I2C_ADDR = 0x0A;
+    const uint8_t DAC7678_I2C_ADDR = 0x1A;
+    const uint8_t TMP100_0_I2C_ADDR = 0x48;
+    const uint8_t TMP100_1_I2C_ADDR = 0x49;
+    const uint8_t TMP100_2_I2C_ADDR = 0x59;
 
     const uint16_t VL0 = 0;
     const uint16_t VL1 = 1;
@@ -154,12 +149,12 @@ protected:
 public:
     static constexpr size_t REGISTER_SINGLE_ACCESS_REQ_QUEUE_LENG = 100;
 
-    struct RegisterSingleAccessReqStruct
-    {
-        uint16_t op;
-        uint32_t reg_addr;
-    };
-    using RegisterSingleAccessReq = RegisterSingleAccessReqStruct;
+    //struct RegisterSingleAccessReqStruct
+    //{
+    //    uint16_t op;
+    //    uint32_t reg_addr;
+    //};
+    //using RegisterSingleAccessReq = RegisterSingleAccessReqStruct;
 
     GermaniumDetector();
     //void do_task_init();

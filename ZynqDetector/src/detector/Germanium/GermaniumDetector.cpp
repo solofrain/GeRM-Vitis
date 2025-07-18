@@ -124,8 +124,10 @@ void GermaniumDetector::register_access_request_proc(const UdpRxMsg &msg)
 {
     RegisterAccessRequest req;
     req.op = msg.op;
-    xQueueSend(register_access_request_queue, req,
-               , 0UL);
+    xQueueSend( register_access_request_queue
+              , req
+              , 0UL
+              );
 }
 //===============================================================
 
@@ -135,40 +137,45 @@ void GermaniumDetector::register_access_request_proc(const UdpRxMsg &msg)
 //===============================================================
 void GermaniumDetector::task_init()
 {
-    xTaskCreate(udp_rx_task,
-                (const char *)"UDP_RX",
-                configMINIMAL_STACK_SIZE,
-                NULL,
-                tskIDLE_PRIORITY,
-                &udp_rx_task_handle_);
+    xTaskCreate( udp_rx_task
+               , (const char *)"UDP_RX"
+               , configMINIMAL_STACK_SIZE
+               , NULL
+               , tskIDLE_PRIORITY
+               , &udp_rx_task_handle_
+               );
 
-    xTaskCreate(udp_tx_task,
-                (const char *)"UDP_TX",
-                configMINIMAL_STACK_SIZE,
-                NULL,
-                tskIDLE_PRIORITY + 1,
-                &udp_tx_task_handle_);
+    xTaskCreate( udp_tx_task
+               , (const char *)"UDP_TX"
+               , configMINIMAL_STACK_SIZE
+               , NULL
+               , tskIDLE_PRIORITY + 1
+               , &udp_tx_task_handle_
+               );
 
-    xTaskCreate( psi2c_task,
-                 ( const char* ) "PsI2c0",
-                 configMINIMAL_STACK_SIZE,
-                 NULL,
-                 tskIDLE_PRIORITY + 1,
-                 &psi2c_0_task_handler_ );
+    xTaskCreate( psi2c_task
+               , ( const char* ) "PsI2c0"
+               , configMINIMAL_STACK_SIZE
+               , NULL
+               , tskIDLE_PRIORITY + 1
+               , &psi2c_0_task_handler_
+               );
 
-    xTaskCreate( psi2c_task,
-                ( const char* ) "PsI2c1",
-                configMINIMAL_STACK_SIZE,
-                NULL,
-                tskIDLE_PRIORITY + 1,
-                &psi2c_1_task_handler_ );
+    xTaskCreate( psi2c_task
+               , ( const char* ) "PsI2c1"
+               , configMINIMAL_STACK_SIZE
+               , NULL
+               , tskIDLE_PRIORITY + 1
+               , &psi2c_1_task_handler_
+               );
 
-    xTaskCreate( psxadc_task,
-                ( const char* ) "PsXadc",
-                configMINIMAL_STACK_SIZE,
-                NULL,
-                tskIDLE_PRIORITY + 1,
-                &psxadc_task_handler_ );
+    xTaskCreate( psxadc_task
+               , ( const char* ) "PsXadc"
+               , configMINIMAL_STACK_SIZE
+               , NULL
+               , tskIDLE_PRIORITY + 1
+               , &psxadc_task_handler_
+               );
 }
 
 void GermaniumDetector::create_device_access_tasks()
@@ -262,19 +269,19 @@ void GermaniumDetector::register_multi_access_task()
 //===============================================================
 void GermaniumDetector::create_detector_queues()
 {
-    psi2c_0_req_queue = xQueueCreate(5, sizeof(PsI2cAccessReq));
-    psi2c_1_req_queue = xQueueCreate(5, sizeof(PsI2cAccessReq));
-    psxadc_req_queue  = xQueueCreate(5, sizeof(PsXadcAccessReq));
+    psi2c_0_req_queue = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
+    psi2c_1_req_queue = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
+    psxadc_req_queue  = xQueueCreate( 5, sizeof(PsXadcAccessReq) );
 
-    psi2c_0_resp_queue = xQueueCreate(5, sizeof(PsI2cAccessResp));
-    psi2c_1_resp_queue = xQueueCreate(5, sizeof(PsI2cAccessResp));
-    psxadc_resp_queue  = xQueueCreate(5, sizeof(PsXadcAccessResp));
+    psi2c_0_resp_queue = xQueueCreate( 5, sizeof(PsI2cAccessResp) );
+    psi2c_1_resp_queue = xQueueCreate( 5, sizeof(PsI2cAccessResp) );
+    psxadc_resp_queue  = xQueueCreate( 5, sizeof(PsXadcAccessResp) );
 
     resp_queue_set = xQueueCreateSet(50);
 
-    xQueueAddToSet(psi2c_0_resp_queue, resp_queue_set);
-    xQueueAddToSet(psi2c_1_resp_queue, resp_queue_set);
-    xQueueAddToSet(psxadc_resp_queue, resp_queue_set);
+    xQueueAddToSet( psi2c_0_resp_queue, resp_queue_set );
+    xQueueAddToSet( psi2c_1_resp_queue, resp_queue_set );
+    xQueueAddToSet( psxadc_resp_queue, resp_queue_set );
 }
 //===============================================================
 

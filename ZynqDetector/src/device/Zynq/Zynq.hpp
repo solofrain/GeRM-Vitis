@@ -24,17 +24,20 @@
 //=========================================
 // Zynq class
 //=========================================
-template <typename DerivedZynq>
+template < typename DerivedZynq
+         , typename DerivedRegister
+         , typename Owner>
 class Zynq
 {
 private:
     
-    std::unique_ptr<Register>  reg_;
-    Owner&    owner_;
-    std::vector<PsI2c> ps_i2cs_;
+    std::unique_ptr<Register<DerivedRegister>>  reg_;
+    Owner&                     owner_;
+    std::vector<PsI2c>         ps_i2cs_;
 
 public:
-    Zynq( uintptr_t base_addr, Owner& owner );
+
+    Zynq( uintptr_t base_addr, const Owner& owner );
 
     //auto add_pl_i2c( const std::string& name, uint32_t instr_reg, uint32_t data_reg );
     //auto add_pl_spi( const std::string& name, uint32_t instr_reg, uint32_t data_reg );

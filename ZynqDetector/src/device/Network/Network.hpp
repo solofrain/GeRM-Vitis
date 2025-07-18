@@ -25,7 +25,9 @@ extern "C" {
 
 //#include "ZynqDetector.hpp"
 
-template <typename Owner>
+template < typename DerivedNetwork,
+         , typename Owner
+         >
 class Network
 {
 private:
