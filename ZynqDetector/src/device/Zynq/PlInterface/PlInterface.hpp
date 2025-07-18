@@ -7,7 +7,7 @@
 //=========================================
 // PL Interface class
 //=========================================
-class PLInterface
+class PlInterface
 {
 protected:
     Register& reg_;
@@ -22,7 +22,7 @@ protected:
     xSemaphoreHandle mutex_;
     
 public:
-    PLInterface( Register& reg,
+    PlInterface( Register& reg,
                  uint32_t  config_reg,
                  uint32_t  instr_reg,
                  uint32_t  data_reg,

@@ -73,13 +73,13 @@ auto Zynq<Owner>::add_ps_i2c_interface
         resp_queue );
 }
 
-//I2CInterface* Zynq::get_pl_i2c_interface( const std::string& name )
+//I2cInterface* Zynq::get_pl_i2c_interface( const std::string& name )
 //{
 //    auto it = pl_i2c_interfaces_.find( name );
 //    return ( it !=pl_ i2c_interfaces_.end() ) ? &(it->second) : nullptr;
 //}
 //
-//SPIInterface* Zynq::get_pl_spi_interface(const std::string& name)
+//SpiInterface* Zynq::get_pl_spi_interface(const std::string& name)
 //{
 //    auto it = pl_spi_interfaces_.find( name );
 //    return ( it != pl_spi_interfaces_.end() ) ? &(it->second) : nullptr;

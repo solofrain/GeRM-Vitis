@@ -1,6 +1,6 @@
 #pragma once
 /**
- * @file I2CBus.hpp
+ * @file I2cBus.hpp
  * @brief Base class of I2C bus.
  * 
  * This file declaures the base class of I2C bus.
@@ -26,7 +26,7 @@
 #inlcude "queue.hpp"
 
 
-class I2CBus
+class I2cBus
 {
 protected:
 
@@ -42,12 +42,12 @@ protected:
 
 public:
     
-    I2CBus( uint8_t bus_index
+    I2cBus( uint8_t bus_index
           , std::string name
           , QueueHandle_t req_queue
           , QueueHandle_t resp_queue );
 
-    ~I2CBus() = default;
+    ~I2cBus() = default;
 
     void create_psi2c_task();
 };

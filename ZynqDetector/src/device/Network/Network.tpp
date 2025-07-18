@@ -311,7 +311,7 @@ void Network<Owner>::create_network_tasks
 template <typename Owner>
 void Network<Owner>::udp_rx_task()
 {
-    UDPRxMsg msg;
+    UdpRxMsg msg;
     uint32_t msg_leng;
     
     struct freertos_sockaddr src_sock_addr;
@@ -356,7 +356,7 @@ void Network<Owner>::udp_tx_task()
 {
     struct freertos_sockaddr dst_sock_addr;
     uint16_t msg_leng, tx_length;
-    UDPTxMsg msg;
+    UdpTxMsg msg;
 
     while(1)
     {
@@ -384,14 +384,14 @@ template <typename Owner>
 void Network<Owner>::rx_msg_proc( std::any& msg )
 {
     //int instr = msg.op && 0x7FFF;
-    auto it = rx_msg_map_.find(((UDPRxMsg)msg).op && 0x7FFF);
+    auto it = rx_msg_map_.find(((UdpRxMsg)msg).op && 0x7FFF);
     if (it != rx_msg_map_.end())
     {
         it->second(msg);  // Call the corresponding function
     }
     else
     {
-        owner_.logger.log_error( "Unknown instruction: ", ((UDPRxMsg)msg).op );
+        owner_.logger.log_error( "Unknown instruction: ", ((UdpRxMsg)msg).op );
     }
 }
 //===============================================================

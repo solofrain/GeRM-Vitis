@@ -4,16 +4,16 @@
 
 #include "FreeRTOS.h"
 
-#include "PLInterface.hpp"
+#include "PlInterface.hpp"
 
 
 //=========================================
 // I2C Interface class
 //=========================================
-class PLI2C: public PLInterface
+class PlI2c: public PlInterface
 {
 public:
-    using PLInterface::PLInterface;
+    using PlInterface::PlInterface;
 };
 //=========================================
 

@@ -10,7 +10,7 @@
 
 
 
-class PSI2C
+class PsI2c
 {
 private:
 
@@ -45,13 +45,14 @@ private:
 
 public:
   
-    PSI2C( uint8_t       bus_index,
-           std::string   name,
-           uint32_t      device_id,
-           uint32_t      base_addr,
-           uint32_t      clk_freq,
-           QueueHandle_t req_queue,
-           QueueHandle_t resp_queue );
+    PsI2c( const uint8_t       bus_index,
+           const std::string   name,
+           const uint32_t      device_id,
+           const uint32_t      base_addr,
+           const uint32_t      clk_freq,
+           const QueueHandle_t req_queue,
+           const QueueHandle_t resp_queue
+         );
 
     void create_psi2c_task();
 };

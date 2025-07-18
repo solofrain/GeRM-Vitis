@@ -1,17 +1,22 @@
-//#include <iostream>
 #include <stdio.h>
 #include <string>
+#include <memory>
+#include <functional>
 
-#include "PSI2C.hpp"
+#include "xil_printf.h"
 
-PSI2C::PSI2C
-    ( const int8_t       bus_index
-    , const std::string  name
-    , const uint32_t     device_id,
-    , const uint32_t     base_addr,
-    , const uint32_t     clk_freq,
-    , const ueueHandle_t req_queue
-    , const ueueHandle_t resp_queue
+#include "task_wrap.hpp"
+#include "queue.hpp"
+#include "PsI2c.hpp"
+
+PsI2c::PsI2c
+    ( const uint8_t       bus_index
+    , const std::string   name
+    , const uint32_t      device_id
+    , const uint32_t      base_addr
+    , const uint32_t      clk_freq
+    , const QueueHandle_t req_queue
+    , const QueueHandle_t resp_queue
     )
     : bus_index_  ( bus_index  )
     , name_       ( name       )
@@ -39,7 +44,7 @@ PSI2C::PSI2C
     i2cps_config_ptr_ = XIicPs_LookupConfig( base_addr_ );
     if ( i2cps_config_ptr_ == NULL )
     {
-        log_error("I2C %d: lookup config failed\n", bus_index_ );
+        xil_printf("I2C %d: lookup config failed\n", bus_index_ );
         //std::cout << "I2C " << bus_index << " lookup config failed\n";
         return;
     }
@@ -48,7 +53,7 @@ PSI2C::PSI2C
     if ( status != XST_SUCCESS )
     {
         //std::cout << "I2C " << bus_index << " config initialization failed\n";
-        log_error("I2C %d: config initialization failed\n", bus_index_ );
+        xil_printf("I2C %d: config initialization failed\n", bus_index_ );
         return;
     }
     
@@ -57,7 +62,7 @@ PSI2C::PSI2C
     if ( status != XST_SUCCESS )
     {
         //std::cout << "I2C " << bus_index << " self-test failed\n";
-        log_error("I2C %d: self-test failed failed\n", bus_index_);
+        xil_printf("I2C %d: self-test failed failed\n", bus_index_);
         return;
     }
 
@@ -68,7 +73,7 @@ PSI2C::PSI2C
 //=========================================
 // Write to I2C bus.
 //=========================================
-int PSI2C::write( char* buffer, uint16_t length, uint16_t slave_address )
+int PsI2c::write( char* buffer, uint16_t length, uint16_t slave_address )
 {
     int status = XST_SUCCESS;
 
@@ -90,7 +95,7 @@ int PSI2C::write( char* buffer, uint16_t length, uint16_t slave_address )
 //=========================================
 // Read from I2C bus.
 //=========================================
-int PSI2C::read( char* buffer, uint16_t length, uint16_t slave_address ) 
+int PsI2c::read( char* buffer, uint16_t length, uint16_t slave_address ) 
 {
     int status = XST_SUCCESS;
 
@@ -110,10 +115,10 @@ int PSI2C::read( char* buffer, uint16_t length, uint16_t slave_address )
 }
 
 
-void PSI2C::task()
+void PsI2c::task()
 {
-    PSI2CReq  req;
-    PSI2CResp resp;
+    PsI2cAccessReq  req;
+    PsI2cAccessResp resp;
 
     //char rd_data[4];
     //char wr_data[4];
@@ -121,27 +126,34 @@ void PSI2C::task()
     while(1)
     {
         xQueueReceive( req_queue_
-                     , &req,
-					 , portMAX_DELAY );
+                     , &req
+					 , portMAX_DELAY
+                     );
         
-        if ( req.op && = 0x8000 )
+        if ( req.op && 0x8000 )
         {
-            read( resp.data, req.length, req.addr );
+            read( (char*)resp.data, req.length, req.addr );
             resp.op = req.op;
             xQueueSend( resp_queue_
-                      , resp,
+                      , static_cast<const void*>(&resp)
                       , 0UL
-                      )
+                      );
         }
         else
         {
-            write( req.data, req.length, req.addr );
+            write( (char*)req.data, req.length, req.addr );
         }
     }
 }
 
-static void PSI2C::create_psi2c_task()
+void PsI2c::create_psi2c_task()
 {
     auto task_func = std::make_unique<std::function<void()>>([this]() { task(); });
-    xTaskCreate( task_wrapper, name_.c_str(), 1000, &task_func, 1, NULL );
+    xTaskCreate( task_wrapper
+               , name_.c_str()
+               , 1000
+               , &task_func
+               , 1
+               , NULL
+               );
 }

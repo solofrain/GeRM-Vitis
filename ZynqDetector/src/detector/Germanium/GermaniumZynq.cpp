@@ -10,7 +10,7 @@
 
 #include "Register.hpp"
 #include "Zynq.hpp"
-
+#include "GermaniumZynq.hpp"
 
 
 //###################################################
@@ -20,17 +20,19 @@
 
 
 //-----------------------------------------
-GermaniumZynq::GermaniumZynq( const QueueHandle_t psi2c0_req_queue
-                            , const QueueHandle_t psi2c0_resp_queue
-                            , const QueueHandle_t psi2c1_req_queue
-                            , const QueueHandle_t psi2c1_resp_queue
-                            , const QueueHandle_t psxadc_req_queue
-                            , const QueueHandle_t psxadc_resp_queue
-                            )
-    : Zynq   ( 0x43C00000                                                                  )
-    , psi2c0_( std::make_shared<PSI2C>( 0, "psi2c0", psi2c0_req_queue, psi2c0_resp_queue ) )
-    , psi2c1_( std::make_shared<PSI2C>( 1, "psi2c1", psi2c1_req_queue, psi2c1_resp_queue ) )
-    , psxadc_( std::make_shared<PSXADC>( "psxadc", psxadc_req_queue, psxadc_resp_queue   ) )
+GermaniumZynq<Owner>::GermaniumZynq
+    ( const uintptr_t base_addr
+    , const QueueHandle_t psi2c0_req_queue
+    , const QueueHandle_t psi2c0_resp_queue
+    , const QueueHandle_t psi2c1_req_queue
+    , const QueueHandle_t psi2c1_resp_queue
+    , const QueueHandle_t psxadc_req_queue
+    , const QueueHandle_t psxadc_resp_queue
+    )
+    : Zynq<GermaniumZynq> ( base_addr                                                      )
+    , psi2c0_( std::make_shared<PsI2c>( 0, "psi2c0", psi2c0_req_queue, psi2c0_resp_queue ) )
+    , psi2c1_( std::make_shared<PsI2c>( 1, "psi2c1", psi2c1_req_queue, psi2c1_resp_queue ) )
+    , psxadc_( std::make_shared<PsXadc>( "psxadc", psxadc_req_queue, psxadc_resp_queue   ) )
 {}
 
 /*
@@ -59,17 +61,17 @@ auto Zynq::add_psi2c_interface( uint32_t bus_index )
     return ps_i2cs_.emplace_back( bus_index );
 }
 
-I2CInterface* Zynq::get_pli2c_interface( const std::string& name )
-{
-    auto it = pl_i2c_interfaces_.find( name );
-    return ( it !=pl_ i2c_interfaces_.end() ) ? &(it->second) : nullptr;
-}
-
-SPIInterface* Zynq::get_plspi_interface(const std::string& name)
-{
-    auto it = pl_spi_interfaces_.find( name );
-    return ( it != pl_spi_interfaces_.end() ) ? &(it->second) : nullptr;
-}
+//I2cInterface* Zynq::get_pli2c_interface( const std::string& name )
+//{
+//    auto it = pl_i2c_interfaces_.find( name );
+//    return ( it !=pl_ i2c_interfaces_.end() ) ? &(it->second) : nullptr;
+//}
+//
+//SpiInterface* Zynq::get_plspi_interface(const std::string& name)
+//{
+//    auto it = pl_spi_interfaces_.find( name );
+//    return ( it != pl_spi_interfaces_.end() ) ? &(it->second) : nullptr;
+//}
 
 //=========================================
 #endif

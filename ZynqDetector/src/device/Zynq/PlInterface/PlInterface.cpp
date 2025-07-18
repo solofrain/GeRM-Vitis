@@ -1,12 +1,12 @@
 #include <unistd.h> // For close()
 
-#include "PLInterface.hpp"
+#include "PlInterface.hpp"
 
 
 //=========================================
 // Interface class
 //=========================================
-PLInterface::PLInterface
+PlInterface::PlInterface
     (
       Register& reg
     , uint32_t config_reg
@@ -31,7 +31,7 @@ PLInterface::PLInterface
 
 }
 
-void PLInterface::write( uint32_t instr, uint32_t data )
+void PlInterface::write( uint32_t instr, uint32_t data )
 {
     if ( xSemaphoreTake( mutex_, portMAX_DELAY ) == pdTRUE )
     {
@@ -42,7 +42,7 @@ void PLInterface::write( uint32_t instr, uint32_t data )
     }
 }
 
-uint32_t PLInterface::read( uint32_t instr, uint32_t data )
+uint32_t PlInterface::read( uint32_t instr, uint32_t data )
 {
     if ( xSemaphoreTake( mutex_, portMAX_DELAY ) == pdTRUE )
     {
@@ -65,7 +65,7 @@ void set_baud_rate( uint32_t baud_rate )
     }
 }
 
-void PLInterface::wait_for_completion()
+void PlInterface::wait_for_completion()
 {
     ulTaskNotifyTake( pdTRUE, portMAX_DELAY );  // Wait indefinitely for ISR notification
 }

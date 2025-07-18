@@ -11,6 +11,7 @@ public:
     const uint16_t VERSIONREG        = 3;
     const uint16_t MARS_CALPULSE     = 4;
     const uint16_t MARS_PIPE_DELAY   = 5;
+    const uint16_t DETECTOR_TYPE     = 6;
     const uint16_t MARS_RDOUT_ENB    = 8;
     const uint16_t EVENT_TIME_CNTR   = 9;
     const uint16_t SIM_EVT_SEL       = 10;
@@ -23,7 +24,7 @@ public:
     const uint16_t TD_CAL            = 20;
     const uint16_t EVENT_FIFO_DATA   = 24;
     const uint16_t EVENT_FIFO_CNT    = 25;
-    const uint16_t EVENT_FIFO_CNTRL  = 26;
+    const uint16_t EVENT_FIFO_CTRL   = 26;
     const uint16_t DMA_CONTROL       = 32;
     const uint16_t DMA_STATUS        = 33;
     const uint16_t DMA_BASEADDR      = 34;
@@ -36,7 +37,8 @@ public:
     const uint16_t DMA_IRQ_ENABLE    = 49;
     const uint16_t DMA_IRQ_COUNT     = 50;
     const uint16_t TRIG              = 52;
-    const uint16_t COUNT_TIME        = 53;
+    const uint16_t COUNT_TIME_LO     = 53;
+    const uint16_t COUNT_TIME_HI     = 53;
     const uint16_t FRAME_NO          = 54;
     const uint16_t COUNT_MODE        = 55;
     const uint16_t UPDATE_LOADS      = 100;
@@ -49,5 +51,5 @@ public:
     const uint16_t TEMP2             = 161;  // Temperature 2
     const uint16_t TEMP3             = 162;  // Temperature 3
     const uint16_t ZTEP              = 170;  // CPU temperature
-    const uint16_t DAC_INT_REF       = 180;  // DAC7678 internal reference
+    const uint16_t DAC_INT_REF       = 180;  // Dac7678 internal reference
 };

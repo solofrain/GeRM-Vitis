@@ -8,8 +8,8 @@
 #include "FreeRTOS.h"
 #include "semphr.h"
 
-#include "PSI2C.hpp"
-#include "PLInterface.hpp"
+#include "PsI2c.hpp"
+#include "PlInterface.hpp"
 
 #define __FREERTOS__
 //#define __LINUX__
@@ -24,14 +24,14 @@
 //=========================================
 // Zynq class
 //=========================================
-template <typename Owner>
+template <typename DerivedZynq>
 class Zynq
 {
 private:
     
     std::unique_ptr<Register>  reg_;
     Owner&    owner_;
-    std::vector<PSI2C> ps_i2cs_;
+    std::vector<PsI2c> ps_i2cs_;
 
 public:
     Zynq( uintptr_t base_addr, Owner& owner );
@@ -48,8 +48,8 @@ public:
         QueueHandle_t req_queue,
         QueueHandle_t resp_queue );
 
-    //PLI2CInterface* get_pl_i2c_interface( const std::string& name );
-    //PLSPIInterface* get_pl_spi_interface( const std::string& name );
+    //PlI2cInterface* get_pl_i2c_interface( const std::string& name );
+    //PlSpiInterface* get_pl_spi_interface( const std::string& name );
 };
 //=========================================
 

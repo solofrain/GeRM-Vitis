@@ -64,7 +64,7 @@ protected:
     virtual void udp_tx_task();
 
     virtual void rx_msg_proc( std::any& msg );
-    virtual void tx_msg_proc() = 0;
+    //virtual void tx_msg_proc() = 0;
     
 
 public:
@@ -81,14 +81,14 @@ public:
         uint16_t id;
         uint16_t op;
         uint32_t data[MAX_UDP_MSG_DATA_LENG >> 2];
-    } UDPRxMsg;
+    } UdpRxMsg;
 
     typedef struct
     {
         uint16_t id;
         uint16_t op;
         uint32_t data[MAX_UDP_MSG_DATA_LENG >> 2];
-    } UDPTxMsg;
+    } UdpTxMsg;
 
     explicit Network( Owner* owner, uint32_t udp_port );
     void network_init();

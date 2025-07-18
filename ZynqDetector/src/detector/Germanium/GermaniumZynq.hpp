@@ -9,9 +9,9 @@
 #include "FreeRTOS.h"
 #include "semphr.h"
 
-#include "PSI2C.hpp"
-#include "PSXADC.hpp"
-#include "PLInterface.hpp"
+#include "PsI2c.hpp"
+#include "PsXadc.hpp"
+#include "PlInterface.hpp"
 
 #define __FREERTOS__
 //#define __LINUX__
@@ -28,19 +28,18 @@
 //=========================================
 // Zynq class
 //=========================================
-template < typename Owner >
-class GermaniumZynq : public Zynq<Owner>
+class GermaniumZynq : public Zynq<GermaniumZynq>
 {
 protected:
     //Register reg_;
-    std::shared_ptr<PSI2C>   psi2c0_;
-    std::shared_ptr<PSI2C>   psi2c1_;
-    std::shared_ptr<PSXADC>  psxadc_;
+    std::shared_ptr<PsI2c>   psi2c0_;
+    std::shared_ptr<PsI2c>   psi2c1_;
+    std::shared_ptr<PsXadc>  psxadc_;
 
     
 
 public:
-    GermaniumZynq( uintptr_t base_addr
+    GermaniumZynq( const uintptr_t base_addr
                  , const QueueHandle_t psi2c0_req_queue
                  , const QueueHandle_t psi2c0_resp_queue
                  , const QueueHandle_t psi2c1_req_queue
@@ -56,7 +55,7 @@ public:
 
     auto add_ps_i2c( uint8_t bus_index );
 
-    //PLI2CInterface* get_pl_i2c_interface( const std::string& name );
-    //PLSPIInterface* get_pl_spi_interface( const std::string& name );
+    //PlI2cInterface* get_pl_i2c_interface( const std::string& name );
+    //PlSpiInterface* get_pl_spi_interface( const std::string& name );
 };
 //=========================================

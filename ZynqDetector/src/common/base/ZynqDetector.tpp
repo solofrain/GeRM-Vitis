@@ -61,7 +61,9 @@ ZynqDetector< DerivedDetector
                           )
     : zynq_    ( base_addr      )
 //    , network_ ( std::move(net) )
-{}
+{
+    network_ = std::make_unique<DerivedNetwork>( static_cast<DerivedDetector>(this) );
+}
 /*
 //===============================================================
 

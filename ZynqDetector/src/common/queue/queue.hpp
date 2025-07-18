@@ -3,8 +3,8 @@
 #include <cstdint>
 #include <type_traits>  // for std::is_same
 
-class PSI2C;
-class PLI2C;
+class PsI2c;
+class PlI2c;
 
 //====================================
 // Requests
@@ -30,17 +30,20 @@ struct RegisterMultiAccessReqStruct : AccessReq
 using RegisterMultiAccessReq = RegisterMultiAccessReqStruct;
 
 
-struct PSI2CAccessReqStruct : AccessReq
+struct PsI2cAccessReqStruct : AccessReq
 {
     uint8_t  length;
     uint8_t  addr;
     uint8_t  read;
     uint8_t  data[4];
 };
-using PSI2CAccessReq = PSI2CAccessReqStruct;
+using PsI2cAccessReq = PsI2cAccessReqStruct;
 
 
-struct PLInterfaceSingleAccessReqStruct : AccessReq
+struct PsXadcAccessReqStruct : AccessReq{};
+using PsXadcAccessReq= PsXadcAccessReqStruct;
+
+struct PlInterfaceSingleAccessReqStruct : AccessReq
 {
     uint16_t op;
     bool     read;
@@ -50,10 +53,10 @@ struct PLInterfaceSingleAccessReqStruct : AccessReq
     uint32_t instr;
     uint32_t data;
 };
-using PLInterfaceSingleAccessReq = PLInterfaceSingleAccessReqStruct;
+using PlInterfaceSingleAccessReq = PlInterfaceSingleAccessReqStruct;
 
 
-struct PLInterfaceMultiAccessReqStruct : AccessReq
+struct PlInterfaceMultiAccessReqStruct : AccessReq
 {
     uint16_t op;
     bool     read;
@@ -64,19 +67,19 @@ struct PLInterfaceMultiAccessReqStruct : AccessReq
     uint32_t instr;
     uint32_t data[4096/4 - 1];
 };
-using PLInterfaceMultiAccessReq = PLInterfaceMultiAccessReqStruct;
+using PlInterfaceMultiAccessReq = PlInterfaceMultiAccessReqStruct;
 
 template<typename T>
 struct AccessReqTypeSelector;
 
 template<>
-struct AccessReqTypeSelector<PSI2C> {
-    using type = PSI2CAccessReq;
+struct AccessReqTypeSelector<PsI2c> {
+    using type = PsI2cAccessReq;
 };
 
 //template<>
-//struct AccessReqTypeSelector<PLI2C> {
-//    using type = PLI2CAccessReq;
+//struct AccessReqTypeSelector<PlI2c> {
+//    using type = PlI2cAccessReq;
 //};
 
 //====================================
@@ -102,20 +105,26 @@ struct RegisterMultiAccessRespStruct : AccessResp
 using RegisterMultiAccessResp = RegisterMultiAccessRespStruct;
 
 
-struct PSI2CAccessRespStruct : AccessResp
+struct PsI2cAccessRespStruct : AccessResp
 {
     uint8_t  length;
     uint8_t  data[4];
 };
-using PSI2CAccessResp = PSI2CAccessRespStruct;
+using PsI2cAccessResp = PsI2cAccessRespStruct;
 
+struct PsXadcAccessRespStruct : AccessResp
+{
+    uint8_t  length;
+    uint8_t  data[4];
+};
+using PsXadcAccessResp = PsXadcAccessRespStruct;
 
-struct PLInterfaceSingleAccessRespStruct : AccessResp
+struct PlInterfaceSingleAccessRespStruct : AccessResp
 {
     uint16_t  op;
     uint32_t  data;
 };
-using PLInterfaceSingleAccessResp = PLInterfaceSingleAccessRespStruct;
+using PlInterfaceSingleAccessResp = PlInterfaceSingleAccessRespStruct;
 
 
 struct PlInterfaceMultiAccessRespStruct : AccessResp

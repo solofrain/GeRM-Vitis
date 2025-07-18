@@ -9,10 +9,10 @@
 #include "GermaniumZynq.hpp"
 #include "GermaniumRegister.hpp"
 
-#include "LTC2309.hpp"
-#include "PSI2C.hpp"
-#include "DAC7678.hpp"
-#include "TMP100.hpp"
+#include "Ltc2309.hpp"
+#include "PsI2c.hpp"
+#include "Dac7678.hpp"
+#include "Tmp100.hpp"
 
 
 
@@ -55,23 +55,23 @@ protected:
     // ASIC configuration data
     unsigned int loads[12][14];
   
-    //PSI2C &psi2c_0_;
-    //PSI2C &psi2c_1_;
-    //PSXADC psxadc_;
-    std::shared_ptr<LTC2309<PSI2C>> ltc2309_0_, ltc2309_1_;
-    std::shared_ptr<DAC7678<PSI2C>> dac7678_;
-    std::shared_ptr<TMP100<PSI2C>>  tmp100_0_;
-    std::shared_ptr<TMP100<PSI2C>>  tmp100_1_;
-    std::shared_ptr<TMP100<PSI2C>>  tmp100_2_;
+    //PsI2c &psi2c_0_;
+    //PsI2c &psi2c_1_;
+    //PsXadc psxadc_;
+    std::shared_ptr<Ltc2309<PsI2c>> ltc2309_0_, ltc2309_1_;
+    std::shared_ptr<Dac7678<PsI2c>> dac7678_;
+    std::shared_ptr<Tmp100<PsI2c>>  tmp100_0_;
+    std::shared_ptr<Tmp100<PsI2c>>  tmp100_1_;
+    std::shared_ptr<Tmp100<PsI2c>>  tmp100_2_;
 
     unsigned int loads_[12][14];
 
-    const uint8_t LTC2309_0_I2C_ADDR = 0x08;
-    const uint8_t LTC2309_1_I2C_ADDR = 0x0A;
-    const uint8_t DAC7678_I2C_ADDR = 0x1A;
-    const uint8_t TMP100_0_I2C_ADDR = 0x48;
-    const uint8_t TMP100_1_I2C_ADDR = 0x49;
-    const uint8_t TMP100_2_I2C_ADDR = 0x59;
+    const uint8_t Ltc2309_0_I2C_ADDR = 0x08;
+    const uint8_t Ltc2309_1_I2C_ADDR = 0x0A;
+    const uint8_t Dac7678_I2C_ADDR = 0x1A;
+    const uint8_t Tmp100_0_I2C_ADDR = 0x48;
+    const uint8_t Tmp100_1_I2C_ADDR = 0x49;
+    const uint8_t Tmp100_2_I2C_ADDR = 0x59;
 
     const uint16_t VL0 = 0;
     const uint16_t VL1 = 1;
@@ -98,7 +98,7 @@ protected:
     //const uint16_t TEMP3 = 
 
     // DAC process map: <op, <device, channel>>
-    const std::map<uint16_t, std::pair<std::shared_ptr<DAC7678<PSI2C>>, uint8_t>> dac_instr_map = 
+    const std::map<uint16_t, std::pair<std::shared_ptr<Dac7678<PsI2c>>, uint8_t>> dac_instr_map = 
         {
           { VL0, std::make_pair( dac7678_, 0 ) },
           { VL1, std::make_pair( dac7678_, 1 ) },
@@ -111,7 +111,7 @@ protected:
         };
 
     // ADC process map: <op, <device, channel>>
-    const std::map<uint16_t, std::pair<std::shared_ptr<LTC2309<PSI2C>>, uint8_t>> adc_instr_map = 
+    const std::map<uint16_t, std::pair<std::shared_ptr<Ltc2309<PsI2c>>, uint8_t>> adc_instr_map = 
         {
           { TEMP1,   std::make_pair( ltc2309_0_, 0 ) },
           { TEMP2,   std::make_pair( ltc2309_0_, 1 ) },
@@ -126,7 +126,7 @@ protected:
         };
 
     // Temperature process map: <op, <device, channel>>
-    const std::map<uint16_t, std::shared_ptr<TMP100<PSI2C>>> temp_instr_map = 
+    const std::map<uint16_t, std::shared_ptr<Tmp100<PsI2c>>> temp_instr_map = 
         {
           { TEMP1, tmp100_0_ },
           { TEMP2, tmp100_1_ },
@@ -145,8 +145,8 @@ protected:
     int  ad9252_cfg( int chip_num, int addr, int data );
     void zddm_arm( int mode, int val );
 
-    void rx_msg_proc(const typename GermaniumNetwork<GermaniumDetector>::UDPRxMsg& udp_msg);
-    void tx_msg_proc();
+    void rx_msg_proc(const typename GermaniumNetwork<GermaniumDetector>::UdpRxMsg& udp_msg);
+    //void tx_msg_proc();
 
     void ps_i2c_access_task();
     void ps_xadc_access_task();
@@ -162,5 +162,5 @@ public:
     using RegisterSingleAccessReq = RegisterSingleAccessReqStruct;
 
     GermaniumDetector();
-    void task_init() override;
+    //void do_task_init();
 };

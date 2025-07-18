@@ -4,7 +4,7 @@
 #include <memory>
 // FreeRTOS includes
 #include "FreeRTOS.h"
-#include "msg.hpp"
+//#include "msg.hpp"
 #include "task.h"
 #include "queue.h"
 #include "timers.h"
@@ -13,8 +13,8 @@
 #include "xparameters.h"
 // Project includes
 #include "ZynqDetector.hpp"
-#include "Germanium.hpp"
-#include "pynq_ssd_msg.hpp"
+#include "GermaniumDetector.hpp"
+//#include "pynq_ssd_msg.hpp"
 
 #define TIMER_ID 1
 #define DELAY_10_SECONDS 10000UL
@@ -51,38 +51,38 @@ GermaniumDetector::GermaniumDetector()
                     , psxadc_req_queue
                     , psxadc_resp_queue
                     )
-    , ltc2309_0_ ( std::make_shared<LTC2309<PSI2C, PSI2CAccessReq>>( psi2c_1
-                                                   , LTC2309_0_I2C_ADDR
+    , ltc2309_0_ ( std::make_shared<Ltc2309<PsI2c, PsI2cAccessReq>>( psi2c_1
+                                                   , Ltc2309_0_I2C_ADDR
                                                    , true
                                                    , psi2c_1_req_queue
                                                    , chan_assign
                                                    )
                  )
-    , ltc2309_1_ ( std::make_shared<LTC2309<PSI2C, PSI2CAccessReq>>( psi2c_1
-                                                   , LTC2309_1_I2C_ADDR
+    , ltc2309_1_ ( std::make_shared<Ltc2309<PsI2c, PsI2cAccessReq>>( psi2c_1
+                                                   , Ltc2309_1_I2C_ADDR
                                                    , true
                                                    , psi2c_1_req_queue
                                                    , chan_assign
                                                    )
                  )
-    , dac7678_   ( std::make_shared<DAC7678<PSI2C, PSI2CAccessReq>>( psi2c_1
-                                                   , DAC7678_I2C_ADDR
+    , dac7678_   ( std::make_shared<Dac7678<PsI2c, PsI2cAccessReq>>( psi2c_1
+                                                   , Dac7678_I2C_ADDR
                                                    , psi2c_1_req_queue
                                                    , chan_assign
                                                    )
                  )
-    , tmp100_0_  ( std::make_shared<TMP100<PSI2C, PSI2CAccessReq>>( psi2c_0
-                                                  , TMP100_0_I2C_ADDR
+    , tmp100_0_  ( std::make_shared<Tmp100<PsI2c, PsI2cAccessReq>>( psi2c_0
+                                                  , Tmp100_0_I2C_ADDR
                                                   , psi2c_0_req_queue
                                                   )
                  )
-    , tmp100_1_  ( std::make_shared<TMP100<PSI2C, PSI2CAccessReq>>( psi2c_0
-                                                  , TMP100_1_I2C_ADDR
+    , tmp100_1_  ( std::make_shared<Tmp100<PsI2c, PsI2cAccessReq>>( psi2c_0
+                                                  , Tmp100_1_I2C_ADDR
                                                   , psi2c_0_req_queue
                                                   )
                  )
-    , tmp100_2_  ( std::make_shared<TMP100<PSI2C, PSI2CAccessReq>>( psi2c_0
-                                                  , TMP100_2_I2C_ADDR
+    , tmp100_2_  ( std::make_shared<Tmp100<PsI2c, PsI2cAccessReq>>( psi2c_0
+                                                  , Tmp100_2_I2C_ADDR
                                                   , psi2c_0_req_queue
                                                   )
                  )
@@ -97,7 +97,7 @@ GermaniumDetector::GermaniumDetector()
 //===============================================================
 //  DETECTOR_TYPE
 //===============================================================
-/*void proc_detector_type(const UDPRxMsg& msg)
+/*void proc_detector_type(const UdpRxMsg& msg)
 {
     if ( msg.op&0x8000 == 0 )
     {
@@ -120,7 +120,7 @@ GermaniumDetector::GermaniumDetector()
 
 //===============================================================
 //===============================================================
-void GermaniumDetector::register_access_request_proc(const UDPRxMsg &msg)
+void GermaniumDetector::register_access_request_proc(const UdpRxMsg &msg)
 {
     RegisterAccessRequest req;
     req.op = msg.op;
@@ -150,21 +150,21 @@ void GermaniumDetector::task_init()
                 &udp_tx_task_handle_);
 
     xTaskCreate( psi2c_task,
-                 ( const char* ) "PSI2C0",
+                 ( const char* ) "PsI2c0",
                  configMINIMAL_STACK_SIZE,
                  NULL,
                  tskIDLE_PRIORITY + 1,
                  &psi2c_0_task_handler_ );
 
     xTaskCreate( psi2c_task,
-                ( const char* ) "PSI2C1",
+                ( const char* ) "PsI2c1",
                 configMINIMAL_STACK_SIZE,
                 NULL,
                 tskIDLE_PRIORITY + 1,
                 &psi2c_1_task_handler_ );
 
     xTaskCreate( psxadc_task,
-                ( const char* ) "PSXADC",
+                ( const char* ) "PsXadc",
                 configMINIMAL_STACK_SIZE,
                 NULL,
                 tskIDLE_PRIORITY + 1,
@@ -188,21 +188,21 @@ void GermaniumDetector::create_device_access_tasks()
                , &register_multi_access_task_handle_ );
 
     xTaskCreate( psxadc_.task_wrapper
-               , (const char *)"PSXADC-Access"
+               , (const char *)"PsXadc-Access"
                , configMINIMAL_STACK_SIZE
                , &psxadc_
                , tskIDLE_PRIORITY
                , &psxadc_task_handle_ );
 
     xTaskCreate( psi2c0_.task_wrapper
-               , (const char *)"PSI2C-0-Access"
+               , (const char *)"PsI2c-0-Access"
                , configMINIMAL_STACK_SIZE
                , &psi2c0_
                , tskIDLE_PRIORITY
                , &psi2c_0_task_handle_ );
 
     xTaskCreate( psi2c1_.task_wrapper
-               , (const char *)"PSI2C-1-Access"
+               , (const char *)"PsI2c-1-Access"
                , configMINIMAL_STACK_SIZE
                , &psi2c1_
                , tskIDLE_PRIORITY
@@ -262,13 +262,13 @@ void GermaniumDetector::register_multi_access_task()
 //===============================================================
 void GermaniumDetector::create_detector_queues()
 {
-    psi2c_0_req_queue = xQueueCreate(5, sizeof(PSI2CReq));
-    psi2c_1_req_queue = xQueueCreate(5, sizeof(PSI2CReq));
-    psxadc_req_queue  = xQueueCreate(5, sizeof(PSXADCReq));
+    psi2c_0_req_queue = xQueueCreate(5, sizeof(PsI2cAccessReq));
+    psi2c_1_req_queue = xQueueCreate(5, sizeof(PsI2cAccessReq));
+    psxadc_req_queue  = xQueueCreate(5, sizeof(PsXadcAccessReq));
 
-    psi2c_0_resp_queue = xQueueCreate(5, sizeof(PSI2CResp));
-    psi2c_1_resp_queue = xQueueCreate(5, sizeof(PSI2CResp));
-    psxadc_resp_queue  = xQueueCreate(5, sizeof(PSXADCResp));
+    psi2c_0_resp_queue = xQueueCreate(5, sizeof(PsI2cAccessResp));
+    psi2c_1_resp_queue = xQueueCreate(5, sizeof(PsI2cAccessResp));
+    psxadc_resp_queue  = xQueueCreate(5, sizeof(PsXadcAccessResp));
 
     resp_queue_set = xQueueCreateSet(50);
 
@@ -298,7 +298,7 @@ void GermaniumDetector::polling_task_init()
 
 void GermaniumDetector::polling_1s()
 {
-    UDPRxMsg msg;
+    UdpRxMsg msg;
     
     for ( auto iter : poll_list )
     {

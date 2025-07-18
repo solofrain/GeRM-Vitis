@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <string>
 
-#include "I2CBus.hpp"
+#include "I2cBus.hpp"
 
-I2CBus::I2CBus( uint8_t       bus_index
+I2cBus::I2cBus( uint8_t       bus_index
               , std::string   name
               , QueueHandle_t req_queue
               , QueueHandle_t resp_queue
@@ -16,7 +16,7 @@ I2CBus::I2CBus( uint8_t       bus_index
 {}
 
 
-static void I2CBus::create_i2cbus_task()
+static void I2cBus::create_i2cbus_task()
 {
     auto task_func = std::make_unique<std::function<void()>>([this]() { task(); });
     xTaskCreate( task_wrapper, name_.c_str(), 1000, &task_func, 1, NULL );

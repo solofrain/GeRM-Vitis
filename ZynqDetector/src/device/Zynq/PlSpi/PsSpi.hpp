@@ -4,14 +4,14 @@
 
 #include "FreeRTOS.h"
 
-#include "PLInterface.hpp"
+#include "PlInterface.hpp"
 
 //=========================================
 // SPI Interface class
 //=========================================
-class PLSPI : public PLInterface
+class PlSpi : public PlInterface
 {
 public:
-    using PLInterface::PLInterface;
+    using PlInterface::PlInterface;
 };
 //=========================================
