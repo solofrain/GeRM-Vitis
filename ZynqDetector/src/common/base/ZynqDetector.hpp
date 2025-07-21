@@ -16,6 +16,7 @@
 #include "xil_printf.h"
 #include "xparameters.h"
 
+#include "Logger.h"
 #include "Register.hpp"
 #include "Network.hpp"
 #include "Zynq.hpp"

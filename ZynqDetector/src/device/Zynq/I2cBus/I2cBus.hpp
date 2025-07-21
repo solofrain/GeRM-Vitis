@@ -35,10 +35,10 @@ protected:
 
     xSemaphoreHandle  mutex_;
 
-    virtual int write( char* buffer, uint16_t length, uint16_t slave_address ) = 0;
-    virtual int read( char* buffer, uint16_t length, uint16_t slave_address ) = 0;
+    int write( char* buffer, uint16_t length, uint16_t slave_address );
+    int read( char* buffer, uint16_t length, uint16_t slave_address );
 
-    virtual void task() = 0;
+    void task();
 
 public:
     

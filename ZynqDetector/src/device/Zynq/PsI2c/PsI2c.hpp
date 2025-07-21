@@ -31,7 +31,7 @@ private:
     uint8_t        bus_index_;
     std::string    name_;
     uint32_t       device_id_;
-    uint32_t       base_addr_;
+    uintptr_t      base_addr_;
     uint32_t       clk_freq_;
     QueueHandle_t  req_queue_;
     QueueHandle_t  resp_queue_;
