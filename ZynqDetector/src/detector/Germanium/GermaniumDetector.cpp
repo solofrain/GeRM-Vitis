@@ -38,8 +38,19 @@ static StaticQueue_t xStaticQueue;
 #endif
 
 GermaniumDetector::GermaniumDetector()
-    : ZynqDetector( 0x43C00000
-                  //, std::make_unique<GermaniumNetwork>()
+    : ZynqDetector< GermaniumDetector
+                  , GermaniumNetwork
+                  , GermaniumZynq
+                  , GermaniumRegister
+                  >
+                  ( register_single_access_req_queue
+                  , register_single_access_resp_queue
+                  , psi2c0_req_queue
+                  , psi2c0_resp_queue
+                  , psi2c1_req_queue
+                  , psi2c1_resp_queue
+                  , psxadc_req_queue
+                  , psxadc_resp_queue
                   )
     , GermaniumZynq ( std::make_uniqure<GermaniumZynq>(base_addr_)
                     , register_single_access_req_queue
@@ -87,8 +98,57 @@ GermaniumDetector::GermaniumDetector()
                                                   )
                  )
 {
-    network_init(std::make_unique<GermaniumNetwork>(this));
 
+    psi2c_0_req_queue = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
+    psi2c_1_req_queue = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
+    psxadc_req_queue  = xQueueCreate( 5, sizeof(PsXadcAccessReq) );
+
+    psi2c_0_resp_queue = xQueueCreate( 5, sizeof(PsI2cAccessResp) );
+    psi2c_1_resp_queue = xQueueCreate( 5, sizeof(PsI2cAccessResp) );
+    psxadc_resp_queue  = xQueueCreate( 5, sizeof(PsXadcAccessResp) );
+
+    resp_queue_set = xQueueCreateSet(50);
+
+    xQueueAddToSet( psi2c_0_resp_queue, resp_queue_set );
+    xQueueAddToSet( psi2c_1_resp_queue, resp_queue_set );
+    xQueueAddToSet( psxadc_resp_queue, resp_queue_set );
+
+
+    this->zynq_ = std::make_unique<GermaniumZynq>( register_single_access_req_queue
+                                                 , register_single_access_resp_queue
+                                                 , register_multi_access_req_queue
+                                                 , register_multi_access_resp_queue
+                                                 , psi2c0_req_queue
+                                                 , psi2c0_resp_queue
+                                                 , psi2c1_req_queue
+                                                 , psi2c1_resp_queue
+                                                 , psxadc_req_queue
+                                                 , psxadc_resp_queue
+                                                 );
+
+    this->network_ = std::make_unique<GermaniumNetwork>( register_single_access_req_queue
+                                                       , register_single_access_resp_queue
+                                                       , register_multi_access_req_queue
+                                                       , register_multi_access_resp_queue
+                                                       , psi2c0_req_queue
+                                                       , psi2c0_resp_queue
+                                                       , psi2c1_req_queue
+                                                       , psi2c1_resp_queue
+                                                       , psxadc_req_queue
+                                                       , psxadc_resp_queue
+                                                       );
+
+    network_init(std::make_unique<GermaniumNetwork>(this));
+}
+//===============================================================
+
+
+//===============================================================
+// Latch MARS configuration.
+//===============================================================
+void GermaniumDetector::polling_task_init()
+{
+    poll_list.emplace_back( HV_RBV | 0x8000 );
     //reg_ = new GermaniumRegister();
 }
 
@@ -269,19 +329,19 @@ void GermaniumDetector::register_multi_access_task()
 //===============================================================
 void GermaniumDetector::create_detector_queues()
 {
-    psi2c_0_req_queue = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
-    psi2c_1_req_queue = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
-    psxadc_req_queue  = xQueueCreate( 5, sizeof(PsXadcAccessReq) );
-
-    psi2c_0_resp_queue = xQueueCreate( 5, sizeof(PsI2cAccessResp) );
-    psi2c_1_resp_queue = xQueueCreate( 5, sizeof(PsI2cAccessResp) );
-    psxadc_resp_queue  = xQueueCreate( 5, sizeof(PsXadcAccessResp) );
-
-    resp_queue_set = xQueueCreateSet(50);
-
-    xQueueAddToSet( psi2c_0_resp_queue, resp_queue_set );
-    xQueueAddToSet( psi2c_1_resp_queue, resp_queue_set );
-    xQueueAddToSet( psxadc_resp_queue, resp_queue_set );
+//    psi2c_0_req_queue = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
+//    psi2c_1_req_queue = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
+//    psxadc_req_queue  = xQueueCreate( 5, sizeof(PsXadcAccessReq) );
+//
+//    psi2c_0_resp_queue = xQueueCreate( 5, sizeof(PsI2cAccessResp) );
+//    psi2c_1_resp_queue = xQueueCreate( 5, sizeof(PsI2cAccessResp) );
+//    psxadc_resp_queue  = xQueueCreate( 5, sizeof(PsXadcAccessResp) );
+//
+//    resp_queue_set = xQueueCreateSet(50);
+//
+//    xQueueAddToSet( psi2c_0_resp_queue, resp_queue_set );
+//    xQueueAddToSet( psi2c_1_resp_queue, resp_queue_set );
+//    xQueueAddToSet( psxadc_resp_queue, resp_queue_set );
 }
 //===============================================================
 

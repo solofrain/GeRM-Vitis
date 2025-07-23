@@ -13,9 +13,9 @@ class Register
 {
 public:
 
-    Register( uintptr_t       base_addr,
-              QueueHandle_t&  single_access_req_queue,
-              QueueHandle_t&  single_access_resp_queue );
+    Register( uintptr_t            base_addr,
+              const QueueHandle_t  single_access_req_queue,
+              const QueueHandle_t  single_access_resp_queue );
 
     // Regular single access
     void write( uint32_t offset, uint32_t value );
@@ -34,9 +34,10 @@ public:
 
 private:
     uintptr_t base_addr_;
-    xSemaphoreHandle mutex_;
-    QueueHandle_t& single_access_req_queue_;
-    QueueHandle_t& single_access_resp_queue_;
+    xSemaphoreHandle  mutex_;
+    QueueHandle_t     single_access_req_queue_;
+    QueueHandle_t     single_access_resp_queue_;
+
     void single_access_task();
 };
 

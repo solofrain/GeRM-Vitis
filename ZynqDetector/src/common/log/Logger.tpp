@@ -5,17 +5,17 @@
 #include <cstdio>
 
 
-Logger::Logger( Register& reg )
-    : reg_ ( reg )
-    , control_word_(0x01)
-{
-    mutex_ = xSemaphoreCreateMutex();
-    
-    if ( mutex_ == NULL )
-    {
-        xil_printf( "Failed to create Logger control mutex.\n" );
-    }
-}
+//Logger::Logger( Register& reg )
+//    : reg_ ( reg )
+//    , control_word_(0x01)
+//{
+//    mutex_ = xSemaphoreCreateMutex();
+//    
+//    if ( mutex_ == NULL )
+//    {
+//        xil_printf( "Failed to create Logger control mutex.\n" );
+//    }
+//}
 
 void Logger::set_log_control(uint8_t control)
 {
@@ -37,7 +37,7 @@ void Logger::log_error(const char *format, ...)
 
 void Logger::log_error(uint32_t error_code, const char *format, ...)
 {
-    reg_.set_status(error_code);
+    //reg_.set_status(error_code);
 
     va_list args;
     va_start(args, format);

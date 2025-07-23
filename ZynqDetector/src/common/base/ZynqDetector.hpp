@@ -16,14 +16,18 @@
 #include "xil_printf.h"
 #include "xparameters.h"
 
-#include "Logger.h"
+#include "Logger.hpp"
 #include "Register.hpp"
 #include "Network.hpp"
 #include "Zynq.hpp"
 
 
 
-template< typename DerivedDetector, typename DerivedNetwork, typename DerivedZynq, typename DerivedRegister>
+template< typename DerivedDetector
+        , typename DerivedNetwork
+        , typename DerivedZynq
+        , typename DerivedRegister
+        >
 class ZynqDetector
 {
 protected:
@@ -145,6 +149,8 @@ public:
     void queue_init();
     //void interrupt_init();
     void task_init();
+    void create_network_tasks();
+    void create_device_access_tasks();
 };
 
 #include "ZynqDetector.tpp"

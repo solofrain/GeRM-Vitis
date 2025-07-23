@@ -24,12 +24,18 @@ template < typename DerivedZynq
          , typename DerivedRegister
          , typename Owner
          >
-Zynq<DerivedZynq, DerivedRegisterOwner>::Zynq
-    ( uintptr_t     base_addr
-    , const Owner&  owner
+Zynq<DerivedZynq, DerivedRegister, Owner>::Zynq
+    ( uintptr_t            base_addr
+    , const QueueHandle_t  register_single_access_req_queue
+    , const QueueHandle_t  register_single_access_resp_queue
     )
-    : reg_   ( base_addr )
-    , owner_ ( owner     )
+    : reg_ ( std::make_unique<DerivedRegister>
+                 ( base_addr
+                 , register_single_access_req_queue
+                 , register_single_access_resp_queue
+                 )
+           )
+//    , owner_ ( owner         )
 {}
 
 /*
@@ -58,7 +64,6 @@ template < typename DerivedZynq
          , typename DerivedRegister
          , typename Owner
          >
-template <typename DerivedZynq, typename Owner>
 auto Zynq<DerivedZynq, DerivedRegister, Owner>::add_ps_i2c_interface
     (
         uint8_t       bus_index,

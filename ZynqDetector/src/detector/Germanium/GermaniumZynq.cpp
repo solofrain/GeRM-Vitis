@@ -8,9 +8,12 @@
 #include <unistd.h> // For close()
 #endif
 
+#include "xparameters.h"
+
 #include "Register.hpp"
 #include "Zynq.hpp"
 #include "GermaniumZynq.hpp"
+#include "GermaniumRegister.hpp"
 
 
 //###################################################
@@ -21,7 +24,10 @@
 
 //-----------------------------------------
 GermaniumZynq::GermaniumZynq
-    ( const uintptr_t base_addr
+    ( const QueueHandle_t register_single_access_req_queue
+    , const QueueHandle_t register_single_access_resp_queue
+    , const QueueHandle_t register_multi_access_req_queue
+    , const QueueHandle_t register_multi_access_resp_queue
     , const QueueHandle_t psi2c0_req_queue
     , const QueueHandle_t psi2c0_resp_queue
     , const QueueHandle_t psi2c1_req_queue
@@ -29,10 +35,35 @@ GermaniumZynq::GermaniumZynq
     , const QueueHandle_t psxadc_req_queue
     , const QueueHandle_t psxadc_resp_queue
     )
-    : Zynq<GermaniumZynq> ( base_addr                                                      )
-    , psi2c0_( std::make_shared<PsI2c>( 0, "psi2c0", psi2c0_req_queue, psi2c0_resp_queue ) )
-    , psi2c1_( std::make_shared<PsI2c>( 1, "psi2c1", psi2c1_req_queue, psi2c1_resp_queue ) )
-    , psxadc_( std::make_shared<PsXadc>( "psxadc", psxadc_req_queue, psxadc_resp_queue   ) )
+    : Zynq< GermaniumZynq
+          , GermaniumRegister
+          , GermaniumDetector
+          >
+          ( XPAR_IOBUS_0_BASEADDR
+          , register_single_access_req_queue
+          , register_single_access_resp_queue
+          )
+    , psi2c0_( std::make_unique<PsI2c>( 0
+                                      , "psi2c0"
+                                      , XPAR_I2C0_BASEADDR
+                                      , XPAR_I2C0_CLOCK_FREQ
+                                      , psi2c0_req_queue
+                                      , psi2c0_resp_queue
+                                      )
+             )
+    , psi2c1_( std::make_unique<PsI2c>( 1
+                                      , "psi2c1"
+                                      , XPAR_I2C1_BASEADDR
+                                      , XPAR_I2C1_CLOCK_FREQ
+                                      , psi2c1_req_queue
+                                      , psi2c1_resp_queue
+                                      )
+             )
+    , psxadc_( std::make_unique<PsXadc>( "psxadc"
+                                       , psxadc_req_queue
+                                       , psxadc_resp_queue
+                                       )
+             )
 {}
 
 /*
@@ -56,10 +87,10 @@ void Zynq::add_pl_spi( const std::string& name
                     , std::forward_as_tuple( reg_, instr_reg, wr_data_reg, rd_data_reg ) );
 }
 */
-auto GermaniumZynq::add_psi2c_interface( uint32_t bus_index )
-{
-    return ps_i2cs_.emplace_back( bus_index );
-}
+//auto GermaniumZynq::add_psi2c_interface( uint32_t bus_index )
+//{
+//    return ps_i2cs_.emplace_back( bus_index );
+//}
 
 //I2cInterface* Zynq::get_pli2c_interface( const std::string& name )
 //{
@@ -84,8 +115,8 @@ auto GermaniumZynq::add_psi2c_interface( uint32_t bus_index )
 //=========================================
 Zynq::Zynq(uint32_t axi_base_addr)
     : axi_base_addr( axi_base_addr )
-    , reg( nullptr )
-    , reg_size( 0x10000 )
+    , reg_         ( nullptr       )
+    , reg_size     ( 0x10000       )
 {
     int fd = open("/dev/mem",O_RDWR | O_SYNC);
     if (fd == -1)
@@ -96,12 +127,14 @@ Zynq::Zynq(uint32_t axi_base_addr)
     try
     {
         //reg_size = getpagesize();
-        reg = static_cast<uint32_t *>( mmap( nullptr
-                                           , reg_size
-                                           , PROT_READ | PROT_WRITE
-                                           , MAP_SHARED
-                                           , fd
-                                           , axi_base_addr ) );
+        reg_ = static_cast<uint32_t *>( mmap( nullptr
+                                            , reg_size
+                                            , PROT_READ | PROT_WRITE
+                                            , MAP_SHARED
+                                            , fd
+                                            , axi_base_addr
+                                            )
+                                      );
     }
     catch (const std::exception& e)
     {

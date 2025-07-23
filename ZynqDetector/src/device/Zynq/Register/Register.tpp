@@ -12,15 +12,18 @@
 template< typename DerivedRegister >
 Register<DerivedRegister>::Register
     (
-      uintptr_t base_addr
-    , QueueHandle_t& single_access_req_queue
-    , QueueHandle_t& single_access_resp_queue
+      uintptr_t            base_addr
+    , const QueueHandle_t  single_access_req_queue
+    , const QueueHandle_t  single_access_resp_queue
     )
     : base_addr_ ( static_cast<uintptr_t>( base_addr ) )
     , single_access_req_queue_ ( single_access_req_queue )
     , single_access_resp_queue_ ( single_access_resp_queue )
 {}
 
+//=========================================
+// Register single access
+//=========================================
 template< typename DerivedRegister >
 void Register<DerivedRegister>::write( uint32_t offset, uint32_t value )
 {
@@ -49,6 +52,9 @@ void Register<DerivedRegister>::set_status( uint32_t status )
     write( 0xC, status );
 }
 
+//=========================================
+// Register multiple access
+//=========================================
 template< typename DerivedRegister >
 void Register<DerivedRegister>::multi_access_start()
 {

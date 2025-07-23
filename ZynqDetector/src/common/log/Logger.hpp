@@ -23,7 +23,7 @@ public:
         LOG_DEBUG_TYPE = 0x2
     };
 
-    Logger( Register& reg );
+    //Logger( Register& reg );
 
     void set_log_control( uint8_t control );
     uint8_t read_log_control();
@@ -44,7 +44,7 @@ private:
         va_list args
     );
 
-    Register& reg_;
+    //Register& reg_;
 
     uint8_t control_word_;
     xSemaphoreHandle mutex_;

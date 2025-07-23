@@ -52,4 +52,10 @@ public:
     static constexpr uint16_t TEMP3             = 162;  // Temperature 3
     static constexpr uint16_t ZTEP              = 170;  // CPU temperature
     static constexpr uint16_t DAC_INT_REF       = 180;  // Dac7678 internal reference
+
+    GermaniumRegister( uintptr_t            base_addr
+                     , const QueueHandle_t  single_access_req_queue
+                     , const QueueHandle_t  single_access_resp_queue
+                     );
+
 };

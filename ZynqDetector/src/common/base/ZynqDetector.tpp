@@ -56,14 +56,14 @@ ZynqDetector< DerivedDetector
             , DerivedNetwork
             , DerivedZynq
             , DerivedRegister
-            >::ZynqDetector( uint32_t base_addr
-//                        , std::unique_ptr<Network> net
-                          )
-    : zynq_    ( base_addr      )
+            >::ZynqDetector()
+//    : zynq_    ()
 //    , network_ ( std::move(net) )
 {
-    network_ = std::make_unique<DerivedNetwork>( static_cast<DerivedDetector>(this) );
 }
+
+
+
 /*
 //===============================================================
 
@@ -175,8 +175,44 @@ void ZynqDetector< DerivedDetector
                  >::task_init()
 {
     create_network_tasks();
-    create_detector_queues();
+    //create_detector_queues();
     create_device_access_tasks();
-    create_polling_tasks();
+    //create_polling_tasks();
+}
+//===============================================================
+
+
+//===============================================================
+//===============================================================
+template< typename DerivedDetector
+        , typename DerivedNetwork
+        , typename DerivedZynq
+        , typename DerivedRegister
+        >
+void ZynqDetector< DerivedDetector
+                 , DerivedNetwork
+                 , DerivedZynq
+                 , DerivedRegister
+                 >::create_network_tasks()
+{
+    network_->create_network_tasks();
+}
+//===============================================================
+
+
+//===============================================================
+//===============================================================
+template< typename DerivedDetector
+        , typename DerivedNetwork
+        , typename DerivedZynq
+        , typename DerivedRegister
+        >
+void ZynqDetector< DerivedDetector
+                 , DerivedNetwork
+                 , DerivedZynq
+                 , DerivedRegister
+                 >::create_device_access_tasks()
+{
+    zynq_->create_device_access_tasks();
 }
 //===============================================================

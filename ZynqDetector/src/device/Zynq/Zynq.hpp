@@ -9,13 +9,13 @@
 #include "semphr.h"
 
 #include "PsI2c.hpp"
-#include "PlInterface.hpp"
+//#include "PlInterface.hpp"
 
 #define __FREERTOS__
 //#define __LINUX__
 
-#define REG_BASE_ADDR  0x43C00000
-#define XADC_ADDR 0xF8007100
+//#define REG_BASE_ADDR  0x43C00000
+//#define XADC_ADDR 0xF8007100
 
 #define REG_VER        0x0
 
@@ -31,13 +31,16 @@ class Zynq
 {
 private:
     
-    std::unique_ptr<Register<DerivedRegister>>  reg_;
-    Owner&                     owner_;
+    std::unique_ptr<DerivedRegister>  reg_;
+    //Owner&                     owner_;
     std::vector<PsI2c>         ps_i2cs_;
 
 public:
 
-    Zynq( uintptr_t base_addr, const Owner& owner );
+    Zynq( uintptr_t            base_addr
+        , const QueueHandle_t  register_single_access_req_queu
+        , const QueueHandle_t  register_single_access_resp_queu
+        );
 
     //auto add_pl_i2c( const std::string& name, uint32_t instr_reg, uint32_t data_reg );
     //auto add_pl_spi( const std::string& name, uint32_t instr_reg, uint32_t data_reg );

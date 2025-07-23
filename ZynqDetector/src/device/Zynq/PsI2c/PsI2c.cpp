@@ -12,7 +12,7 @@
 PsI2c::PsI2c
     ( const uint8_t       bus_index
     , const std::string   name
-    , const uint32_t      device_id
+    //, const uint32_t      device_id
     , const uint32_t      base_addr
     , const uint32_t      clk_freq
     , const QueueHandle_t req_queue
@@ -20,7 +20,7 @@ PsI2c::PsI2c
     )
     : bus_index_  ( bus_index  )
     , name_       ( name       )
-    , device_id_  ( device_id  )
+    //, device_id_  ( device_id  )
     , base_addr_  ( base_addr  )
     , clk_freq_   ( clk_freq   )
     , req_queue_  ( req_queue  )

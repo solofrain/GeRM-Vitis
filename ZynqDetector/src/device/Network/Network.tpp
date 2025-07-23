@@ -26,18 +26,17 @@ extern "C" {
 #include "Logger.hpp"
 #include "task_wrap.hpp"
 
-template <typename Owner>
-Network<Owner>::Network( Owner* owner, uint32_t udp_port )
-	                   : owner_    ( owner )
-                       , udp_port_ ( udp_port )
+template < typename DerivedNetwork, typename Owner >
+Network<DerivedNetwork, Owner>::Network( Owner* owner )
+	                                   : owner_ ( owner )
 {}
 
 //===============================================================
 // Network initialization.
 //===============================================================
 
-template <typename Owner>
-void Network<Owner>::tcpip_init_done(void *arg)
+template < typename DerivedNetwork, typename Owner >
+void Network<DerivedNetwork, Owner>::tcpip_init_done(void *arg)
 {
     if (arg)
     {
@@ -46,8 +45,8 @@ void Network<Owner>::tcpip_init_done(void *arg)
 }
 
 
-template <typename Owner>
-void Network<Owner>::network_init()
+template < typename DerivedNetwork, typename Owner >
+void Network<DerivedNetwork, Owner>::network_init()
 {
     int setup = 0;
 
@@ -106,8 +105,8 @@ void Network<Owner>::network_init()
 // - DNS server
 // - MAC address
 //===============================================================
-template <typename Owner>
-void Network<Owner>::read_network_config( const std::string& filename )
+template < typename DerivedNetwork, typename Owner >
+void Network<DerivedNetwork, Owner>::read_network_config( const std::string& filename )
 {
     FATFS fs;    // File system object
     FRESULT res; // Result code
@@ -232,8 +231,8 @@ void Network<Owner>::read_network_config( const std::string& filename )
 //===============================================================
 // Convert a string to an IP/MAC address.
 //===============================================================
-template <typename Owner>
-bool Network<Owner>::string_to_addr(
+template < typename DerivedNetwork, typename Owner >
+bool Network<DerivedNetwork, Owner>::string_to_addr(
     const std::string& addr_str,
     uint8_t* addr
 )
@@ -290,12 +289,8 @@ bool Network<Owner>::string_to_addr(
 //===============================================================
 // Create Tx and Rx tasks
 //===============================================================
-template <typename Owner>
-void Network<Owner>::create_network_tasks
-(
-    TaskHandle_t udp_rx_task_handle,
-    TaskHandle_t udp_tx_task_handle
-)
+template < typename DerivedNetwork, typename Owner >
+void Network<DerivedNetwork, Owner>::create_network_tasks()
 {
     auto task_func = std::make_unique<std::function<void()>>([this]() { udp_rx_task(); });
     xTaskCreate( task_wrapper, "UDP Rx", 1000, &task_func, 1, udp_rx_task_handle );
@@ -308,8 +303,8 @@ void Network<Owner>::create_network_tasks
 //===============================================================
 // UDP receive task.
 //===============================================================
-template <typename Owner>
-void Network<Owner>::udp_rx_task()
+template < typename DerivedNetwork, typename Owner >
+void Network<DerivedNetwork, Owner>::udp_rx_task()
 {
     UdpRxMsg msg;
     uint32_t msg_leng;
@@ -339,7 +334,7 @@ void Network<Owner>::udp_rx_task()
         {
             // update server IP address
             remote_ip_addr = remote_ip_addr_tmp;
-            memcpy( svr_ip_addr_, &remote_ip_addr, 4 );
+            svr_ip_addr_.store( remote_ip_addr_tmp, std::memory_order_relaxed );
         }
         
         rx_msg_proc( msg );
@@ -351,8 +346,8 @@ void Network<Owner>::udp_rx_task()
 //===============================================================
 // UDP transmit task.
 //===============================================================
-template <typename Owner>
-void Network<Owner>::udp_tx_task()
+template < typename DerivedNetwork, typename Owner >
+void Network<DerivedNetwork, Owner>::udp_tx_task()
 {
     struct freertos_sockaddr dst_sock_addr;
     uint16_t msg_leng, tx_length;
@@ -380,12 +375,12 @@ void Network<Owner>::udp_tx_task()
 //===============================================================
 // UDP Rx message processing.
 //===============================================================
-template <typename Owner>
-void Network<Owner>::rx_msg_proc( std::any& msg )
+template < typename DerivedNetwork, typename Owner >
+void Network<DerivedNetwork, Owner>::rx_msg_proc( UdpRxMsg& msg )
 {
     //int instr = msg.op && 0x7FFF;
-    auto it = rx_msg_map_.find(((UdpRxMsg)msg).op && 0x7FFF);
-    if (it != rx_msg_map_.end())
+    auto it = static_cast<DerivedNetwork*>(this)->rx_instr_map_.find(((UdpRxMsg)msg).op && 0x7FFF);
+    if (it != static_cast<DerivedNetwork*>(this)->rx_instr_map_.end())
     {
         it->second(msg);  // Call the corresponding function
     }
