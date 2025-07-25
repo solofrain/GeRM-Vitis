@@ -22,21 +22,25 @@
 //-----------------------------------------
 template < typename DerivedZynq
          , typename DerivedRegister
-         , typename Owner
          >
-Zynq<DerivedZynq, DerivedRegister, Owner>::Zynq
-    ( uintptr_t            base_addr
-    , const QueueHandle_t  register_single_access_req_queue
-    , const QueueHandle_t  register_single_access_resp_queue
+Zynq<DerivedZynq, DerivedRegister>::Zynq
+    ( uintptr_t                      base_addr
+    , const QueueHandle_t            register_single_access_req_queue
+    , const QueueHandle_t            register_single_access_resp_queue
+    , const Logger<DerivedRegister>& logger
     )
-    : reg_ ( std::make_unique<DerivedRegister>
-                 ( base_addr
-                 , register_single_access_req_queue
-                 , register_single_access_resp_queue
-                 )
-           )
-//    , owner_ ( owner         )
+    : logger_ ( logger )
 {}
+
+
+template < typename DerivedZynq
+         , typename DerivedRegister
+         >
+void Zynq<DerivedZynq, DerivedRegister>::init_register( std::unique_ptr<DerivedRegister> reg )
+{
+    reg_ = std::move( reg );
+}
+
 
 /*
 auto Zynq::add_pl_i2c( const std::string& name
@@ -62,9 +66,8 @@ void Zynq::add_pl_spi( const std::string& name
 
 template < typename DerivedZynq
          , typename DerivedRegister
-         , typename Owner
          >
-auto Zynq<DerivedZynq, DerivedRegister, Owner>::add_ps_i2c_interface
+auto Zynq<DerivedZynq, DerivedRegister>::add_ps_i2c_interface
     (
         uint8_t       bus_index,
         std::string   name,

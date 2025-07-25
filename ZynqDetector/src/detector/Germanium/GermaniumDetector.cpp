@@ -14,6 +14,7 @@
 // Project includes
 #include "ZynqDetector.hpp"
 #include "GermaniumDetector.hpp"
+#include "GermaniumZynq.hpp"
 //#include "pynq_ssd_msg.hpp"
 
 #define TIMER_ID 1
@@ -61,12 +62,14 @@ GermaniumDetector::GermaniumDetector()
                     , psi2c_1_resp_queue
                     , psxadc_req_queue
                     , psxadc_resp_queue
+                    , this->logger_
                     )
     , ltc2309_0_ ( std::make_shared<Ltc2309<PsI2c, PsI2cAccessReq>>( psi2c_1
                                                    , Ltc2309_0_I2C_ADDR
                                                    , true
                                                    , psi2c_1_req_queue
                                                    , chan_assign
+                                                   , this->logger_
                                                    )
                  )
     , ltc2309_1_ ( std::make_shared<Ltc2309<PsI2c, PsI2cAccessReq>>( psi2c_1
@@ -74,27 +77,32 @@ GermaniumDetector::GermaniumDetector()
                                                    , true
                                                    , psi2c_1_req_queue
                                                    , chan_assign
+                                                   , this->logger_
                                                    )
                  )
     , dac7678_   ( std::make_shared<Dac7678<PsI2c, PsI2cAccessReq>>( psi2c_1
                                                    , Dac7678_I2C_ADDR
                                                    , psi2c_1_req_queue
                                                    , chan_assign
+                                                   , this->logger_
                                                    )
                  )
     , tmp100_0_  ( std::make_shared<Tmp100<PsI2c, PsI2cAccessReq>>( psi2c_0
                                                   , Tmp100_0_I2C_ADDR
                                                   , psi2c_0_req_queue
+                                                  , this->logger_
                                                   )
                  )
     , tmp100_1_  ( std::make_shared<Tmp100<PsI2c, PsI2cAccessReq>>( psi2c_0
                                                   , Tmp100_1_I2C_ADDR
                                                   , psi2c_0_req_queue
+                                                  , this->logger_
                                                   )
                  )
     , tmp100_2_  ( std::make_shared<Tmp100<PsI2c, PsI2cAccessReq>>( psi2c_0
                                                   , Tmp100_2_I2C_ADDR
                                                   , psi2c_0_req_queue
+                                                  , this->logger_
                                                   )
                  )
 {
@@ -124,6 +132,7 @@ GermaniumDetector::GermaniumDetector()
                                                  , psi2c1_resp_queue
                                                  , psxadc_req_queue
                                                  , psxadc_resp_queue
+                                                 , this->logger_
                                                  );
 
     this->network_ = std::make_unique<GermaniumNetwork>( register_single_access_req_queue
@@ -136,9 +145,10 @@ GermaniumDetector::GermaniumDetector()
                                                        , psi2c1_resp_queue
                                                        , psxadc_req_queue
                                                        , psxadc_resp_queue
+                                                       , this->logger_
                                                        );
 
-    network_init(std::make_unique<GermaniumNetwork>(this));
+    network_->network_init();
 }
 //===============================================================
 
@@ -149,7 +159,7 @@ GermaniumDetector::GermaniumDetector()
 void GermaniumDetector::polling_task_init()
 {
     poll_list.emplace_back( HV_RBV | 0x8000 );
-    //reg_ = new GermaniumRegister();
+    //zynq_->reg_->= new GermaniumRegister();
 }
 
 //===============================================================
@@ -161,7 +171,7 @@ void GermaniumDetector::polling_task_init()
 {
     if ( msg.op&0x8000 == 0 )
     {
-        if ( msg.reg_acc_reg_data == 0 )
+        if ( msg.zynq_->reg_->cc_zynq_->reg_->ata == 0 )
         {
             nelm_ = 192;
             num_chips_ = 6;
@@ -240,7 +250,7 @@ void GermaniumDetector::task_init()
 
 void GermaniumDetector::create_device_access_tasks()
 {
-    reg_.create_register_single_access_task();
+    this->zynq_->zynq_->reg_->>create_register_single_access_task();
 
     psxadc_.create_psxadc_task();
 
@@ -296,7 +306,7 @@ void GermaniumDetector::register_multi_access_task()
 {
     GermaniumAccessReq req;
 
-    xQueueReceive( reg_multi_access_resp_queue_, &req, 0);
+    xQueueReceive( this->zynq_->base_->reg_->ulti_access_resp_queue_, &req, 0);
     switch ( req.op & 0x7fff )
     {
         case UPDATE_LOADS:
@@ -389,8 +399,8 @@ void GermaniumDetector::polling_1s()
 //===============================================================
 void GermaniumDetector::latch_conf()
 {
-    reg_.write( GermaniumRegister::MARS_CONF_LOAD, 2 );
-    reg_.write( GermaniumRegister::MARS_CONF_LOAD, 0 );
+    this->zynq_->base_->reg_->write( GermaniumRegister::MARS_CONF_LOAD, 2 );
+    this->zynq_->base_->reg_->write( GermaniumRegister::MARS_CONF_LOAD, 0 );
 }
 //===============================================================
 
@@ -402,18 +412,18 @@ void GermaniumDetector::stuff_mars()
 {
     for ( int i = 0; i < 12; i++ )
     {
-        reg_.write( GermaniumRegister::MARS_CONF_LOAD, 4 );
-        reg_.write( GermaniumRegister::MARS_CONF_LOAD, 0 );
+        this->zynq_->base_->reg_->write( GermaniumRegister::MARS_CONF_LOAD, 4 );
+        this->zynq_->base_->reg_->write( GermaniumRegister::MARS_CONF_LOAD, 0 );
 
         for ( int j = 0; j < 14; j++ )
         {
-            reg_.write( GermaniumRegister::MARS_CONF_LOAD, loads_[i][j] );
+            this->zynq_->base_->reg_->write( GermaniumRegister::MARS_CONF_LOAD, loads_[i][j] );
             latch_conf();
             vTaskDelay(pdMS_TO_TICKS(1));;
         }
 
-        reg_.write( GermaniumRegister::MARS_CONF_LOAD, 0x00010000 << i );
-        reg_.write( GermaniumRegister::MARS_CONF_LOAD, 0 );
+        this->zynq_->base_->reg_->write( GermaniumRegister::MARS_CONF_LOAD, 0x00010000 << i );
+        this->zynq_->base_->reg_->write( GermaniumRegister::MARS_CONF_LOAD, 0 );
         vTaskDelay(pdMS_TO_TICKS(1));
     }
 }
@@ -433,19 +443,19 @@ void GermaniumDetector::send_spi_bit( int chip_sel, int val )
     sda = val & 0x1;
 
     // set sclk low
-    reg_.write( GermaniumRegister::ADC_SPI, (chip_sel | 0) );
+    this->zynq_->base_->reg_->write( GermaniumRegister::ADC_SPI, (chip_sel | 0) );
 
     // set data with clock low
-    reg_.write( GermaniumRegister::ADC_SPI, (chip_sel | sda) );
+    this->zynq_->base_->reg_->write( GermaniumRegister::ADC_SPI, (chip_sel | sda) );
 
     // set clk high
-    reg_.write( GermaniumRegister::ADC_SPI, (chip_sel | 0x2 | sda) );
+    this->zynq_->base_->reg_->write( GermaniumRegister::ADC_SPI, (chip_sel | 0x2 | sda) );
 
     // set clk low
-    reg_.write( GermaniumRegister::ADC_SPI, (chip_sel | sda) );
+    this->zynq_->base_->reg_->write( GermaniumRegister::ADC_SPI, (chip_sel | sda) );
 
     // set data low
-    reg_.write( GermaniumRegister::ADC_SPI, (chip_sel | 0) );
+    this->zynq_->base_->reg_->write( GermaniumRegister::ADC_SPI, (chip_sel | 0) );
 }
 //===============================================================
 
@@ -508,9 +518,9 @@ int GermaniumDetector::ad9252_cfg( int chip_num, int addr, int data )
     }
 
     // Assert CSB
-    reg_.write( GermaniumRegister::ADC_SPI, chip_sel );
+    this->zynq_->base_->reg_->write( GermaniumRegister::ADC_SPI, chip_sel );
     load_ad9252reg( chip_sel, addr, data) ;
-    reg_.write( GermaniumRegister::ADC_SPI, 0b11100 );
+    this->zynq_->base_->reg_->write( GermaniumRegister::ADC_SPI, 0b11100 );
 
     return (0);
 }
@@ -528,12 +538,12 @@ void GermaniumDetector::zddm_arm( int mode, int val )
     {
         if ( val == 1 )
         {
-            resp.data = reg_.read( GermaniumRegister::FRAME_NO );
-            reg_.write( GermaniumRegister::TRIG, val );
+            resp.data = this->zynq_->base_->reg_->read( GermaniumRegister::FRAME_NO );
+            this->zynq_->base_->reg_->write( GermaniumRegister::TRIG, val );
         }
         if ( val == 0 )
         {
-            reg_.write( GermaniumRegister::TRIG, val );
+            static_cast<GermaniumZynq*>(this->zynq_.get())->base_->reg_->write( GermaniumRegister::TRIG, val );
         }
     }
 
@@ -542,11 +552,11 @@ void GermaniumDetector::zddm_arm( int mode, int val )
         if ( val == 1 )
         {
             RegisterSingleAccessResp resp;
-            resp.data = reg_.read( GermaniumRegister::FRAME_NO );
+            resp.data = this->zynq_->base_->reg_->read( GermaniumRegister::FRAME_NO );
         }
         if ( val == 0 )
         {
-            reg_.write( GermaniumRegister::TRIG, val );
+            this->zynq_->base_->reg_->write( GermaniumRegister::TRIG, val );
         }
     }
 }

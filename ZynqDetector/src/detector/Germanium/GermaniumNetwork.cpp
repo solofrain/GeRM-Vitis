@@ -7,28 +7,35 @@
 //#include "Network.hpp"
 //#include "GermaniumNetwork.hpp"
 
-GermaniumNetwork::GermaniumNetwork( const QueueHandle_t register_single_access_req_queue
-                                  , const QueueHandle_t register_single_access_resp_queue
-                                  , const QueueHandle_t register_multi_access_req_queue
-                                  , const QueueHandle_t register_multi_access_resp_queue
-                                  , const QueueHandle_t psi2c0_access_req_queue
-                                  , const QueueHandle_t psi2c0_access_resp_queue
-                                  , const QueueHandle_t psi2c1_access_req_queue
-                                  , const QueueHandle_t psi2c1_access_resp_queue
-                                  , const QueueHandle_t psxadc_access_req_queue
-                                  , const QueueHandle_t psxadc_access_resp_queue
+GermaniumNetwork::GermaniumNetwork( const QueueHandle_t              register_single_access_req_queue
+                                  , const QueueHandle_t              register_single_access_resp_queue
+                                  , const QueueHandle_t              register_multi_access_req_queue
+                                  , const QueueHandle_t              register_multi_access_resp_queue
+                                  , const QueueHandle_t              psi2c0_access_req_queue
+                                  , const QueueHandle_t              psi2c0_access_resp_queue
+                                  , const QueueHandle_t              psi2c1_access_req_queue
+                                  , const QueueHandle_t              psi2c1_access_resp_queue
+                                  , const QueueHandle_t              psxadc_access_req_queue
+                                  , const QueueHandle_t              psxadc_access_resp_queue
+                                  , const Logger<GermaniumRegister>& logger
                                   )
-                                  : register_single_access_req_queue_  ( register_single_access_req_queue  )
-                                  , register_single_access_resp_queue_ ( register_single_access_resp_queue )
-                                  , register_multi_access_req_queue_   ( register_multi_access_req_queue   )
-                                  , register_multi_access_resp_queue_  ( register_multi_access_resp_queue  )
-                                  , psi2c0_access_req_queue_           ( psi2c0_access_req_queue           )
-                                  , psi2c0_access_resp_queue_          ( psi2c0_access_resp_queue          )
-                                  , psi2c1_access_req_queue_           ( psi2c1_access_req_queue           )
-                                  , psi2c1_access_resp_queue_          ( psi2c1_access_resp_queue          )
-                                  , psxadc_access_req_queue_           ( psxadc_access_req_queue           )
-                                  , psxadc_access_resp_queue_          ( psxadc_access_resp_queue          )
-{}
+                                  : Network<GermaniumNetwork, GermaniumRegister> ( logger                            )
+                                  , register_single_access_req_queue_            ( register_single_access_req_queue  )
+                                  , register_single_access_resp_queue_           ( register_single_access_resp_queue )
+                                  , register_multi_access_req_queue_             ( register_multi_access_req_queue   )
+                                  , register_multi_access_resp_queue_            ( register_multi_access_resp_queue  )
+                                  , psi2c0_access_req_queue_                     ( psi2c0_access_req_queue           )
+                                  , psi2c0_access_resp_queue_                    ( psi2c0_access_resp_queue          )
+                                  , psi2c1_access_req_queue_                     ( psi2c1_access_req_queue           )
+                                  , psi2c1_access_resp_queue_                    ( psi2c1_access_resp_queue          )
+                                  , psxadc_access_req_queue_                     ( psxadc_access_req_queue           )
+                                  , psxadc_access_resp_queue_                    ( psxadc_access_resp_queue          )
+                                  , logger_                                      ( logger                            )
+                                  , base_           ( static_cast<Network<GermaniumNetwork, GermaniumRegister>*>(this)
+{
+    rx_instr_map_init();
+}
+
 
 //===============================================================
 // Initialize Rx message process handling map.

@@ -16,18 +16,26 @@
 //        xil_printf( "Failed to create Logger control mutex.\n" );
 //    }
 //}
+template<typename Reg>
+void Logger<Reg>::set_register( Reg* reg )
+{
+    reg_ = reg;
+}
 
-void Logger::set_log_control(uint8_t control)
+template<typename Reg>
+void Logger<Reg>::set_log_control(uint8_t control)
 {
     control_word_ = control | 0x01;
 }
 
-uint8_t Logger::read_log_control()
+template<typename Reg>
+uint8_t Logger<Reg>::read_log_control()
 {
     return control_word_;
 }
 
-void Logger::log_error(const char *format, ...)
+template<typename Reg>
+void Logger<Reg>::log_error(const char *format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -35,9 +43,10 @@ void Logger::log_error(const char *format, ...)
     va_end(args);
 }
 
-void Logger::log_error(uint32_t error_code, const char *format, ...)
+template<typename Reg>
+void Logger<Reg>::log_error(uint32_t error_code, const char *format, ...)
 {
-    //reg_.set_status(error_code);
+    reg_->set_status(error_code);
 
     va_list args;
     va_start(args, format);
@@ -45,7 +54,8 @@ void Logger::log_error(uint32_t error_code, const char *format, ...)
     va_end(args);
 }
 
-void Logger::log_warn(const char *format, ...)
+template<typename Reg>
+void Logger<Reg>::log_warn(const char *format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -53,7 +63,8 @@ void Logger::log_warn(const char *format, ...)
     va_end(args);
 }
 
-void Logger::log_debug(const char *format, ...)
+template<typename Reg>
+void Logger<Reg>::log_debug(const char *format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -61,7 +72,8 @@ void Logger::log_debug(const char *format, ...)
     va_end(args);
 }
 
-void Logger::log(LogType type, const char *format, ...)
+template<typename Reg>
+void Logger<Reg>::log(LogType type, const char *format, ...)
 {
     if (type & control_word_)
     {
@@ -72,7 +84,8 @@ void Logger::log(LogType type, const char *format, ...)
     }
 }
 
-void Logger::log(LogType type, char* color, const char *format, ...)
+template<typename Reg>
+void Logger<Reg>::log(LogType type, char* color, const char *format, ...)
 {
     if (type & control_word_)
     {
@@ -83,7 +96,8 @@ void Logger::log(LogType type, char* color, const char *format, ...)
     }
 }
 
-void Logger::xvprintf(const char* format, va_list args)
+template<typename Reg>
+void Logger<Reg>::xvprintf(const char* format, va_list args)
 {
     char buf[256];
     vsnprintf(buf, sizeof(buf), format, args);
@@ -92,7 +106,8 @@ void Logger::xvprintf(const char* format, va_list args)
 
 
 // Private helper method to centralize va_list handling and actual printing
-void Logger::log_va(LogType type, const char* color, const char *format, va_list args)
+template<typename Reg>
+void Logger<Reg>::log_va(LogType type, const char* color, const char *format, va_list args)
 {
     if ( type & control_word_ )
     {

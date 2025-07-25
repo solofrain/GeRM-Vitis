@@ -15,10 +15,12 @@ Register<DerivedRegister>::Register
       uintptr_t            base_addr
     , const QueueHandle_t  single_access_req_queue
     , const QueueHandle_t  single_access_resp_queue
+    , const Logger<DerivedRegister>&   logger
     )
-    : base_addr_ ( static_cast<uintptr_t>( base_addr ) )
-    , single_access_req_queue_ ( single_access_req_queue )
-    , single_access_resp_queue_ ( single_access_resp_queue )
+    : base_addr_ ( static_cast<uintptr_t>( base_addr )              )
+    , single_access_req_queue_           ( single_access_req_queue  )
+    , single_access_resp_queue_          ( single_access_resp_queue )
+    , logger_                            ( logger                   )
 {}
 
 //=========================================

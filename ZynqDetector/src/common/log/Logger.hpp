@@ -7,6 +7,7 @@
 #include <memory>
 #include <xil_printf.h>
 
+#include "FreeRTOS.h"
 #include "semphr.h"
 
 #include "Register.hpp"
@@ -15,6 +16,7 @@
 #define YELLOW_TEXT "\x1b[33m"
 #define RESET_TEXT  "\x1b[0m"
 
+template<typename Reg>
 class Logger {
 public:
     enum LogType {
@@ -24,6 +26,8 @@ public:
     };
 
     //Logger( Register& reg );
+
+    void set_register( Reg* reg_ );
 
     void set_log_control( uint8_t control );
     uint8_t read_log_control();
@@ -44,7 +48,7 @@ private:
         va_list args
     );
 
-    //Register& reg_;
+    Reg* reg_;
 
     uint8_t control_word_;
     xSemaphoreHandle mutex_;

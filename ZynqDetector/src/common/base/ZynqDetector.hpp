@@ -31,6 +31,7 @@ template< typename DerivedDetector
 class ZynqDetector
 {
 protected:
+    Logger<DerivedRegister> logger;
 
     //==================================================
     //                    Variables                   //
@@ -90,7 +91,6 @@ protected:
     //TimerHandle_t xPollTimer_ = NULL;
     //std::vector<uint16_t> poll_list_{};  // PVs to be polled
 
-    Logger logger;
 
     //==================================================
     //                    Functions                   //

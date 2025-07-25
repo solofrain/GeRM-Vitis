@@ -26,17 +26,17 @@ extern "C" {
 #include "Logger.hpp"
 #include "task_wrap.hpp"
 
-template < typename DerivedNetwork, typename Owner >
-Network<DerivedNetwork, Owner>::Network( Owner* owner )
-	                                   : owner_ ( owner )
+template < typename DerivedNetwork, typename DerivedRegister >
+Network<DerivedNetwork, DerivedRegister>::Network( const Logger<DerivedRegister>& logger )
+	                                             : logger_ ( logger )
 {}
 
 //===============================================================
 // Network initialization.
 //===============================================================
 
-template < typename DerivedNetwork, typename Owner >
-void Network<DerivedNetwork, Owner>::tcpip_init_done(void *arg)
+template < typename DerivedNetwork, typename DerivedRegister >
+void Network<DerivedNetwork, DerivedRegister>::tcpip_init_done(void *arg)
 {
     if (arg)
     {
@@ -45,8 +45,8 @@ void Network<DerivedNetwork, Owner>::tcpip_init_done(void *arg)
 }
 
 
-template < typename DerivedNetwork, typename Owner >
-void Network<DerivedNetwork, Owner>::network_init()
+template < typename DerivedNetwork, typename DerivedRegister >
+void Network<DerivedNetwork, DerivedRegister>::network_init()
 {
     int setup = 0;
 
@@ -77,7 +77,7 @@ void Network<DerivedNetwork, Owner>::network_init()
 
     if ( ( sock_ = socket( AF_INET, SOCK_DGRAM, 0 ) ) < 0 )
     {
-        *owner_.logger.log_err( "Failed to create socket." );
+        logger_->log_err( "Failed to create socket." );
         return;
     }
 
@@ -88,7 +88,7 @@ void Network<DerivedNetwork, Owner>::network_init()
 
     if ( bind( sock_, (struct sockaddr *)&sock_addr_, sizeof(sock_addr_) != ERR_OK) )
     {
-        *owner_.logger.log_error( "Error on bind" );
+        logger_->log_error( "Error on bind" );
         close( sock_ );
         return;
     }
@@ -105,8 +105,8 @@ void Network<DerivedNetwork, Owner>::network_init()
 // - DNS server
 // - MAC address
 //===============================================================
-template < typename DerivedNetwork, typename Owner >
-void Network<DerivedNetwork, Owner>::read_network_config( const std::string& filename )
+template < typename DerivedNetwork, typename DerivedRegister >
+void Network<DerivedNetwork, DerivedRegister>::read_network_config( const std::string& filename )
 {
     FATFS fs;    // File system object
     FRESULT res; // Result code
@@ -181,7 +181,7 @@ void Network<DerivedNetwork, Owner>::read_network_config( const std::string& fil
         {
             if ( !inet_aton(value.c_str(), netif_.ip_addr ) )
             {
-                owner_.logger.log_error( "Invalid IP address format", value );
+                logger_->log_error( "Invalid IP address format", value );
                 break;
             }
         }
@@ -191,7 +191,7 @@ void Network<DerivedNetwork, Owner>::read_network_config( const std::string& fil
             {
                 if ( !inet_aton( value.c_str(), netif_.netmask ) )
                 {
-                    owner_.logger.log_error( "Invalid netmask format", value );
+                    logger_->log_error( "Invalid netmask format", value );
                     break;
                 }
             }
@@ -201,7 +201,7 @@ void Network<DerivedNetwork, Owner>::read_network_config( const std::string& fil
                 {
                     if ( !inet_aton( value.c_str(), netif_.gw ) )
                     {
-                        owner_.logger.log_error( "Invalid gateway format", value );
+                        logger_->log_error( "Invalid gateway format", value );
                         break;
                     }
                 }
@@ -211,7 +211,7 @@ void Network<DerivedNetwork, Owner>::read_network_config( const std::string& fil
                     {
                         if ( !string_to_addr( value, mac_addr_ ) )
                         {
-                            owner_( "Invalid MAC address format", value );
+                            logger_->log_error( "Invalid MAC address format", value );
                             break;
                         }
                     }
@@ -231,8 +231,8 @@ void Network<DerivedNetwork, Owner>::read_network_config( const std::string& fil
 //===============================================================
 // Convert a string to an IP/MAC address.
 //===============================================================
-template < typename DerivedNetwork, typename Owner >
-bool Network<DerivedNetwork, Owner>::string_to_addr(
+template < typename DerivedNetwork, typename DerivedRegister >
+bool Network<DerivedNetwork, DerivedRegister>::string_to_addr(
     const std::string& addr_str,
     uint8_t* addr
 )
@@ -244,7 +244,7 @@ bool Network<DerivedNetwork, Owner>::string_to_addr(
     auto num_separator = std::count( addr_str.begin(), addr_str.end(), separator );
     if ( ( is_ip && num_separator != 3 ) || ( !is_ip && num_separator != 5 ) )
     {
-        owner_.logger.log_error( "Wrong address string format", addr_str );
+        logger_->log_error( "Wrong address string format", addr_str );
         return false;
     }
 
@@ -289,8 +289,8 @@ bool Network<DerivedNetwork, Owner>::string_to_addr(
 //===============================================================
 // Create Tx and Rx tasks
 //===============================================================
-template < typename DerivedNetwork, typename Owner >
-void Network<DerivedNetwork, Owner>::create_network_tasks()
+template < typename DerivedNetwork, typename DerivedRegister >
+void Network<DerivedNetwork, DerivedRegister>::create_network_tasks()
 {
     auto task_func = std::make_unique<std::function<void()>>([this]() { udp_rx_task(); });
     xTaskCreate( task_wrapper, "UDP Rx", 1000, &task_func, 1, udp_rx_task_handle );
@@ -303,8 +303,8 @@ void Network<DerivedNetwork, Owner>::create_network_tasks()
 //===============================================================
 // UDP receive task.
 //===============================================================
-template < typename DerivedNetwork, typename Owner >
-void Network<DerivedNetwork, Owner>::udp_rx_task()
+template < typename DerivedNetwork, typename DerivedRegister >
+void Network<DerivedNetwork, DerivedRegister>::udp_rx_task()
 {
     UdpRxMsg msg;
     uint32_t msg_leng;
@@ -346,8 +346,8 @@ void Network<DerivedNetwork, Owner>::udp_rx_task()
 //===============================================================
 // UDP transmit task.
 //===============================================================
-template < typename DerivedNetwork, typename Owner >
-void Network<DerivedNetwork, Owner>::udp_tx_task()
+template < typename DerivedNetwork, typename DerivedRegister >
+void Network<DerivedNetwork, DerivedRegister>::udp_tx_task()
 {
     struct freertos_sockaddr dst_sock_addr;
     uint16_t msg_leng, tx_length;
@@ -365,7 +365,7 @@ void Network<DerivedNetwork, Owner>::udp_tx_task()
 
         if (tx_length < 0)
         {
-            owner_.logger.log_error( "Failed to send UDP message\n" );
+            logger_->log_error( "Failed to send UDP message\n" );
         }
     }
 }
@@ -375,8 +375,8 @@ void Network<DerivedNetwork, Owner>::udp_tx_task()
 //===============================================================
 // UDP Rx message processing.
 //===============================================================
-template < typename DerivedNetwork, typename Owner >
-void Network<DerivedNetwork, Owner>::rx_msg_proc( UdpRxMsg& msg )
+template < typename DerivedNetwork, typename DerivedRegister >
+void Network<DerivedNetwork, DerivedRegister>::rx_msg_proc( UdpRxMsg& msg )
 {
     //int instr = msg.op && 0x7FFF;
     auto it = static_cast<DerivedNetwork*>(this)->rx_instr_map_.find(((UdpRxMsg)msg).op && 0x7FFF);
@@ -386,7 +386,7 @@ void Network<DerivedNetwork, Owner>::rx_msg_proc( UdpRxMsg& msg )
     }
     else
     {
-        owner_.logger.log_error( "Unknown instruction: ", ((UdpRxMsg)msg).op );
+        logger_->log_error( "Unknown instruction: ", ((UdpRxMsg)msg).op );
     }
 }
 //===============================================================

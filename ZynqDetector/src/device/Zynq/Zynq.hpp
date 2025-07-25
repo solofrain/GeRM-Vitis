@@ -8,6 +8,7 @@
 #include "FreeRTOS.h"
 #include "semphr.h"
 
+#include "Logger.hpp"
 #include "PsI2c.hpp"
 //#include "PlInterface.hpp"
 
@@ -26,21 +27,24 @@
 //=========================================
 template < typename DerivedZynq
          , typename DerivedRegister
-         , typename Owner>
+         >
 class Zynq
 {
 private:
     
-    std::unique_ptr<DerivedRegister>  reg_;
-    //Owner&                     owner_;
-    std::vector<PsI2c>         ps_i2cs_;
+    std::unique_ptr<DerivedRegister>    reg_ = nullptr;
+    std::vector<PsI2c<DerivedRegister>> ps_i2cs_;
+    const Logger<DerivedRegister>&      logger_;
 
 public:
 
-    Zynq( uintptr_t            base_addr
-        , const QueueHandle_t  register_single_access_req_queu
-        , const QueueHandle_t  register_single_access_resp_queu
+    Zynq( uintptr_t                       base_addr
+        , const QueueHandle_t             register_single_access_req_queu
+        , const QueueHandle_t             register_single_access_resp_queu
+        , const Logger<DerivedRegister>&  logger
         );
+
+    void init_register(std::unique_ptr<DerivedRegister> reg);
 
     //auto add_pl_i2c( const std::string& name, uint32_t instr_reg, uint32_t data_reg );
     //auto add_pl_spi( const std::string& name, uint32_t instr_reg, uint32_t data_reg );
@@ -51,8 +55,8 @@ public:
         uint32_t      device_id,
         uint32_t      base_addr,
         uint32_t      clk_freq,
-        QueueHandle_t req_queue,
-        QueueHandle_t resp_queue );
+        const QueueHandle_t req_queue,
+        const QueueHandle_t resp_queue );
 
     //PlI2cInterface* get_pl_i2c_interface( const std::string& name );
     //PlSpiInterface* get_pl_spi_interface( const std::string& name );

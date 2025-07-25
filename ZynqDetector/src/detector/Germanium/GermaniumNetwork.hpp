@@ -2,19 +2,20 @@
 
 #include "Network.hpp"
 
-class GermaniumNetwork : public Network<GermaniumNetwork, GermaniumNetwork>
+class GermaniumNetwork : public Network<GermaniumNetwork>
 {
 public:
-    GermaniumNetwork( const QueueHandle_t register_single_access_req_queue
-                    , const QueueHandle_t register_single_access_resp_queue
-                    , const QueueHandle_t register_multi_access_req_queue
-                    , const QueueHandle_t register_multi_access_resp_queue
-                    , const QueueHandle_t psi2c0_access_req_queue
-                    , const QueueHandle_t psi2c0_access_resp_queue
-                    , const QueueHandle_t psi2c1_access_req_queue
-                    , const QueueHandle_t psi2c1_access_resp_queue
-                    , const QueueHandle_t psxadc_access_req_queue
-                    , const QueueHandle_t psxadc_access_resp_queue
+    GermaniumNetwork( const QueueHandle_t              register_single_access_req_queue
+                    , const QueueHandle_t              register_single_access_resp_queue
+                    , const QueueHandle_t              register_multi_access_req_queue
+                    , const QueueHandle_t              register_multi_access_resp_queue
+                    , const QueueHandle_t              psi2c0_access_req_queue
+                    , const QueueHandle_t              psi2c0_access_resp_queue
+                    , const QueueHandle_t              psi2c1_access_req_queue
+                    , const QueueHandle_t              psi2c1_access_resp_queue
+                    , const QueueHandle_t              psxadc_access_req_queue
+                    , const QueueHandle_t              psxadc_access_resp_queue
+                    , const Logger<GermaniumRegister>& logger
                     );
 
     //===============================================================
@@ -199,7 +200,10 @@ protected:
 
     //friend Germanium
 private:
-    GermaniumNetwork& owner_; 
+
+    Network<GermaniumNetwork>* base_;
+
+    const Logger<GermaniumRegister>& logger_;
 
     QueueHandle_t& register_single_access_req_queue_;
     QueueHandle_t& register_single_access_resp_queue_;
@@ -214,4 +218,3 @@ private:
 };
 
 
-#include "GermaniumNetwork.tpp"

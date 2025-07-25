@@ -24,47 +24,62 @@
 
 //-----------------------------------------
 GermaniumZynq::GermaniumZynq
-    ( const QueueHandle_t register_single_access_req_queue
-    , const QueueHandle_t register_single_access_resp_queue
-    , const QueueHandle_t register_multi_access_req_queue
-    , const QueueHandle_t register_multi_access_resp_queue
-    , const QueueHandle_t psi2c0_req_queue
-    , const QueueHandle_t psi2c0_resp_queue
-    , const QueueHandle_t psi2c1_req_queue
-    , const QueueHandle_t psi2c1_resp_queue
-    , const QueueHandle_t psxadc_req_queue
-    , const QueueHandle_t psxadc_resp_queue
+    ( const QueueHandle_t              register_single_access_req_queue
+    , const QueueHandle_t              register_single_access_resp_queue
+    , const QueueHandle_t              register_multi_access_req_queue
+    , const QueueHandle_t              register_multi_access_resp_queue
+    , const QueueHandle_t              psi2c0_req_queue
+    , const QueueHandle_t              psi2c0_resp_queue
+    , const QueueHandle_t              psi2c1_req_queue
+    , const QueueHandle_t              psi2c1_resp_queue
+    , const QueueHandle_t              psxadc_req_queue
+    , const QueueHandle_t              psxadc_resp_queue
+    , const Logger<GermaniumRegister>& logger
     )
     : Zynq< GermaniumZynq
           , GermaniumRegister
-          , GermaniumDetector
           >
           ( XPAR_IOBUS_0_BASEADDR
           , register_single_access_req_queue
           , register_single_access_resp_queue
+          , logger
           )
-    , psi2c0_( std::make_unique<PsI2c>( 0
+    , base_  ( static_cast<Zynq<GermaniumZynq, GermaniumRegister>*>(this) )
+    , psi2c0_( std::make_unique<PsI2c<GermaniumRegister>>( 0
                                       , "psi2c0"
                                       , XPAR_I2C0_BASEADDR
                                       , XPAR_I2C0_CLOCK_FREQ
                                       , psi2c0_req_queue
                                       , psi2c0_resp_queue
+                                      , logger
                                       )
              )
-    , psi2c1_( std::make_unique<PsI2c>( 1
+    , psi2c1_( std::make_unique<PsI2c<GermaniumRegister>>( 1
                                       , "psi2c1"
                                       , XPAR_I2C1_BASEADDR
                                       , XPAR_I2C1_CLOCK_FREQ
                                       , psi2c1_req_queue
                                       , psi2c1_resp_queue
+                                      , logger
                                       )
              )
-    , psxadc_( std::make_unique<PsXadc>( "psxadc"
+    , psxadc_( std::make_unique<PsXadc<GermaniumRegister>>( "psxadc"
                                        , psxadc_req_queue
                                        , psxadc_resp_queue
+                                       , logger
                                        )
              )
-{}
+    , logger_ ( logger )
+{
+    this->init_register( std::make_unique<GermaniumRegister>( XPAR_IOBUS_0_BASEADDR
+                                                            , register_single_access_req_queue
+                                                            , register_single_access_resp_queue
+                                                            , register_multi_access_req_queue
+                                                            , register_multi_access_resp_queue
+                                                            , logger
+                                                            )
+                       );
+}
 
 /*
 auto Zynq::add_pl_i2c( const std::string& name

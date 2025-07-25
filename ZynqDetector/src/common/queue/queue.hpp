@@ -3,8 +3,9 @@
 #include <cstdint>
 #include <type_traits>  // for std::is_same
 
+template<typename DerivedRegister>
 class PsI2c;
-class PlI2c;
+//class PlI2c;
 
 //====================================
 // Requests
@@ -72,8 +73,8 @@ using PlInterfaceMultiAccessReq = PlInterfaceMultiAccessReqStruct;
 template<typename T>
 struct AccessReqTypeSelector;
 
-template<>
-struct AccessReqTypeSelector<PsI2c> {
+template<typename DerivedRegister>
+struct AccessReqTypeSelector<PsI2c<DerivedRegister>> {
     using type = PsI2cAccessReq;
 };
 

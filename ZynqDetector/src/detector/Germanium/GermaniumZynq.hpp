@@ -9,6 +9,8 @@
 #include "FreeRTOS.h"
 #include "semphr.h"
 
+#include "Logger.hpp"
+
 #include "PsI2c.hpp"
 #include "PsXadc.hpp"
 //#include "PlInterface.hpp"
@@ -26,31 +28,24 @@ class GermaniumRegister;
 //=========================================
 // Zynq class
 //=========================================
-class GermaniumZynq : public Zynq<GermaniumZynq, GermaniumRegister, GermaniumDetector>
+class GermaniumZynq : public Zynq<GermaniumZynq, GermaniumRegister>
 {
-protected:
-    //Register reg_;
-    std::unique_ptr<PsI2c>   psi2c0_;
-    std::unique_ptr<PsI2c>   psi2c1_;
-    std::unique_ptr<PsXadc>  psxadc_;
-
-    //static constexpr uintptr_t REG_BASE_ADDR  = 0x43C00000;
-    //static constexpr uintptr_t PSI2C0_ADDR    = 0x43C00000;
-    //static constexpr uintptr_t PSI2C1_ADDR    = 0x43C00000;
-    //static constexpr uintptr_t XADC_ADDR      = 0xF8007100;
-    //static constexpr uint32_t  PSI2C_CLK_FREQ = 0xF8007100;
-
 
 public:
-    GermaniumZynq( const QueueHandle_t register_single_access_req_queue
-                 , const QueueHandle_t register_single_access_resp_queue
-                 , const QueueHandle_t psi2c0_req_queue
-                 , const QueueHandle_t psi2c0_resp_queue
-                 , const QueueHandle_t psi2c1_req_queue
-                 , const QueueHandle_t psi2c1_resp_queue
-                 , const QueueHandle_t psxadc_req_queue
-                 , const QueueHandle_t psxadc_resp_queue
+    GermaniumZynq( const QueueHandle_t              register_single_access_req_queue
+                 , const QueueHandle_t              register_single_access_resp_queue
+                 , const QueueHandle_t              register_multi_access_req_queue
+                 , const QueueHandle_t              register_multi_access_resp_queue
+                 , const QueueHandle_t              psi2c0_req_queue
+                 , const QueueHandle_t              psi2c0_resp_queue
+                 , const QueueHandle_t              psi2c1_req_queue
+                 , const QueueHandle_t              psi2c1_resp_queue
+                 , const QueueHandle_t              psxadc_req_queue
+                 , const QueueHandle_t              psxadc_resp_queue
+                 , const Logger<GermaniumRegister>& logger
                  );
+
+    Zynq<GermaniumZynq, GermaniumRegister>* base_;
 
 //    GermaniumZynq( uintptr_t base_addr );
 
@@ -61,5 +56,19 @@ public:
 
     //PlI2cInterface* get_pl_i2c_interface( const std::string& name );
     //PlSpiInterface* get_pl_spi_interface( const std::string& name );
+
+protected:
+    //Register reg_;
+    std::unique_ptr<PsI2c<GermaniumRegister>>     psi2c0_;
+    std::unique_ptr<PsI2c<GermaniumRegister>>     psi2c1_;
+    std::unique_ptr<PsXadc<GermaniumRegister>>    psxadc_;
+    const Logger<GermaniumRegister>&              logger_;
+
+    //static constexpr uintptr_t REG_BASE_ADDR  = 0x43C00000;
+    //static constexpr uintptr_t PSI2C0_ADDR    = 0x43C00000;
+    //static constexpr uintptr_t PSI2C1_ADDR    = 0x43C00000;
+    //static constexpr uintptr_t XADC_ADDR      = 0xF8007100;
+    //static constexpr uint32_t  PSI2C_CLK_FREQ = 0xF8007100;
+
 };
 //=========================================

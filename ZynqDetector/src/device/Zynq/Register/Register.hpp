@@ -7,15 +7,20 @@
 #include "semphr.h"
 
 #include "queue.hpp"
+//#include "Logger.hpp"
+
+template<typename Reg> class Logger;
 
 template <typename DerivedRegister>
 class Register
 {
 public:
 
-    Register( uintptr_t            base_addr,
-              const QueueHandle_t  single_access_req_queue,
-              const QueueHandle_t  single_access_resp_queue );
+    Register( uintptr_t                        base_addr
+            , const QueueHandle_t              single_access_req_queue
+            , const QueueHandle_t              single_access_resp_queue
+            , const Logger<DerivedRegister>&   logger
+            );
 
     // Regular single access
     void write( uint32_t offset, uint32_t value );
@@ -32,11 +37,15 @@ public:
 
     void create_register_single_access_task();
 
+    const Register<DerivedRegister>* base_;
+
 private:
     uintptr_t base_addr_;
     xSemaphoreHandle  mutex_;
     QueueHandle_t     single_access_req_queue_;
     QueueHandle_t     single_access_resp_queue_;
+
+    const Logger<DerivedRegister>& logger_;
 
     void single_access_task();
 };

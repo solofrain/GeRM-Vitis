@@ -9,7 +9,7 @@
 #include "xparameters.h"
 
 
-
+template<typename DerivedRegister>
 class PsI2c
 {
 private:
@@ -38,6 +38,8 @@ private:
     
     xSemaphoreHandle mutex_;
 
+    const Logger<DerivedRegister>& logger_;
+
     int write( char* buffer, uint16_t length, uint16_t slave_address );
     int read( char* buffer, uint16_t length, uint16_t slave_address );
 
@@ -45,14 +47,17 @@ private:
 
 public:
   
-    PsI2c( const uint8_t       bus_index,
-           const std::string   name,
-           //const uint32_t      device_id,
-           const uint32_t      base_addr,
-           const uint32_t      clk_freq,
-           const QueueHandle_t req_queue,
-           const QueueHandle_t resp_queue
+    PsI2c( const uint8_t                  bus_index
+         , const std::string              name
+         //, const uint32_t                 device_id
+         , const uint32_t                 base_addr
+         , const uint32_t                 clk_freq
+         , const QueueHandle_t            req_queue
+         , const QueueHandle_t            resp_queue
+         , const Logger<DerivedRegister>& logger
          );
 
     void create_psi2c_task();
 };
+
+#include "PsI2c.tpp"

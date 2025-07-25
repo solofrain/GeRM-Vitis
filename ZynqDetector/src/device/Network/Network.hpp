@@ -24,9 +24,10 @@ extern "C" {
 }
 
 //#include "ZynqDetector.hpp"
+#include "Logger.hpp"
 
 template < typename DerivedNetwork
-         , typename Owner
+         , typename DerivedRegister
          >
 class Network
 {
@@ -56,14 +57,14 @@ public:
     };
     using UdpTxMsg = UdpTxMsgStruct;
 
-    explicit Network( Owner* owner );
+    explicit Network( const Logger<DerivedRegister>& logger  );
     void network_init();
     void create_network_tasks( TaskHandle_t udp_rx_task_handle,
 	                           TaskHandle_t udp_tx_task_handle
 						     );
 
 private:
-    Owner* owner_;
+    const Logger<DerivedRegister>& logger_;
 
 protected:
     uint32_t udp_port_;

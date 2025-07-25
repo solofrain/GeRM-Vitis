@@ -7,9 +7,9 @@
 
 #include "task_wrap.hpp"
 #include "queue.hpp"
-#include "PsI2c.hpp"
 
-PsI2c::PsI2c
+template<typename DerivedRegister>
+PsI2c<DerivedRegister>::PsI2c
     ( const uint8_t       bus_index
     , const std::string   name
     //, const uint32_t      device_id
@@ -17,6 +17,7 @@ PsI2c::PsI2c
     , const uint32_t      clk_freq
     , const QueueHandle_t req_queue
     , const QueueHandle_t resp_queue
+    , const Logger<DerivedRegister>& logger
     )
     : bus_index_  ( bus_index  )
     , name_       ( name       )
@@ -25,6 +26,7 @@ PsI2c::PsI2c
     , clk_freq_   ( clk_freq   )
     , req_queue_  ( req_queue  )
     , resp_queue_ ( resp_queue )
+    , logger_     ( logger     )
 {
     //if ( bus_index == 0 )
     //{
@@ -73,7 +75,8 @@ PsI2c::PsI2c
 //=========================================
 // Write to I2C bus.
 //=========================================
-int PsI2c::write( char* buffer, uint16_t length, uint16_t slave_address )
+template<typename DerivedRegister>
+int PsI2c<DerivedRegister>::write( char* buffer, uint16_t length, uint16_t slave_address )
 {
     int status = XST_SUCCESS;
 
@@ -85,7 +88,7 @@ int PsI2c::write( char* buffer, uint16_t length, uint16_t slave_address )
         if (status != XST_SUCCESS)
         {
             //std::cout << "I2C " << bus_index_ << " failed to send\n";
-            printf("I2C %d: failed to send\n", bus_index_);
+            logger_->log_error("I2C %d: failed to send\n", bus_index_);
         }
     }
 
@@ -95,7 +98,8 @@ int PsI2c::write( char* buffer, uint16_t length, uint16_t slave_address )
 //=========================================
 // Read from I2C bus.
 //=========================================
-int PsI2c::read( char* buffer, uint16_t length, uint16_t slave_address ) 
+template<typename DerivedRegister>
+int PsI2c<DerivedRegister>::read( char* buffer, uint16_t length, uint16_t slave_address ) 
 {
     int status = XST_SUCCESS;
 
@@ -107,7 +111,7 @@ int PsI2c::read( char* buffer, uint16_t length, uint16_t slave_address )
         if (status != XST_SUCCESS)
         {
             //std::cout << "I2C " << bus_index_ << " failed to receive\n";
-            printf("I2C %d: failed to receive\n", bus_index_);
+            logger_->log_error("I2C %d: failed to receive\n", bus_index_);
         }
     }
     
@@ -115,7 +119,8 @@ int PsI2c::read( char* buffer, uint16_t length, uint16_t slave_address )
 }
 
 
-void PsI2c::task()
+template<typename DerivedRegister>
+void PsI2c<DerivedRegister>::task()
 {
     PsI2cAccessReq  req;
     PsI2cAccessResp resp;
@@ -146,7 +151,8 @@ void PsI2c::task()
     }
 }
 
-void PsI2c::create_psi2c_task()
+template<typename DerivedRegister>
+void PsI2c<DerivedRegister>::create_psi2c_task()
 {
     auto task_func = std::make_unique<std::function<void()>>([this]() { task(); });
     xTaskCreate( task_wrapper

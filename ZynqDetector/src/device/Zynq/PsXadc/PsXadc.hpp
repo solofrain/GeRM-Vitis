@@ -2,6 +2,7 @@
 
 #include <xadcps.h>
 
+template<typename DerivedRegister>
 class PsXadc
 {
 private:
@@ -11,6 +12,8 @@ private:
 
     XAdcPs         xadc_instance_ptr_;
     XAdcPs_Config *xadc_config_;
+
+    const Logger<DerivedRegister>& logger_;
     //u32            temperature_raw_;
     //float          temprature_;
     //u32            vcc_raw_;
@@ -41,9 +44,10 @@ public:
     //    uint32_t data;
     //};
 
-    PsXadc( const std::string name
-          , const QueueHandle_t req_queue
-          , const QueueHandle_t resp_queue
+    PsXadc( const std::string                name
+          , const QueueHandle_t              req_queue
+          , const QueueHandle_t              resp_queue
+          , const Logger<DerivedRegister>&   logger_
           );
 
     // Task
