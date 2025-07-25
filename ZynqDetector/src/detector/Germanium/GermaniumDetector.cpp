@@ -44,107 +44,107 @@ GermaniumDetector::GermaniumDetector()
                   , GermaniumZynq
                   , GermaniumRegister
                   >
-                  ( register_single_access_req_queue
-                  , register_single_access_resp_queue
-                  , psi2c0_req_queue
-                  , psi2c0_resp_queue
-                  , psi2c1_req_queue
-                  , psi2c1_resp_queue
-                  , psxadc_req_queue
-                  , psxadc_resp_queue
+                  ( register_single_access_req_queue_
+                  , register_single_access_resp_queue_
+                  , psi2c0_req_queue_
+                  , psi2c0_resp_queue_
+                  , psi2c1_req_queue_
+                  , psi2c1_resp_queue_
+                  , psxadc_req_queue_
+                  , psxadc_resp_queue_
                   )
     , GermaniumZynq ( std::make_uniqure<GermaniumZynq>(base_addr_)
-                    , register_single_access_req_queue
-                    , register_single_access_resp_queue
-                    , psi2c_0_req_queue
-                    , psi2c_0_resp_queue
-                    , psi2c_1_req_queue
-                    , psi2c_1_resp_queue
-                    , psxadc_req_queue
-                    , psxadc_resp_queue
+                    , register_single_access_req_queue_
+                    , register_single_access_resp_queue_
+                    , psi2c0_req_queue_
+                    , psi2c0_resp_queue_
+                    , psi2c1_req_queue_
+                    , psi2c1_resp_queue_
+                    , psxadc_req_queue_
+                    , psxadc_resp_queue_
                     , this->logger_
                     )
-    , ltc2309_0_ ( std::make_shared<Ltc2309<PsI2c, PsI2cAccessReq>>( psi2c_1
+    , ltc2309_0_ ( std::make_unique<Ltc2309<PsI2c, PsI2cAccessReq>>( psi2c_1
                                                    , Ltc2309_0_I2C_ADDR
                                                    , true
-                                                   , psi2c_1_req_queue
+                                                   , psi2c1_req_queue_
                                                    , chan_assign
                                                    , this->logger_
                                                    )
                  )
-    , ltc2309_1_ ( std::make_shared<Ltc2309<PsI2c, PsI2cAccessReq>>( psi2c_1
+    , ltc2309_1_ ( std::make_unique<Ltc2309<PsI2c, PsI2cAccessReq>>( psi2c_1
                                                    , Ltc2309_1_I2C_ADDR
                                                    , true
-                                                   , psi2c_1_req_queue
+                                                   , psi2c1_req_queue_
                                                    , chan_assign
                                                    , this->logger_
                                                    )
                  )
-    , dac7678_   ( std::make_shared<Dac7678<PsI2c, PsI2cAccessReq>>( psi2c_1
+    , dac7678_   ( std::make_unique<Dac7678<PsI2c, PsI2cAccessReq>>( psi2c_1
                                                    , Dac7678_I2C_ADDR
-                                                   , psi2c_1_req_queue
+                                                   , psi2c1_req_queue_
                                                    , chan_assign
                                                    , this->logger_
                                                    )
                  )
-    , tmp100_0_  ( std::make_shared<Tmp100<PsI2c, PsI2cAccessReq>>( psi2c_0
+    , tmp100_0_  ( std::make_unique<Tmp100<PsI2c, PsI2cAccessReq>>( psi2c_0
                                                   , Tmp100_0_I2C_ADDR
-                                                  , psi2c_0_req_queue
+                                                  , psi2c0_req_queue_
                                                   , this->logger_
                                                   )
                  )
-    , tmp100_1_  ( std::make_shared<Tmp100<PsI2c, PsI2cAccessReq>>( psi2c_0
+    , tmp100_1_  ( std::make_unique<Tmp100<PsI2c, PsI2cAccessReq>>( psi2c_0
                                                   , Tmp100_1_I2C_ADDR
-                                                  , psi2c_0_req_queue
+                                                  , psi2c0_req_queue_
                                                   , this->logger_
                                                   )
                  )
-    , tmp100_2_  ( std::make_shared<Tmp100<PsI2c, PsI2cAccessReq>>( psi2c_0
+    , tmp100_2_  ( std::make_unique<Tmp100<PsI2c, PsI2cAccessReq>>( psi2c_0
                                                   , Tmp100_2_I2C_ADDR
-                                                  , psi2c_0_req_queue
+                                                  , psi2c0_req_queue_
                                                   , this->logger_
                                                   )
                  )
 {
 
-    psi2c_0_req_queue = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
-    psi2c_1_req_queue = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
+    psi2c0_req_queue = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
+    psi2c1_req_queue = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
     psxadc_req_queue  = xQueueCreate( 5, sizeof(PsXadcAccessReq) );
 
-    psi2c_0_resp_queue = xQueueCreate( 5, sizeof(PsI2cAccessResp) );
-    psi2c_1_resp_queue = xQueueCreate( 5, sizeof(PsI2cAccessResp) );
+    psi2c0_resp_queue = xQueueCreate( 5, sizeof(PsI2cAccessResp) );
+    psi2c1_resp_queue = xQueueCreate( 5, sizeof(PsI2cAccessResp) );
     psxadc_resp_queue  = xQueueCreate( 5, sizeof(PsXadcAccessResp) );
 
     resp_queue_set = xQueueCreateSet(50);
 
-    xQueueAddToSet( psi2c_0_resp_queue, resp_queue_set );
-    xQueueAddToSet( psi2c_1_resp_queue, resp_queue_set );
+    xQueueAddToSet( psi2c0_resp_queue, resp_queue_set );
+    xQueueAddToSet( psi2c1_resp_queue, resp_queue_set );
     xQueueAddToSet( psxadc_resp_queue, resp_queue_set );
 
 
-    this->zynq_ = std::make_unique<GermaniumZynq>( register_single_access_req_queue
-                                                 , register_single_access_resp_queue
-                                                 , register_multi_access_req_queue
-                                                 , register_multi_access_resp_queue
-                                                 , psi2c0_req_queue
-                                                 , psi2c0_resp_queue
-                                                 , psi2c1_req_queue
-                                                 , psi2c1_resp_queue
-                                                 , psxadc_req_queue
-                                                 , psxadc_resp_queue
+    this->zynq_ = std::make_unique<GermaniumZynq>( register_single_access_req_queue_
+                                                 , register_single_access_resp_queue_
+                                                 , register_multi_access_req_queue_
+                                                 , register_multi_access_resp_queue_
+                                                 , psi2c0_req_queue_
+                                                 , psi2c0_resp_queue_
+                                                 , psi2c1_req_queue_
+                                                 , psi2c1_resp_queue_
+                                                 , psxadc_req_queue_
+                                                 , psxadc_resp_queue_
                                                  , this->logger_
                                                  );
 
-    this->network_ = std::make_unique<GermaniumNetwork>( register_single_access_req_queue
-                                                       , register_single_access_resp_queue
-                                                       , register_multi_access_req_queue
-                                                       , register_multi_access_resp_queue
-                                                       , psi2c0_req_queue
-                                                       , psi2c0_resp_queue
-                                                       , psi2c1_req_queue
-                                                       , psi2c1_resp_queue
-                                                       , psxadc_req_queue
-                                                       , psxadc_resp_queue
+    this->network_ = std::make_unique<GermaniumNetwork>( register_single_access_req_queue_
+                                                       , register_single_access_resp_queue_
+                                                       , register_multi_access_req_queue_
+                                                       , register_multi_access_resp_queue_
+                                                       , psi2c0_req_queue_
+                                                       , psi2c0_resp_queue_
+                                                       , psi2c1_req_queue_
+                                                       , psi2c1_resp_queue_
+                                                       , psxadc_req_queue_
+                                                       , psxadc_resp_queue_
                                                        , this->logger_
                                                        );
 
@@ -339,18 +339,18 @@ void GermaniumDetector::register_multi_access_task()
 //===============================================================
 void GermaniumDetector::create_detector_queues()
 {
-//    psi2c_0_req_queue = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
-//    psi2c_1_req_queue = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
+//    psi2c0_req_queue = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
+//    psi2c1_req_queue = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
 //    psxadc_req_queue  = xQueueCreate( 5, sizeof(PsXadcAccessReq) );
 //
-//    psi2c_0_resp_queue = xQueueCreate( 5, sizeof(PsI2cAccessResp) );
-//    psi2c_1_resp_queue = xQueueCreate( 5, sizeof(PsI2cAccessResp) );
+//    psi2c0_resp_queue = xQueueCreate( 5, sizeof(PsI2cAccessResp) );
+//    psi2c1_resp_queue = xQueueCreate( 5, sizeof(PsI2cAccessResp) );
 //    psxadc_resp_queue  = xQueueCreate( 5, sizeof(PsXadcAccessResp) );
 //
 //    resp_queue_set = xQueueCreateSet(50);
 //
-//    xQueueAddToSet( psi2c_0_resp_queue, resp_queue_set );
-//    xQueueAddToSet( psi2c_1_resp_queue, resp_queue_set );
+//    xQueueAddToSet( psi2c0_resp_queue, resp_queue_set );
+//    xQueueAddToSet( psi2c1_resp_queue, resp_queue_set );
 //    xQueueAddToSet( psxadc_resp_queue, resp_queue_set );
 }
 //===============================================================

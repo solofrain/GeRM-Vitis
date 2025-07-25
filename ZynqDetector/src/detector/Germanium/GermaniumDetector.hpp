@@ -93,39 +93,39 @@ protected:
     //const uint16_t TEMP3 = 
 
     // DAC process map: <op, <device, channel>>
-    const std::map<uint16_t, std::pair<std::shared_ptr<Dac7678<PsI2c<GermaniumRegister>>>, uint8_t>> dac_instr_map = 
+    const std::map<uint16_t, std::pair<Dac7678<PsI2c<GermaniumRegister>, GermaniumRegister>*, uint8_t>> dac_instr_map = 
         {
-          { VL0, std::make_pair( dac7678_, 0 ) },
-          { VL1, std::make_pair( dac7678_, 1 ) },
-          { VH1, std::make_pair( dac7678_, 2 ) },
-          { VL2, std::make_pair( dac7678_, 3 ) },
-          { VH2, std::make_pair( dac7678_, 4 ) },
-          { HV,  std::make_pair( dac7678_, 5 ) },
-          { P1,  std::make_pair( dac7678_, 6 ) },
-          { P2,  std::make_pair( dac7678_, 7 ) }
+          { VL0, std::make_pair( dac7678_.get(), 0 ) },
+          { VL1, std::make_pair( dac7678_.get(), 1 ) },
+          { VH1, std::make_pair( dac7678_.get(), 2 ) },
+          { VL2, std::make_pair( dac7678_.get(), 3 ) },
+          { VH2, std::make_pair( dac7678_.get(), 4 ) },
+          { HV,  std::make_pair( dac7678_.get(), 5 ) },
+          { P1,  std::make_pair( dac7678_.get(), 6 ) },
+          { P2,  std::make_pair( dac7678_.get(), 7 ) }
         };
 
     // ADC process map: <op, <device, channel>>
-    const std::map<uint16_t, std::pair<std::shared_ptr<Ltc2309<PsI2c<GermaniumRegister>>>, uint8_t>> adc_instr_map = 
+    const std::map<uint16_t, std::pair<Ltc2309<PsI2c<GermaniumRegister>, GermaniumRegister>*, uint8_t>> adc_instr_map = 
         {
-          { TEMP1,   std::make_pair( ltc2309_0_, 0 ) },
-          { TEMP2,   std::make_pair( ltc2309_0_, 1 ) },
-          { TEMP3,   std::make_pair( ltc2309_0_, 2 ) },
-          { TEMP4,   std::make_pair( ltc2309_0_, 3 ) },
-          { HV_RBV,  std::make_pair( ltc2309_0_, 4 ) },
-          { HV_CURR, std::make_pair( ltc2309_0_, 5 ) },
-          { P1,      std::make_pair( ltc2309_0_, 6 ) },
-          { P2,      std::make_pair( ltc2309_0_, 7 ) },
-          { ILEAK,   std::make_pair( ltc2309_1_, 0 ) },
-          { P_V,     std::make_pair( ltc2309_1_, 1 ) }
+          { TEMP1,   std::make_pair( ltc2309_0_.get(), 0 ) },
+          { TEMP2,   std::make_pair( ltc2309_0_.get(), 1 ) },
+          { TEMP3,   std::make_pair( ltc2309_0_.get(), 2 ) },
+          { TEMP4,   std::make_pair( ltc2309_0_.get(), 3 ) },
+          { HV_RBV,  std::make_pair( ltc2309_0_.get(), 4 ) },
+          { HV_CURR, std::make_pair( ltc2309_0_.get(), 5 ) },
+          { P1,      std::make_pair( ltc2309_0_.get(), 6 ) },
+          { P2,      std::make_pair( ltc2309_0_.get(), 7 ) },
+          { ILEAK,   std::make_pair( ltc2309_1_.get(), 0 ) },
+          { P_V,     std::make_pair( ltc2309_1_.get(), 1 ) }
         };
 
     // Temperature process map: <op, <device, channel>>
-    const std::map<uint16_t, std::shared_ptr<Tmp100<PsI2c<GermaniumRegister>>>> temp_instr_map = 
+    const std::map<uint16_t, Tmp100<PsI2c<GermaniumRegister>, GermaniumRegister>*> temp_instr_map = 
         {
-          { TEMP1, tmp100_0_ },
-          { TEMP2, tmp100_1_ },
-          { TEMP3, tmp100_2_ }
+          { TEMP1, tmp100_0_.get() },
+          { TEMP2, tmp100_1_.get() },
+          { TEMP3, tmp100_2_.get() }
         };
 
 

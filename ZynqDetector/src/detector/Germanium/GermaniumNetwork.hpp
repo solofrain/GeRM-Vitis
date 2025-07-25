@@ -2,7 +2,9 @@
 
 #include "Network.hpp"
 
-class GermaniumNetwork : public Network<GermaniumNetwork>
+class GermaniumRegister;
+
+class GermaniumNetwork : public Network<GermaniumNetwork, GermaniumRegister>
 {
 public:
     GermaniumNetwork( const QueueHandle_t              register_single_access_req_queue
@@ -201,7 +203,7 @@ protected:
     //friend Germanium
 private:
 
-    Network<GermaniumNetwork>* base_;
+    Network<GermaniumNetwork, GermaniumRegister>* base_;
 
     const Logger<GermaniumRegister>& logger_;
 

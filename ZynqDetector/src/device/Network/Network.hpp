@@ -59,9 +59,7 @@ public:
 
     explicit Network( const Logger<DerivedRegister>& logger  );
     void network_init();
-    void create_network_tasks( TaskHandle_t udp_rx_task_handle,
-	                           TaskHandle_t udp_tx_task_handle
-						     );
+    void create_network_tasks();
 
 private:
     const Logger<DerivedRegister>& logger_;
@@ -96,10 +94,10 @@ protected:
     static void tcpip_init_done( void *arg );
     bool string_to_addr( const std::string& addr_str, uint8_t* addr );
 
-    TaskHandle_t udp_rx_task_handle;
-    TaskHandle_t udp_tx_task_handle;
+    TaskHandle_t udp_rx_task_handle_;
+    TaskHandle_t udp_tx_task_handle_;
     
-    void create_network_tasks();
+    //void create_network_tasks();
     void udp_rx_task();
     void udp_tx_task();
 
