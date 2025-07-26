@@ -250,7 +250,7 @@ void GermaniumDetector::task_init()
 
 void GermaniumDetector::create_device_access_tasks()
 {
-    this->zynq_->zynq_->reg_->>create_register_single_access_task();
+    this->zynq_->reg_->>create_register_single_access_task();
 
     psxadc_.create_psxadc_task();
 

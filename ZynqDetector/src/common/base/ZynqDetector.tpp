@@ -213,6 +213,6 @@ void ZynqDetector< DerivedDetector
                  , DerivedRegister
                  >::create_device_access_tasks()
 {
-    zynq_->create_device_access_tasks();
+    zynq_->base_->create_device_access_tasks();
 }
 //===============================================================

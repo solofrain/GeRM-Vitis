@@ -101,6 +101,17 @@ auto Zynq<DerivedZynq, DerivedRegister>::add_ps_i2c_interface
 //}
 
 //=========================================
+
+
+template < typename DerivedZynq
+         , typename DerivedRegister
+         >
+void Zynq<DerivedZynq, DerivedRegister>::create_device_access_tasks()
+{
+    
+}
+
+
 #endif
 
 

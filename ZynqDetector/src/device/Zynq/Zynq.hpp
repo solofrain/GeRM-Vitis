@@ -60,6 +60,7 @@ public:
 
     //PlI2cInterface* get_pl_i2c_interface( const std::string& name );
     //PlSpiInterface* get_pl_spi_interface( const std::string& name );
+    void create_device_access_tasks();
 };
 //=========================================
 
