@@ -43,27 +43,7 @@ GermaniumDetector::GermaniumDetector()
                   , GermaniumNetwork
                   , GermaniumZynq
                   , GermaniumRegister
-                  >
-                  ( register_single_access_req_queue_
-                  , register_single_access_resp_queue_
-                  , psi2c0_req_queue_
-                  , psi2c0_resp_queue_
-                  , psi2c1_req_queue_
-                  , psi2c1_resp_queue_
-                  , psxadc_req_queue_
-                  , psxadc_resp_queue_
-                  )
-    , GermaniumZynq ( std::make_uniqure<GermaniumZynq>(base_addr_)
-                    , register_single_access_req_queue_
-                    , register_single_access_resp_queue_
-                    , psi2c0_req_queue_
-                    , psi2c0_resp_queue_
-                    , psi2c1_req_queue_
-                    , psi2c1_resp_queue_
-                    , psxadc_req_queue_
-                    , psxadc_resp_queue_
-                    , this->logger_
-                    )
+                  >()
     , ltc2309_0_ ( std::make_unique<Ltc2309<PsI2c, PsI2cAccessReq>>( psi2c_1
                                                    , Ltc2309_0_I2C_ADDR
                                                    , true
@@ -121,32 +101,35 @@ GermaniumDetector::GermaniumDetector()
     xQueueAddToSet( psi2c1_resp_queue, resp_queue_set );
     xQueueAddToSet( psxadc_resp_queue, resp_queue_set );
 
+    auto z = std::make_unique<GermaniumZynq>( register_single_access_req_queue_
+                                            , register_single_access_resp_queue_
+                                            , register_multi_access_req_queue_
+                                            , register_multi_access_resp_queue_
+                                            , psi2c0_req_queue_
+                                            , psi2c0_resp_queue_
+                                            , psi2c1_req_queue_
+                                            , psi2c1_resp_queue_
+                                            , psxadc_req_queue_
+                                            , psxadc_resp_queue_
+                                            , this->logger_
+                                            );
 
-    this->zynq_ = std::make_unique<GermaniumZynq>( register_single_access_req_queue_
-                                                 , register_single_access_resp_queue_
-                                                 , register_multi_access_req_queue_
-                                                 , register_multi_access_resp_queue_
-                                                 , psi2c0_req_queue_
-                                                 , psi2c0_resp_queue_
-                                                 , psi2c1_req_queue_
-                                                 , psi2c1_resp_queue_
-                                                 , psxadc_req_queue_
-                                                 , psxadc_resp_queue_
-                                                 , this->logger_
-                                                 );
+    this->set_zynq ( std::move(z) );
 
-    this->network_ = std::make_unique<GermaniumNetwork>( register_single_access_req_queue_
-                                                       , register_single_access_resp_queue_
-                                                       , register_multi_access_req_queue_
-                                                       , register_multi_access_resp_queue_
-                                                       , psi2c0_req_queue_
-                                                       , psi2c0_resp_queue_
-                                                       , psi2c1_req_queue_
-                                                       , psi2c1_resp_queue_
-                                                       , psxadc_req_queue_
-                                                       , psxadc_resp_queue_
-                                                       , this->logger_
-                                                       );
+    auto n = std::make_unique<GermaniumNetwork>( register_single_access_req_queue_
+                                               , register_single_access_resp_queue_
+                                               , register_multi_access_req_queue_
+                                               , register_multi_access_resp_queue_
+                                               , psi2c0_req_queue_
+                                               , psi2c0_resp_queue_
+                                               , psi2c1_req_queue_
+                                               , psi2c1_resp_queue_
+                                               , psxadc_req_queue_
+                                               , psxadc_resp_queue_
+                                               , this->logger_
+                                               );
+
+    this->set_network( std::move(z) );
 
     network_->network_init();
 }

@@ -57,11 +57,35 @@ ZynqDetector< DerivedDetector
             , DerivedZynq
             , DerivedRegister
             >::ZynqDetector()
-//    : zynq_    ()
-//    , network_ ( std::move(net) )
+{}
+
+template< typename DerivedDetector
+        , typename DerivedNetwork
+        , typename DerivedZynq
+        , typename DerivedRegister
+        >
+void ZynqDetector< DerivedDetector
+                 , DerivedNetwork
+                 , DerivedZynq
+                 , DerivedRegister
+                 >::set_zynq(std::unique_ptr<DerivedZynq> z)
 {
+    zynq_ = std::move(z);
 }
 
+template< typename DerivedDetector
+        , typename DerivedNetwork
+        , typename DerivedZynq
+        , typename DerivedRegister
+        >
+void ZynqDetector< DerivedDetector
+                 , DerivedNetwork
+                 , DerivedZynq
+                 , DerivedRegister
+                 >::set_network(std::unique_ptr<DerivedNetwork> n)
+{
+    network_ = std::move(n);
+}
 
 
 /*

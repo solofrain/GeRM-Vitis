@@ -38,15 +38,15 @@ protected:
     TaskHandle_t psi2c_1_task_handler_;
     TaskHandle_t psxadc_task_handler_;
 
-    QueueHandle_t psi2c_0_req_queue;
-    QueueHandle_t psi2c_1_req_queue;
-    QueueHandle_t psxadc_req_queue;
-    QueueHandle_t register_multi_access_req_queue;
+    QueueHandle_t psi2c_0_req_queue_;
+    QueueHandle_t psi2c_1_req_queue_;
+    QueueHandle_t psxadc_req_queue_;
+    QueueHandle_t register_multi_access_req_queue_;
 
-    QueueHandle_t psi2c_0_resp_queue;
-    QueueHandle_t psi2c_1_resp_queue;
-    QueueHandle_t psxadc_resp_queue;
-    QueueHandle_t register_multi_access_resp_queue;
+    QueueHandle_t psi2c_0_resp_queue_;
+    QueueHandle_t psi2c_1_resp_queue_;
+    QueueHandle_t psxadc_resp_queue_;
+    QueueHandle_t register_multi_access_resp_queue_;
 
 
     std::unique_ptr<Ltc2309<PsI2c<GermaniumRegister>, GermaniumRegister>> ltc2309_0_, ltc2309_1_;

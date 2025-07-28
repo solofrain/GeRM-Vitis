@@ -32,21 +32,18 @@ public:
     void set_log_control( uint8_t control );
     uint8_t read_log_control();
 
-    void log_error( const char *format, ... );
-    void log_error( uint32_t error_code, const char *format, ... );
-    void log_warn( const char *format, ... );
-    void log_debug( const char *format, ... );
+    void log_error( const char *format, ... ) const;
+    void log_error( uint32_t error_code, const char *format, ... ) const;
+    void log_warn( const char *format, ... ) const;
+    void log_debug( const char *format, ... ) const;
+    void log(LogType type, const char *format, ...) const;
+    void log(LogType type, char* color, const char *format, ...) const;
 
 private:
 
-    void xvprintf(const char* format, va_list args);
+    void xvprintf(const char* format, va_list args) const;
 
-    void log_va(
-        LogType type,
-        const char* color,
-        const char *format,
-        va_list args
-    );
+    void log_va( LogType type, const char* color, const char *format, va_list args ) const;
 
     Reg* reg_;
 

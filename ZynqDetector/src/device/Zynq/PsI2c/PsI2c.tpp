@@ -88,7 +88,7 @@ int PsI2c<DerivedRegister>::write( char* buffer, uint16_t length, uint16_t slave
         if (status != XST_SUCCESS)
         {
             //std::cout << "I2C " << bus_index_ << " failed to send\n";
-            logger_->log_error("I2C %d: failed to send\n", bus_index_);
+            logger_.log_error("I2C %d: failed to send\n", bus_index_);
         }
     }
 
@@ -111,7 +111,7 @@ int PsI2c<DerivedRegister>::read( char* buffer, uint16_t length, uint16_t slave_
         if (status != XST_SUCCESS)
         {
             //std::cout << "I2C " << bus_index_ << " failed to receive\n";
-            logger_->log_error("I2C %d: failed to receive\n", bus_index_);
+            logger_.log_error("I2C %d: failed to receive\n", bus_index_);
         }
     }
     

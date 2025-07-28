@@ -57,6 +57,8 @@ public:
     //PlI2cInterface* get_pl_i2c_interface( const std::string& name );
     //PlSpiInterface* get_pl_spi_interface( const std::string& name );
 
+    void create_device_access_tasks_special();
+
 protected:
     //Register reg_;
     std::unique_ptr<PsI2c<GermaniumRegister>>     psi2c0_;
@@ -69,6 +71,8 @@ protected:
     //static constexpr uintptr_t PSI2C1_ADDR    = 0x43C00000;
     //static constexpr uintptr_t XADC_ADDR      = 0xF8007100;
     //static constexpr uint32_t  PSI2C_CLK_FREQ = 0xF8007100;
+
+    void device_access_tasks();
 
 };
 //=========================================

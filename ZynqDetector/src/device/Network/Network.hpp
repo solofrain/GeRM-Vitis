@@ -65,7 +65,6 @@ private:
     const Logger<DerivedRegister>& logger_;
 
 protected:
-    uint32_t udp_port_;
 
     struct netif netif_;
     int    sock_;

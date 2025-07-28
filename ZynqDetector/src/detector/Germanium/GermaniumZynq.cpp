@@ -71,14 +71,23 @@ GermaniumZynq::GermaniumZynq
              )
     , logger_ ( logger )
 {
-    this->init_register( std::make_unique<GermaniumRegister>( XPAR_IOBUS_0_BASEADDR
-                                                            , register_single_access_req_queue
-                                                            , register_single_access_resp_queue
-                                                            , register_multi_access_req_queue
-                                                            , register_multi_access_resp_queue
-                                                            , logger
-                                                            )
-                       );
+    auto r = std::make_unique<GermaniumRegister>( XPAR_IOBUS_0_BASEADDR
+                                                , register_single_access_req_queue
+                                                , register_single_access_resp_queue
+                                                , register_multi_access_req_queue
+                                                , register_multi_access_resp_queue
+                                                , logger
+                                                );
+    this->set_register( std::move(r) );
+}
+
+
+
+void GermaniumZynq::create_device_access_tasks_special()
+{
+    psi2c0_->create_psi2c_task();
+    psi2c1_->create_psi2c_task();
+    psxadc_->create_psxadc_task();
 }
 
 /*

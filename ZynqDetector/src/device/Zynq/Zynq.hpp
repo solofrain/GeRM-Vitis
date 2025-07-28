@@ -32,6 +32,9 @@ class Zynq
 {
 private:
     
+    const QueueHandle_t  register_single_access_req_queue_;
+    const QueueHandle_t  register_single_access_resp_queue_;
+
     std::unique_ptr<DerivedRegister>    reg_ = nullptr;
     std::vector<PsI2c<DerivedRegister>> ps_i2cs_;
     const Logger<DerivedRegister>&      logger_;
@@ -44,7 +47,7 @@ public:
         , const Logger<DerivedRegister>&  logger
         );
 
-    void init_register(std::unique_ptr<DerivedRegister> reg);
+    void set_register( std::unique_ptr<DerivedRegister> z );
 
     //auto add_pl_i2c( const std::string& name, uint32_t instr_reg, uint32_t data_reg );
     //auto add_pl_spi( const std::string& name, uint32_t instr_reg, uint32_t data_reg );

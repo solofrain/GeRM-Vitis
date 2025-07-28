@@ -144,6 +144,9 @@ public:
     ~ZynqDetector();
 
     //void DummyDetector::create_irq_task_map();
+
+    void set_zynq( std::unique_ptr<DerivedZynq> z );
+    void set_network( std::unique_ptr<DerivedNetwork> n );
     
     void network_init();
     void queue_init();

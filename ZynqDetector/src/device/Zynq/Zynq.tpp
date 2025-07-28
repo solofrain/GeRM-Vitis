@@ -29,14 +29,16 @@ Zynq<DerivedZynq, DerivedRegister>::Zynq
     , const QueueHandle_t            register_single_access_resp_queue
     , const Logger<DerivedRegister>& logger
     )
-    : logger_ ( logger )
+    : register_single_access_req_queue_ ( register_single_access_req_queue   )
+    , register_single_access_resp_queue_ ( register_single_access_resp_queue )
+    , logger_ ( logger )
 {}
 
 
 template < typename DerivedZynq
          , typename DerivedRegister
          >
-void Zynq<DerivedZynq, DerivedRegister>::init_register( std::unique_ptr<DerivedRegister> reg )
+void Zynq<DerivedZynq, DerivedRegister>::set_register( std::unique_ptr<DerivedRegister> reg )
 {
     reg_ = std::move( reg );
 }
@@ -108,7 +110,7 @@ template < typename DerivedZynq
          >
 void Zynq<DerivedZynq, DerivedRegister>::create_device_access_tasks()
 {
-    
+   static_cast<DerivedZynq*>(this)->create_device_access_tasks_special();
 }
 
 
