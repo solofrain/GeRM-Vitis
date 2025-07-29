@@ -44,73 +44,73 @@ GermaniumDetector::GermaniumDetector()
                   , GermaniumZynq
                   , GermaniumRegister
                   >()
-    , ltc2309_0_ ( std::make_unique<Ltc2309<PsI2c, PsI2cAccessReq>>( psi2c_1
-                                                   , Ltc2309_0_I2C_ADDR
+    , ltc2309_0_ ( std::make_unique<Ltc2309<PsI2c<GermaniumRegister>, GermaniumRegister>>( /*psi2c_1_
+                                                   , */LTC2309_0_I2C_ADDR
                                                    , true
-                                                   , psi2c1_req_queue_
-                                                   , chan_assign
+                                                   , psi2c_1_access_req_queue_
+                                                   , chan_assign_
                                                    , this->logger_
                                                    )
                  )
-    , ltc2309_1_ ( std::make_unique<Ltc2309<PsI2c, PsI2cAccessReq>>( psi2c_1
-                                                   , Ltc2309_1_I2C_ADDR
+    , ltc2309_1_ ( std::make_unique<Ltc2309<PsI2c<GermaniumRegister>, GermaniumRegister>>( /*psi2c_1_
+                                                   , */LTC2309_1_I2C_ADDR
                                                    , true
-                                                   , psi2c1_req_queue_
-                                                   , chan_assign
+                                                   , psi2c_1_access_req_queue_
+                                                   , chan_assign_
                                                    , this->logger_
                                                    )
                  )
-    , dac7678_   ( std::make_unique<Dac7678<PsI2c, PsI2cAccessReq>>( psi2c_1
-                                                   , Dac7678_I2C_ADDR
-                                                   , psi2c1_req_queue_
-                                                   , chan_assign
+    , dac7678_   ( std::make_unique<Dac7678<PsI2c<GermaniumRegister>, GermaniumRegister>>( /*psi2c_1_
+                                                   , */DAC7678_I2C_ADDR
+                                                   , psi2c_1_access_req_queue_
+                                                   , chan_assign_
                                                    , this->logger_
                                                    )
                  )
-    , tmp100_0_  ( std::make_unique<Tmp100<PsI2c, PsI2cAccessReq>>( psi2c_0
-                                                  , Tmp100_0_I2C_ADDR
-                                                  , psi2c0_req_queue_
+    , tmp100_0_  ( std::make_unique<Tmp100<PsI2c<GermaniumRegister>, GermaniumRegister>>( /*psi2c_0_
+                                                  , */TMP100_0_I2C_ADDR
+                                                  , psi2c_0_access_req_queue_
                                                   , this->logger_
                                                   )
                  )
-    , tmp100_1_  ( std::make_unique<Tmp100<PsI2c, PsI2cAccessReq>>( psi2c_0
-                                                  , Tmp100_1_I2C_ADDR
-                                                  , psi2c0_req_queue_
+    , tmp100_1_  ( std::make_unique<Tmp100<PsI2c<GermaniumRegister>, GermaniumRegister>>( /*psi2c_0_
+                                                  , */TMP100_1_I2C_ADDR
+                                                  , psi2c_0_access_req_queue_
                                                   , this->logger_
                                                   )
                  )
-    , tmp100_2_  ( std::make_unique<Tmp100<PsI2c, PsI2cAccessReq>>( psi2c_0
-                                                  , Tmp100_2_I2C_ADDR
-                                                  , psi2c0_req_queue_
+    , tmp100_2_  ( std::make_unique<Tmp100<PsI2c<GermaniumRegister>, GermaniumRegister>>( /*psi2c_0_
+                                                  , */TMP100_2_I2C_ADDR
+                                                  , psi2c_0_access_req_queue_
                                                   , this->logger_
                                                   )
                  )
 {
 
-    psi2c0_req_queue = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
-    psi2c1_req_queue = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
-    psxadc_req_queue  = xQueueCreate( 5, sizeof(PsXadcAccessReq) );
+    psi2c_0_access_req_queue_ = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
+    psi2c_1_access_req_queue_ = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
+    psxadc_access_req_queue_  = xQueueCreate( 5, sizeof(PsXadcAccessReq) );
 
-    psi2c0_resp_queue = xQueueCreate( 5, sizeof(PsI2cAccessResp) );
-    psi2c1_resp_queue = xQueueCreate( 5, sizeof(PsI2cAccessResp) );
-    psxadc_resp_queue  = xQueueCreate( 5, sizeof(PsXadcAccessResp) );
+    psi2c_access_resp_queue_ = xQueueCreate( 10, sizeof(PsI2cAccessResp) );
+    //psi2c_1_access_resp_queue_ = xQueueCreate( 5, sizeof(PsI2cAccessResp) );
+    psxadc_access_resp_queue_  = xQueueCreate( 5, sizeof(PsXadcAccessResp) );
 
-    resp_queue_set = xQueueCreateSet(50);
+    //resp_queue_set = xQueueCreateSet(50);
 
-    xQueueAddToSet( psi2c0_resp_queue, resp_queue_set );
-    xQueueAddToSet( psi2c1_resp_queue, resp_queue_set );
-    xQueueAddToSet( psxadc_resp_queue, resp_queue_set );
+    //xQueueAddToSet( psi2c_0_resp_queue, resp_queue_set );
+    //xQueueAddToSet( psi2c_1_resp_queue, resp_queue_set );
+    //xQueueAddToSet( psxadc_resp_queue, resp_queue_set );
 
     auto z = std::make_unique<GermaniumZynq>( register_single_access_req_queue_
                                             , register_single_access_resp_queue_
                                             , register_multi_access_req_queue_
                                             , register_multi_access_resp_queue_
-                                            , psi2c0_req_queue_
-                                            , psi2c0_resp_queue_
-                                            , psi2c1_req_queue_
-                                            , psi2c1_resp_queue_
-                                            , psxadc_req_queue_
-                                            , psxadc_resp_queue_
+                                            , psi2c_0_access_req_queue_
+                                            //, psi2c_0_access_resp_queue_
+                                            , psi2c_1_access_req_queue_
+                                            , psi2c_access_resp_queue_
+                                            , psxadc_access_req_queue_
+                                            , psxadc_access_resp_queue_
                                             , this->logger_
                                             );
 
@@ -120,16 +120,16 @@ GermaniumDetector::GermaniumDetector()
                                                , register_single_access_resp_queue_
                                                , register_multi_access_req_queue_
                                                , register_multi_access_resp_queue_
-                                               , psi2c0_req_queue_
-                                               , psi2c0_resp_queue_
-                                               , psi2c1_req_queue_
-                                               , psi2c1_resp_queue_
-                                               , psxadc_req_queue_
-                                               , psxadc_resp_queue_
+                                               , psi2c_0_access_req_queue_
+                                               //, psi2c_0_access_resp_queue_
+                                               , psi2c_1_access_req_queue_
+                                               , psi2c_access_resp_queue_
+                                               , psxadc_access_req_queue_
+                                               , psxadc_access_resp_queue_
                                                , this->logger_
                                                );
 
-    this->set_network( std::move(z) );
+    this->set_network( std::move(n) );
 
     network_->network_init();
 }
@@ -139,11 +139,11 @@ GermaniumDetector::GermaniumDetector()
 //===============================================================
 // Latch MARS configuration.
 //===============================================================
-void GermaniumDetector::polling_task_init()
-{
-    poll_list.emplace_back( HV_RBV | 0x8000 );
-    //zynq_->reg_->= new GermaniumRegister();
-}
+//void GermaniumDetector::polling_task_init()
+//{
+//    poll_list.emplace_back( HV_RBV | 0x8000 );
+//    //zynq_->reg_->= new GermaniumRegister();
+//}
 
 //===============================================================
 
@@ -173,208 +173,204 @@ void GermaniumDetector::polling_task_init()
 
 //===============================================================
 //===============================================================
-void GermaniumDetector::register_access_request_proc(const UdpRxMsg &msg)
-{
-    RegisterAccessRequest req;
-    req.op = msg.op;
-    xQueueSend( register_access_request_queue
-              , req
-              , 0UL
-              );
-}
+//void GermaniumDetector::register_access_request_proc(const UdpRxMsg &msg)
+//{
+//    RegisterAccessRequest req;
+//    req.op = msg.op;
+//    xQueueSend( register_access_request_queue
+//              , req
+//              , 0UL
+//              );
+//}
 //===============================================================
 
 
 //===============================================================
 // Only UDP tasks for GeDetector.
 //===============================================================
-void GermaniumDetector::task_init()
-{
-    xTaskCreate( udp_rx_task
-               , (const char *)"UDP_RX"
-               , configMINIMAL_STACK_SIZE
-               , NULL
-               , tskIDLE_PRIORITY
-               , &udp_rx_task_handle_
-               );
-
-    xTaskCreate( udp_tx_task
-               , (const char *)"UDP_TX"
-               , configMINIMAL_STACK_SIZE
-               , NULL
-               , tskIDLE_PRIORITY + 1
-               , &udp_tx_task_handle_
-               );
-
-    xTaskCreate( psi2c_task
-               , ( const char* ) "PsI2c0"
-               , configMINIMAL_STACK_SIZE
-               , NULL
-               , tskIDLE_PRIORITY + 1
-               , &psi2c_0_task_handler_
-               );
-
-    xTaskCreate( psi2c_task
-               , ( const char* ) "PsI2c1"
-               , configMINIMAL_STACK_SIZE
-               , NULL
-               , tskIDLE_PRIORITY + 1
-               , &psi2c_1_task_handler_
-               );
-
-    xTaskCreate( psxadc_task
-               , ( const char* ) "PsXadc"
-               , configMINIMAL_STACK_SIZE
-               , NULL
-               , tskIDLE_PRIORITY + 1
-               , &psxadc_task_handler_
-               );
-}
+//void GermaniumDetector::task_init()
+//{
+//    xTaskCreate( udp_rx_task
+//               , (const char *)"UDP_RX"
+//               , configMINIMAL_STACK_SIZE
+//               , NULL
+//               , tskIDLE_PRIORITY
+//               , &udp_rx_task_handle_
+//               );
+//
+//    xTaskCreate( udp_tx_task
+//               , (const char *)"UDP_TX"
+//               , configMINIMAL_STACK_SIZE
+//               , NULL
+//               , tskIDLE_PRIORITY + 1
+//               , &udp_tx_task_handle_
+//               );
+//
+//    xTaskCreate( psi2c_task
+//               , ( const char* ) "PsI2c0"
+//               , configMINIMAL_STACK_SIZE
+//               , NULL
+//               , tskIDLE_PRIORITY + 1
+//               , &psi2c_0_task_handler_
+//               );
+//
+//    xTaskCreate( psi2c_task
+//               , ( const char* ) "PsI2c1"
+//               , configMINIMAL_STACK_SIZE
+//               , NULL
+//               , tskIDLE_PRIORITY + 1
+//               , &psi2c_1_task_handler_
+//               );
+//
+//    xTaskCreate( psxadc_task
+//               , ( const char* ) "PsXadc"
+//               , configMINIMAL_STACK_SIZE
+//               , NULL
+//               , tskIDLE_PRIORITY + 1
+//               , &psxadc_task_handler_
+//               );
+//}
 
 void GermaniumDetector::create_device_access_tasks()
 {
-    this->zynq_->reg_->>create_register_single_access_task();
+    // Devices managed by Zynq
+    this->zynq_->base_->create_device_access_tasks();
+    //this->zynq_->reg_->create_register_single_access_task();
 
-    psxadc_.create_psxadc_task();
-
-    psi2c0_.create_psi2c_task();
-    psi2c1_.create_psi2c_task();
-
-    xTaskCreate( register_multi_access_task_wrapper
-               , (const char *)"Register-Multi-Access"
-               , configMINIMAL_STACK_SIZE
-               , this
-               , tskIDLE_PRIORITY
-               , &register_multi_access_task_handle_ );
-
-    xTaskCreate( psxadc_.task_wrapper
-               , (const char *)"PsXadc-Access"
-               , configMINIMAL_STACK_SIZE
-               , &psxadc_
-               , tskIDLE_PRIORITY
-               , &psxadc_task_handle_ );
-
-    xTaskCreate( psi2c0_.task_wrapper
-               , (const char *)"PsI2c-0-Access"
-               , configMINIMAL_STACK_SIZE
-               , &psi2c0_
-               , tskIDLE_PRIORITY
-               , &psi2c_0_task_handle_ );
-
-    xTaskCreate( psi2c1_.task_wrapper
-               , (const char *)"PsI2c-1-Access"
-               , configMINIMAL_STACK_SIZE
-               , &psi2c1_
-               , tskIDLE_PRIORITY
-               , &psi2c_1_task_handle_ );
+//    psxadc_.create_psxadc_task();
+//
+//    psi2c_0_.create_psi2c_task();
+//    psi2c_1_.create_psi2c_task();
+//
+//    xTaskCreate( register_multi_access_task_wrapper
+//               , (const char *)"Register-Multi-Access"
+//               , configMINIMAL_STACK_SIZE
+//               , this
+//               , tskIDLE_PRIORITY
+//               , &register_multi_access_task_handle_ );
+//
+//    xTaskCreate( psxadc_.task_wrapper
+//               , (const char *)"PsXadc-Access"
+//               , configMINIMAL_STACK_SIZE
+//               , &psxadc_
+//               , tskIDLE_PRIORITY
+//               , &psxadc_task_handle_ );
+//
+//    xTaskCreate( psi2c_0_.task_wrapper
+//               , (const char *)"PsI2c-0-Access"
+//               , configMINIMAL_STACK_SIZE
+//               , &psi2c_0_
+//               , tskIDLE_PRIORITY
+//               , &psi2c_0_task_handle_ );
+//
+//    xTaskCreate( psi2c_1_.task_wrapper
+//               , (const char *)"PsI2c-1-Access"
+//               , configMINIMAL_STACK_SIZE
+//               , &psi2c_1_
+//               , tskIDLE_PRIORITY
+//               , &psi2c_1_task_handle_ );
 }
 //===============================================================
 
 
-//===============================================================
-// Register multi-access task wrapper
-//===============================================================
-void GermaniumDetector::create_register_multi_access_task()
-{
-    auto task_func = std::make_unique<std::function<void()>>([this]() { register_multi_access_task(); });
-    xTaskCreate( task_wrapper, "Register Single Access", 1000, &task_func, 1, NULL );
-}
-//===============================================================
-
-
-//===============================================================
-// Register multi-access task
-//===============================================================
-void GermaniumDetector::register_multi_access_task()
-{
-    GermaniumAccessReq req;
-
-    xQueueReceive( this->zynq_->base_->reg_->ulti_access_resp_queue_, &req, 0);
-    switch ( req.op & 0x7fff )
-    {
-        case UPDATE_LOADS:
-            update_loads( &req.data )
-            break;
-
-        case STUFF_MARS:
-            stuff_mars();
-            break;
-
-        case AD9252_CNFG:
-            ad9252_cnfg( req.ad9252_cnfg.chip_num
-                       , req.ad9252_cnfg.addr
-                       , req.ad9252_cnfg.val );
-
-        case ZDDM_ARM:
-            zddm_arm( req.zddm_arm.mode
-                    , req.zddm_arm.val );
-            break;
-            
-        default:
-            log_error( "Invalid op: %d", req.op & 0x7fff );
-    }
-}
-//===============================================================
+////===============================================================
+//// Register multi-access task wrapper
+////===============================================================
+//void GermaniumDetector::create_register_multi_access_task()
+//{
+//    auto task_func = std::make_unique<std::function<void()>>([this]() { register_multi_access_task(); });
+//    xTaskCreate( task_wrapper, "Register Single Access", 1000, &task_func, 1, NULL );
+//}
+////===============================================================
+//
+//
+////===============================================================
+//// Register multi-access task
+////===============================================================
+//void GermaniumDetector::register_multi_access_task()
+//{
+//    GermaniumAccessReq req;
+//
+//    xQueueReceive( this->zynq_->base_->reg_->ulti_access_resp_queue_, &req, 0);
+//    switch ( req.op & 0x7fff )
+//    {
+//        case UPDATE_LOADS:
+//            update_loads( &req.data )
+//            break;
+//
+//        case STUFF_MARS:
+//            stuff_mars();
+//            break;
+//
+//        case AD9252_CNFG:
+//            ad9252_cnfg( req.ad9252_cnfg.chip_num
+//                       , req.ad9252_cnfg.addr
+//                       , req.ad9252_cnfg.val );
+//
+//        case ZDDM_ARM:
+//            zddm_arm( req.zddm_arm.mode
+//                    , req.zddm_arm.val );
+//            break;
+//            
+//        default:
+//            log_error( "Invalid op: %d", req.op & 0x7fff );
+//    }
+//}
+////===============================================================
 
 
 //===============================================================
 // Germanium queue init
 //===============================================================
-void GermaniumDetector::create_detector_queues()
-{
-//    psi2c0_req_queue = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
-//    psi2c1_req_queue = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
+//void GermaniumDetector::create_detector_queues()
+//{
+//    psi2c_0_req_queue = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
+//    psi2c_1_req_queue = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
 //    psxadc_req_queue  = xQueueCreate( 5, sizeof(PsXadcAccessReq) );
 //
-//    psi2c0_resp_queue = xQueueCreate( 5, sizeof(PsI2cAccessResp) );
-//    psi2c1_resp_queue = xQueueCreate( 5, sizeof(PsI2cAccessResp) );
+//    psi2c_0_resp_queue = xQueueCreate( 5, sizeof(PsI2cAccessResp) );
+//    psi2c_1_resp_queue = xQueueCreate( 5, sizeof(PsI2cAccessResp) );
 //    psxadc_resp_queue  = xQueueCreate( 5, sizeof(PsXadcAccessResp) );
-//
-//    resp_queue_set = xQueueCreateSet(50);
-//
-//    xQueueAddToSet( psi2c0_resp_queue, resp_queue_set );
-//    xQueueAddToSet( psi2c1_resp_queue, resp_queue_set );
-//    xQueueAddToSet( psxadc_resp_queue, resp_queue_set );
-}
+//}
 //===============================================================
 
 
 //===============================================================
 // Latch MARS configuration.
 //===============================================================
-void GermaniumDetector::polling_task_init()
-{
-    poll_list.emplace_back( HV_RBV | 0x8000 );
-    poll_list.emplace_back( HV_CURR | 0x8000  );
-
-    TimerHandle_t xTimer = xTimerCreate( "1S Polling Tmer"
-        , pdMS_TO_TICKS(1000) // 1 second
-        , pdTRUE              // auto-reload
-        , ( void * ) 1        // timer ID
-        , polling_1s );
-}
-//===============================================================
-
-
-void GermaniumDetector::polling_1s()
-{
-    UdpRxMsg msg;
-    
-    for ( auto iter : poll_list )
-    {
-        int instr = *iter;
-        auto it = instr_map_.find(instr);
-        if (it != instr_map_.end())
-        {
-            msg.op = instr;
-            it->second(msg);  // Call the corresponding function
-        }
-        else
-        {
-            std::cout << "Unknown instruction: " << instr << '\n';
-        }
-    }
-}
+//void GermaniumDetector::polling_task_init()
+//{
+//    poll_list.emplace_back( HV_RBV | 0x8000 );
+//    poll_list.emplace_back( HV_CURR | 0x8000  );
+//
+//    TimerHandle_t xTimer = xTimerCreate( "1S Polling Tmer"
+//        , pdMS_TO_TICKS(1000) // 1 second
+//        , pdTRUE              // auto-reload
+//        , ( void * ) 1        // timer ID
+//        , polling_1s );
+//}
+////===============================================================
+//
+//
+//void GermaniumDetector::polling_1s()
+//{
+//    UdpRxMsg msg;
+//    
+//    for ( auto iter : poll_list )
+//    {
+//        int instr = *iter;
+//        auto it = instr_map_.find(instr);
+//        if (it != instr_map_.end())
+//        {
+//            msg.op = instr;
+//            it->second(msg);  // Call the corresponding function
+//        }
+//        else
+//        {
+//            std::cout << "Unknown instruction: " << instr << '\n';
+//        }
+//    }
+//}
 //===============================================================
 
 //===============================================================

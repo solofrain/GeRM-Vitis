@@ -63,8 +63,13 @@ public:
 
     Register<GermaniumRegister>* base_;
 
+    void create_register_access_tasks_special();
+
 private:
-    const QueueHandle_t multi_access_req_queue;
-    const QueueHandle_t multi_access_resp_queue;
+    const QueueHandle_t multi_access_req_queue_;
+    const QueueHandle_t multi_access_resp_queue_;
+
+    void create_register_multi_access_task();
+    void register_multi_access_task();
 
 };

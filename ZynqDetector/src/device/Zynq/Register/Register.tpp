@@ -2,6 +2,7 @@
 #include <functional>
 
 #include "FreeRTOS.h"
+#include "xil_printf.h"
 
 #include "task_wrap.hpp"
 
@@ -21,7 +22,13 @@ Register<DerivedRegister>::Register
     , single_access_req_queue_           ( single_access_req_queue  )
     , single_access_resp_queue_          ( single_access_resp_queue )
     , logger_                            ( logger                   )
-{}
+{
+    mutex_ = xSemaphoreCreateMutex();
+    if (mutex_ == NULL)
+    {
+        xil_printf("Failed to initialize register mutex!\n");
+    }
+}
 
 //=========================================
 // Register single access
@@ -114,6 +121,14 @@ void Register<DerivedRegister>::single_access_task()
             write( req.data, offset );
         }
     }
+}
+
+
+template< typename DerivedRegister >
+void Register<DerivedRegister>::create_register_access_tasks()
+{
+    create_register_single_access_task();
+    static_cast<DerivedRegister*>(this)->create_register_access_tasks_special();
 }
 
 template< typename DerivedRegister >

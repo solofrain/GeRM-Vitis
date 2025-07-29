@@ -35,9 +35,13 @@ public:
     // Write to status register
     void set_status( uint32_t status );
 
+    void create_register_access_tasks();
     void create_register_single_access_task();
 
     const Register<DerivedRegister>* base_;
+
+protected:
+    const Logger<DerivedRegister>& logger_;
 
 private:
     uintptr_t base_addr_;
@@ -45,7 +49,6 @@ private:
     QueueHandle_t     single_access_req_queue_;
     QueueHandle_t     single_access_resp_queue_;
 
-    const Logger<DerivedRegister>& logger_;
 
     void single_access_task();
 };

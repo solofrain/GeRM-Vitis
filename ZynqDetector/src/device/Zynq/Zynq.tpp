@@ -110,7 +110,11 @@ template < typename DerivedZynq
          >
 void Zynq<DerivedZynq, DerivedRegister>::create_device_access_tasks()
 {
-   static_cast<DerivedZynq*>(this)->create_device_access_tasks_special();
+    // Create register access tasks
+    reg_->base_->create_register_access_tasks();
+
+    // Create derived class specific tasks
+    static_cast<DerivedZynq*>(this)->create_device_access_tasks_special();
 }
 
 

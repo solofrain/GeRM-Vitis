@@ -12,9 +12,9 @@ GermaniumNetwork::GermaniumNetwork( const QueueHandle_t              register_si
                                   , const QueueHandle_t              register_multi_access_req_queue
                                   , const QueueHandle_t              register_multi_access_resp_queue
                                   , const QueueHandle_t              psi2c0_access_req_queue
-                                  , const QueueHandle_t              psi2c0_access_resp_queue
+                                  //, const QueueHandle_t              psi2c0_access_resp_queue
                                   , const QueueHandle_t              psi2c1_access_req_queue
-                                  , const QueueHandle_t              psi2c1_access_resp_queue
+                                  , const QueueHandle_t              psi2c_access_resp_queue
                                   , const QueueHandle_t              psxadc_access_req_queue
                                   , const QueueHandle_t              psxadc_access_resp_queue
                                   , const Logger<GermaniumRegister>& logger
@@ -25,9 +25,9 @@ GermaniumNetwork::GermaniumNetwork( const QueueHandle_t              register_si
                                   , register_multi_access_req_queue_             ( register_multi_access_req_queue   )
                                   , register_multi_access_resp_queue_            ( register_multi_access_resp_queue  )
                                   , psi2c0_access_req_queue_                     ( psi2c0_access_req_queue           )
-                                  , psi2c0_access_resp_queue_                    ( psi2c0_access_resp_queue          )
+                                  //, psi2c0_access_resp_queue_                    ( psi2c0_access_resp_queue          )
                                   , psi2c1_access_req_queue_                     ( psi2c1_access_req_queue           )
-                                  , psi2c1_access_resp_queue_                    ( psi2c1_access_resp_queue          )
+                                  , psi2c_access_resp_queue_                     ( psi2c_access_resp_queue          )
                                   , psxadc_access_req_queue_                     ( psxadc_access_req_queue           )
                                   , psxadc_access_resp_queue_                    ( psxadc_access_resp_queue          )
                                   , logger_                                      ( logger                            )
@@ -88,13 +88,22 @@ void GermaniumNetwork::rx_instr_map_init()
 //===============================================================
 // Compose Tx message.
 //===============================================================
-void GermaniumNetwork::tx_msg_proc( const UdpTxMsg &msg )
+size_t GermaniumNetwork::tx_msg_proc( UdpTxMsg& msg )
 {
+    QueueSetHandle_t resp_queue_set;
+    resp_queue_set = xQueueCreateSet(50);
+
+    xQueueAddToSet( register_single_access_resp_queue, resp_queue_set );
+    xQueueAddToSet( register_multi_access_resp_queue, resp_queue_set );
+    xQueueAddToSet( psi2c_resp_queue, resp_queue_set );
+    xQueueAddToSet( psxadc_resp_queue, resp_queue_set );
+
+
     QueueSetMemberHandle_t active_queue;
 
-    uint16_t msg_leng;
+    //uint16_t msg_leng;
 
-    active_queue = (QueueHandle_t)xQueueSelectFromSet(resp_queue_set_, portMAX_DELAY);
+    active_queue = (QueueHandle_t)xQueueSelectFromSet(resp_queue_set, portMAX_DELAY);
 
     if ( active_queue == reg_single_access_resp_queue_ )
     {
@@ -104,7 +113,7 @@ void GermaniumNetwork::tx_msg_proc( const UdpTxMsg &msg )
         msg.op = reg_single_access_resp.op;
         msg.reg_single_access_resp_data = reg_single_access_resp.data;
         
-        return;
+        return (4+sizeof(msg.reg_single_access_resp_data);
     }
 
     if ( active_queue == reg_multi_access_resp_queue_ )
@@ -115,7 +124,7 @@ void GermaniumNetwork::tx_msg_proc( const UdpTxMsg &msg )
         msg.op = reg_multi_access_resp.op;
         msg.reg_multi_access_resp_data = reg_multi_access_resp.data;
         
-        return;
+        return (4+sizeof(msg.reg_multi_access_resp_data);
     }
             
     if ( active_queue == psi2c_access_resp_queue )
@@ -126,7 +135,7 @@ void GermaniumNetwork::tx_msg_proc( const UdpTxMsg &msg )
         msg.op = psi2c_access_resp.op;
         msg.i2c_access_resp_data = psi2c_access_resp.data;
         
-        return;
+        return (4+sizeof(msg.i2c_access_resp_data);
     }
 
     if ( active_queue == psxadc_access_resp_queue )
@@ -137,7 +146,7 @@ void GermaniumNetwork::tx_msg_proc( const UdpTxMsg &msg )
         msg.op = psxadc_access_resp.op;
         msg.xadc_access_resp_data = psxadc_access_resp.data;
 
-        return;
+        return (4+sizeof(msg.xdc_access_resp_data);
     }
 }//===============================================================
 

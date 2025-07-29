@@ -29,9 +29,9 @@ GermaniumZynq::GermaniumZynq
     , const QueueHandle_t              register_multi_access_req_queue
     , const QueueHandle_t              register_multi_access_resp_queue
     , const QueueHandle_t              psi2c0_req_queue
-    , const QueueHandle_t              psi2c0_resp_queue
+    //, const QueueHandle_t              psi2c0_resp_queue
     , const QueueHandle_t              psi2c1_req_queue
-    , const QueueHandle_t              psi2c1_resp_queue
+    , const QueueHandle_t              psi2c_resp_queue
     , const QueueHandle_t              psxadc_req_queue
     , const QueueHandle_t              psxadc_resp_queue
     , const Logger<GermaniumRegister>& logger
@@ -50,7 +50,7 @@ GermaniumZynq::GermaniumZynq
                                       , XPAR_I2C0_BASEADDR
                                       , XPAR_I2C0_CLOCK_FREQ
                                       , psi2c0_req_queue
-                                      , psi2c0_resp_queue
+                                      , psi2c_resp_queue
                                       , logger
                                       )
              )
@@ -59,7 +59,7 @@ GermaniumZynq::GermaniumZynq
                                       , XPAR_I2C1_BASEADDR
                                       , XPAR_I2C1_CLOCK_FREQ
                                       , psi2c1_req_queue
-                                      , psi2c1_resp_queue
+                                      , psi2c_resp_queue
                                       , logger
                                       )
              )

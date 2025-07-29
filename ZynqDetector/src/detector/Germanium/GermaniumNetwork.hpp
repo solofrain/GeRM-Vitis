@@ -12,9 +12,9 @@ public:
                     , const QueueHandle_t              register_multi_access_req_queue
                     , const QueueHandle_t              register_multi_access_resp_queue
                     , const QueueHandle_t              psi2c0_access_req_queue
-                    , const QueueHandle_t              psi2c0_access_resp_queue
+                    //, const QueueHandle_t              psi2c0_access_resp_queue
                     , const QueueHandle_t              psi2c1_access_req_queue
-                    , const QueueHandle_t              psi2c1_access_resp_queue
+                    , const QueueHandle_t              psi2c_access_resp_queue
                     , const QueueHandle_t              psxadc_access_req_queue
                     , const QueueHandle_t              psxadc_access_resp_queue
                     , const Logger<GermaniumRegister>& logger
@@ -69,6 +69,8 @@ public:
     static constexpr uint16_t ZTEP              = 170;  // CPU temperature
     static constexpr uint16_t DAC_INT_REF       = 180;  // Dac7678 internal reference
 
+    Network<GermaniumNetwork, GermaniumRegister>* base_;
+
     std::map<uint32_t, std::function<void(const UdpRxMsg&)>> rx_instr_map_;
     //===============================================================
     // Data types
@@ -90,22 +92,22 @@ public:
     //-----------------------------
     union UdpRxMsgPayloadStruct
     {
-        uint32_t   Reg_single_acc_req_data;
-        uint32_t   Loads[12][14];
-        ZddmArm    Zddm_arm_data;
-        Ad9252Cfg  Ad9252_cfg_data;
-        uint32_t   I2c_acc_req_data;
-        uint32_t   Xadc_acc_req_data;
+        uint32_t   reg_single_acc_req_data;
+        uint32_t   loads[12][14];
+        ZddmArm    zddm_arm_data;
+        Ad9252Cfg  ad9252_cfg_data;
+        uint32_t   i2c_acc_req_data;
+        uint32_t   xadc_acc_req_data;
     };
     using UdpRxMsgPayload = UdpRxMsgPayloadStruct;
     //-----------------------------
-    struct UdpRxMsgStruct
-    {
-        uint16_t  id;
-        uint16_t  op;
-        char      payload[sizeof(UdpRxMsgPayload)];
-    };
-    using UdpRxMsg = UdpRxMsgStruct;
+    //struct UdpRxMsgStruct
+    //{
+    //    uint16_t  id;
+    //    uint16_t  op;
+    //    char      payload[sizeof(UdpRxMsgPayload)];
+    //};
+    //using UdpRxMsg = UdpRxMsgStruct;
     //-----------------------------
     union RegisterMultiAccessRequestDataStruct
     {
@@ -116,32 +118,34 @@ public:
     //-----------------------------
     struct RegisterMultiAccessRequestStruct
     {
-        uint16_t  op;
-        char      data[sizeof(RegisterMultiAccessRequestData)];
+        uint16_t                       op;
+        RegisterMultiAccessRequestData data;
     };
     using RegisterMultiAccessRequest = RegisterMultiAccessRequestStruct;
     //-----------------------------
     union UdpTxMsgPayloadStruct
     {
         uint32_t  register_single_access_response_data;
+        uint32_t  register_multi_access_response_data;
         uint32_t  psi2c_access_response_data;
         uint32_t  psxadc_access_response_data;
     };
     using UdpTxMsgPayload = UdpTxMsgPayloadStruct;
 
     //-----------------------------
-    struct UdpTxMsgStruct
-    {
-        uint16_t  id;
-        uint16_t  op;
-        char      payload[sizeof(UdpTxMsgPayload)];
-    };
-    using UdpTxMsg = UdpTxMsgStruct;
+    //struct UdpTxMsgStruct
+    //{
+    //    uint16_t  id;
+    //    uint16_t  op;
+    //    char      payload[sizeof(UdpTxMsgPayload)];
+    //};
+    //using UdpTxMsg = UdpTxMsgStruct;
     //===============================================================    
+
+    size_t tx_msg_proc( UdpTxMsg &msg );
 
 protected:
     void rx_msg_map_init();
-    void tx_msg_proc( const UdpTxMsg &msg );
 
     void proc_register_single_access_msg( const UdpRxMsg& msg );
     void proc_register_multi_access_msg( const UdpRxMsg& msg );
@@ -203,7 +207,6 @@ protected:
     //friend Germanium
 private:
 
-    Network<GermaniumNetwork, GermaniumRegister>* base_;
 
     const Logger<GermaniumRegister>& logger_;
 
@@ -212,9 +215,9 @@ private:
     QueueHandle_t& register_multi_access_req_queue_;
     QueueHandle_t& register_multi_access_resp_queue_;
     QueueHandle_t& psi2c0_access_req_queue_;
-    QueueHandle_t& psi2c0_access_resp_queue_;
+    //QueueHandle_t& psi2c0_access_resp_queue_;
     QueueHandle_t& psi2c1_access_req_queue_;
-    QueueHandle_t& psi2c1_access_resp_queue_;
+    QueueHandle_t& psi2c_access_resp_queue_;
     QueueHandle_t& psxadc_access_req_queue_;
     QueueHandle_t& psxadc_access_resp_queue_;
 };

@@ -8,15 +8,16 @@
 #include <map>
 
 extern "C" {
-
-#include "lwipopts.h"
-#include "lwip/ip_addr.h"
-#include "lwip/err.h"
-#include "lwip/udp.h"
-#include "lwip/inet.h"
 #include "lwip/sockets.h"
-#include "lwip/sys.h"
-#include "lwip/init.h"
+#include "lwip/netif.h"
+#include "lwip/inet.h"
+
+//#include "lwipopts.h"
+//#include "lwip/ip_addr.h"
+//#include "lwip/err.h"
+//#include "lwip/udp.h"
+//#include "lwip/sys.h"
+//#include "lwip/init.h"
 
 #include "netif/xadapter.h"
 #include "errno.h"
@@ -41,21 +42,38 @@ public:
     //------------------------------
     static constexpr uint16_t MAX_UDP_MSG_LENG = 4096;
     static constexpr uint16_t MAX_UDP_MSG_DATA_LENG = MAX_UDP_MSG_LENG - 4; // length of message data in bytes
+
+    //struct UdpRxMsgStruct
+    //{
+    //    uint16_t id;
+    //    uint16_t op;
+    //    uint32_t data[MAX_UDP_MSG_DATA_LENG >> 2];
+    //};
+    //using UdpRxMsg = UdpRxMsgStruct;
+
+    //struct UdpTxMsgStruct
+    //{
+    //    uint16_t id;
+    //    uint16_t op;
+    //    uint32_t data[MAX_UDP_MSG_DATA_LENG >> 2];
+    //};
+    //using UdpTxMsg = UdpTxMsgStruct;
     struct UdpRxMsgStruct
-    {
-        uint16_t id;
-        uint16_t op;
-        uint32_t data[MAX_UDP_MSG_DATA_LENG >> 2];
-    };
+    {   
+        uint16_t                         id; 
+        uint16_t                         op;
+        DerivedNetwork::UdpRxMsgPayload  payload;
+    };  
     using UdpRxMsg = UdpRxMsgStruct;
 
     struct UdpTxMsgStruct
     {
-        uint16_t id;
-        uint16_t op;
-        uint32_t data[MAX_UDP_MSG_DATA_LENG >> 2];
+        uint16_t                         id;
+        uint16_t                         op;
+        DerivedNetwork::UdpTxMsgPayload  payload;
     };
     using UdpTxMsg = UdpTxMsgStruct;
+
 
     explicit Network( const Logger<DerivedRegister>& logger  );
     void network_init();
@@ -68,7 +86,7 @@ protected:
 
     struct netif netif_;
     int    sock_;
-    struct sockaddr_in sock_addr_;
+    struct sockaddr_in local_addr_;
 
     //uint8_t ip_addr_[4];
     //uint8_t netmask_[4];
@@ -78,9 +96,7 @@ protected:
 
 //    socket_t xUDPSocket;
 
-    //std::atomic<bool> svr_ip_addr_lock_ {false};
-    //uint8_t svr_ip_addr_[4];
-    alignas(64) std::atomic<uint32_t> svr_ip_addr_;
+    alignas(64) std::atomic<uint32_t> remote_ip_addr_;
 
     int32_t udp_socket_;
 

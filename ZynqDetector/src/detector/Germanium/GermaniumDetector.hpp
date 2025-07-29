@@ -38,14 +38,14 @@ protected:
     TaskHandle_t psi2c_1_task_handler_;
     TaskHandle_t psxadc_task_handler_;
 
-    QueueHandle_t psi2c_0_req_queue_;
-    QueueHandle_t psi2c_1_req_queue_;
-    QueueHandle_t psxadc_req_queue_;
+    QueueHandle_t psi2c_0_access_req_queue_;
+    QueueHandle_t psi2c_1_access_req_queue_;
+    QueueHandle_t psxadc_access_req_queue_;
     QueueHandle_t register_multi_access_req_queue_;
 
-    QueueHandle_t psi2c_0_resp_queue_;
-    QueueHandle_t psi2c_1_resp_queue_;
-    QueueHandle_t psxadc_resp_queue_;
+    QueueHandle_t psi2c_access_resp_queue_;
+    //QueueHandle_t psi2c_1_access_resp_queue_;
+    QueueHandle_t psxadc_access_resp_queue_;
     QueueHandle_t register_multi_access_resp_queue_;
 
 
@@ -143,11 +143,15 @@ protected:
     void rx_msg_proc(const typename GermaniumNetwork::UdpRxMsg& udp_msg);
     //void tx_msg_proc();
 
-    void ps_i2c_access_task();
-    void ps_xadc_access_task();
+    //void ps_i2c_access_task();
+    //void ps_xadc_access_task();
+
+    //void polling_taski_init();
 
 public:
     static constexpr size_t REGISTER_SINGLE_ACCESS_REQ_QUEUE_LENG = 100;
+
+    //PsI2c<GermaniumRegister> psi2c_0_, psi2c_1_;
 
     ZynqDetector< GermaniumDetector
                 , GermaniumNetwork
@@ -164,5 +168,7 @@ public:
     //using RegisterSingleAccessReq = RegisterSingleAccessReqStruct;
 
     GermaniumDetector();
+
+    void create_device_access_tasks();
     //void do_task_init();
 };

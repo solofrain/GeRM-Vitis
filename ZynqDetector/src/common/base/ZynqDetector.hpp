@@ -31,7 +31,6 @@ template< typename DerivedDetector
 class ZynqDetector
 {
 protected:
-    Logger<DerivedRegister> logger;
 
     //==================================================
     //                    Variables                   //
@@ -64,20 +63,7 @@ protected:
     // Queue handlers
     QueueHandle_t  register_single_access_req_queue_  = NULL;
     QueueHandle_t  register_single_access_resp_queue_ = NULL;
-
-    QueueSetMemberHandle_t  active_resp_queue_;
-    QueueSetHandle_t        resp_queue_set_;
         
-    
-    //------------------------------
-    // Task handlers
-    //------------------------------
-    TaskHandle_t  udp_rx_task_handle_;
-    TaskHandle_t  udp_tx_task_handle_;
-    TaskHandle_t  register_single_access_task_handle_;
-    //TaskHandle_t  slow_access_task_handle_;
-
-    
     //------------------------------
     // Network
     //------------------------------
@@ -139,6 +125,7 @@ protected:
     
 
 public:
+    Logger<DerivedRegister> logger_;
 
     ZynqDetector();
     ~ZynqDetector();

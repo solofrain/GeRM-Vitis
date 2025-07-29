@@ -6,9 +6,13 @@ extern "C" {
 #include "lwip/netif.h"
 #include "lwip/ip_addr.h"
 #include "lwip/inet.h"
+#include "lwip/init.h"
 }
 
 #include "ff.h"  // FatFS
+
+//#include "platform.h"
+
 
 // To resolve the conflictions of read/write definition in socket.h and sstream
 #ifdef read
@@ -53,6 +57,7 @@ void Network<DerivedNetwork, DerivedRegister>::network_init()
         // Initialize lwIP stack (TCP/IP thread + netif)
 
     lwip_init();
+    //platform_init();
 
 
     /* Add network interface to the netif_list, and set it as default */
@@ -77,18 +82,18 @@ void Network<DerivedNetwork, DerivedRegister>::network_init()
 
     if ( ( sock_ = socket( AF_INET, SOCK_DGRAM, 0 ) ) < 0 )
     {
-        logger_->log_err( "Failed to create socket." );
+        logger_.log_error( "Failed to create socket." );
         return;
     }
 
-    memset( &sock_addr_, 0, sizeof(struct sockaddr_in) );
-    sock_addr_.sin_family      = AF_INET;
-    sock_addr_.sin_port        = htons(UDP_PORT);
-    sock_addr_.sin_addr.s_addr = htonl(INADDR_ANY);
+    memset( &local_addr_, 0, sizeof(struct sockaddr_in) );
+    local_addr_.sin_family      = AF_INET;
+    local_addr_.sin_port        = htons(UDP_PORT);
+    local_addr_.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    if ( bind( sock_, (struct sockaddr *)&sock_addr_, sizeof(sock_addr_) != ERR_OK) )
+    if ( bind( sock_, (struct sockaddr *)&local_addr_, sizeof(local_addr_) != ERR_OK) )
     {
-        logger_->log_error( "Error on bind" );
+        logger_.log_error( "Error on bind" );
         close( sock_ );
         return;
     }
@@ -181,7 +186,7 @@ void Network<DerivedNetwork, DerivedRegister>::read_network_config( const std::s
         {
             if ( !inet_aton(value.c_str(), netif_.ip_addr ) )
             {
-                logger_->log_error( "Invalid IP address format", value );
+                logger_.log_error( "Invalid IP address format", value );
                 break;
             }
         }
@@ -191,7 +196,7 @@ void Network<DerivedNetwork, DerivedRegister>::read_network_config( const std::s
             {
                 if ( !inet_aton( value.c_str(), netif_.netmask ) )
                 {
-                    logger_->log_error( "Invalid netmask format", value );
+                    logger_.log_error( "Invalid netmask format", value );
                     break;
                 }
             }
@@ -201,7 +206,7 @@ void Network<DerivedNetwork, DerivedRegister>::read_network_config( const std::s
                 {
                     if ( !inet_aton( value.c_str(), netif_.gw ) )
                     {
-                        logger_->log_error( "Invalid gateway format", value );
+                        logger_.log_error( "Invalid gateway format", value );
                         break;
                     }
                 }
@@ -211,7 +216,7 @@ void Network<DerivedNetwork, DerivedRegister>::read_network_config( const std::s
                     {
                         if ( !string_to_addr( value, mac_addr_ ) )
                         {
-                            logger_->log_error( "Invalid MAC address format", value );
+                            logger_.log_error( "Invalid MAC address format", value );
                             break;
                         }
                     }
@@ -244,7 +249,7 @@ bool Network<DerivedNetwork, DerivedRegister>::string_to_addr(
     auto num_separator = std::count( addr_str.begin(), addr_str.end(), separator );
     if ( ( is_ip && num_separator != 3 ) || ( !is_ip && num_separator != 5 ) )
     {
-        logger_->log_error( "Wrong address string format", addr_str );
+        logger_.log_error( "Wrong address string format", addr_str );
         return false;
     }
 
@@ -307,21 +312,21 @@ template < typename DerivedNetwork, typename DerivedRegister >
 void Network<DerivedNetwork, DerivedRegister>::udp_rx_task()
 {
     UdpRxMsg msg;
-    uint32_t msg_leng;
+    int      msg_leng;
     
-    struct freertos_sockaddr src_sock_addr;
-    socklen_t src_addr_leng = sizeof( src_sock_addr );
+    struct sockaddr_in remote_addr;
+    socklen_t remote_addr_leng = sizeof( remote_addr );
 
     uint32_t remote_ip_addr, remote_ip_addr_tmp;
 
     while(1)
     {
-        uint16_t msg_leng = lwip_recvfrom/*FreeRTOS_recvfrom*/( udp_socket_
+        msg_leng = recvfrom/*lwip_recvfrom*//*FreeRTOS_recvfrom*/( udp_socket_
                                              , &msg
                                              , sizeof( msg )
                                              , 0
-                                             , ( struct sockaddr * ) &src_sock_addr
-                                             , &src_addr_leng );
+                                             , ( struct sockaddr* ) &remote_addr
+                                             , &remote_addr_leng );
 
         if ( (msg_leng <= 0) || (msg.id != UDP_MSG_ID) )
         {
@@ -329,12 +334,12 @@ void Network<DerivedNetwork, DerivedRegister>::udp_rx_task()
             continue;
         }
 
-        remote_ip_addr_tmp = FreeRTOS_ntohl(src_sock_addr.sin_addr);
+        remote_ip_addr_tmp = remote_addr.sin_addr.s_addr;
         if ( remote_ip_addr_tmp != remote_ip_addr )
         {
             // update server IP address
             remote_ip_addr = remote_ip_addr_tmp;
-            svr_ip_addr_.store( remote_ip_addr_tmp, std::memory_order_relaxed );
+            remote_ip_addr_.store( remote_ip_addr_tmp, std::memory_order_relaxed );
         }
         
         rx_msg_proc( msg );
@@ -349,23 +354,30 @@ void Network<DerivedNetwork, DerivedRegister>::udp_rx_task()
 template < typename DerivedNetwork, typename DerivedRegister >
 void Network<DerivedNetwork, DerivedRegister>::udp_tx_task()
 {
-    struct freertos_sockaddr dst_sock_addr;
-    uint16_t msg_leng, tx_length;
+    struct sockaddr_in remote_addr;
+    remote_addr.sin_family = AF_INET;
+    remote_addr.sin_port = htons(UDP_PORT);
+
+    uint16_t msg_leng;
+    int      tx_length;
     UdpTxMsg msg;
 
     while(1)
     {
-        msg_leng = tx_msg_proc(msg);
-        tx_length = FreeRTOS_sendto( udp_socket_
-                                   , msg
-                                   , msg_leng
-                                   , 0
-                                   , &dst_sock_addr
-                                   , sizeof(dst_sock_addr) );
+        msg_leng = static_cast<DerivedNetwork*>(this)->tx_msg_proc(msg);
+
+        remote_addr.sin_addr.s_addr = remote_ip_addr_.load(std::memory_order_relaxed);
+
+        tx_length = sendto( udp_socket_
+                          , &msg
+                          , msg_leng
+                          , 0
+                          , (struct sockaddr*)&remote_addr
+                          , sizeof(remote_addr) );
 
         if (tx_length < 0)
         {
-            logger_->log_error( "Failed to send UDP message\n" );
+            logger_.log_error( "Failed to send UDP message\n" );
         }
     }
 }
@@ -386,7 +398,7 @@ void Network<DerivedNetwork, DerivedRegister>::rx_msg_proc( UdpRxMsg& msg )
     }
     else
     {
-        logger_->log_error( "Unknown instruction: ", ((UdpRxMsg)msg).op );
+        logger_.log_error( "Unknown instruction: ", ((UdpRxMsg)msg).op );
     }
 }
 //===============================================================

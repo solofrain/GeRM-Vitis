@@ -35,7 +35,6 @@ private:
     const QueueHandle_t  register_single_access_req_queue_;
     const QueueHandle_t  register_single_access_resp_queue_;
 
-    std::unique_ptr<DerivedRegister>    reg_ = nullptr;
     std::vector<PsI2c<DerivedRegister>> ps_i2cs_;
     const Logger<DerivedRegister>&      logger_;
 
@@ -46,6 +45,8 @@ public:
         , const QueueHandle_t             register_single_access_resp_queu
         , const Logger<DerivedRegister>&  logger
         );
+
+    std::unique_ptr<DerivedRegister>    reg_ = nullptr;
 
     void set_register( std::unique_ptr<DerivedRegister> z );
 

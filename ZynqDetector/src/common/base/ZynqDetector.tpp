@@ -199,7 +199,6 @@ void ZynqDetector< DerivedDetector
                  >::task_init()
 {
     create_network_tasks();
-    //create_detector_queues();
     create_device_access_tasks();
     //create_polling_tasks();
 }
@@ -219,7 +218,7 @@ void ZynqDetector< DerivedDetector
                  , DerivedRegister
                  >::create_network_tasks()
 {
-    network_->create_network_tasks();
+    network_->base_->create_network_tasks();
 }
 //===============================================================
 
