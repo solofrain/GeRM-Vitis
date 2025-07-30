@@ -35,37 +35,37 @@ void GermaniumRegister::create_register_multi_access_task()
 //===============================================================
 
 
-//===============================================================
-// Register multi-access task
-//===============================================================
-void GermaniumRegister::register_multi_access_task()
-{
-    RegisterMultiAccessReq req;
-
-    xQueueReceive( multi_access_resp_queue_, &req, 0);
-    switch ( req.op & 0x7fff )
-    {
-        case UPDATE_LOADS:
-            update_loads( &req.data )
-            break;
-
-        case STUFF_MARS:
-            stuff_mars();
-            break;
-
-        case AD9252_CNFG:
-            ad9252_cnfg( req.ad9252_cnfg.chip_num
-                       , req.ad9252_cnfg.addr
-                       , req.ad9252_cnfg.val );
-
-        case ZDDM_ARM:
-            zddm_arm( req.zddm_arm.mode
-                    , req.zddm_arm.val );
-            break;
-
-        default:
-            logger_.log_error( "Invalid op: %d", req.op & 0x7fff );
-    }
-}
+////===============================================================
+//// Register multi-access task
+////===============================================================
+//void GermaniumRegister::register_multi_access_task()
+//{
+//    RegisterMultiAccessReq req;
+//
+//    xQueueReceive( multi_access_resp_queue_, &req, 0);
+//    switch ( req.op & 0x7fff )
+//    {
+//        case UPDATE_LOADS:
+//            update_loads( &req.data )
+//            break;
+//
+//        case STUFF_MARS:
+//            stuff_mars();
+//            break;
+//
+//        case AD9252_CNFG:
+//            ad9252_cnfg( req.ad9252_cnfg.chip_num
+//                       , req.ad9252_cnfg.addr
+//                       , req.ad9252_cnfg.val );
+//
+//        case ZDDM_ARM:
+//            zddm_arm( req.zddm_arm.mode
+//                    , req.zddm_arm.val );
+//            break;
+//
+//        default:
+//            logger_.log_error( "Invalid op: %d", req.op & 0x7fff );
+//    }
+//}
 //===============================================================
 

@@ -15,6 +15,7 @@ vitis_journal.py
 !ZynqDetector/src/common/*
 !ZynqDetector/src/device
 !ZynqDetector/src/device/*
+!ZynqDetector/src/device/Raw/*
 !ZynqDetector/src/device/Zynq/*
 !ZynqDetector/src/detector
 !ZynqDetector/src/detector/*

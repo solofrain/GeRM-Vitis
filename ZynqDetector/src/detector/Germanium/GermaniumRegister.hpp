@@ -41,10 +41,10 @@ public:
     static constexpr uint16_t COUNT_TIME_HI     = 53;
     static constexpr uint16_t FRAME_NO          = 54;
     static constexpr uint16_t COUNT_MODE        = 55;
-    static constexpr uint16_t UPDATE_LOADS      = 100;
-    static constexpr uint16_t STUFF_MARS        = 101;
-    static constexpr uint16_t AD9252_CNFG       = 102;
-    static constexpr uint16_t ZDDM_ARM          = 103;
+//    static constexpr uint16_t UPDATE_LOADS      = 100;
+//    static constexpr uint16_t STUFF_MARS        = 101;
+//    static constexpr uint16_t AD9252_CNFG       = 102;
+//    static constexpr uint16_t ZDDM_ARM          = 103;
     static constexpr uint16_t HV                = 150;  // High voltage
     static constexpr uint16_t HV_CUR            = 151;  // High voltage current
     static constexpr uint16_t TEMP1             = 160;  // Temperature 1
@@ -52,6 +52,9 @@ public:
     static constexpr uint16_t TEMP3             = 162;  // Temperature 3
     static constexpr uint16_t ZTEP              = 170;  // CPU temperature
     static constexpr uint16_t DAC_INT_REF       = 180;  // Dac7678 internal reference
+
+    static constexpr uint16_t STUFF_MARS        = 190;
+    static constexpr uint16_t ADC_CLK_SKEW      = 191;
 
     GermaniumRegister( uintptr_t                        base_addr
                      , const QueueHandle_t              single_access_req_queue
@@ -71,5 +74,8 @@ private:
 
     void create_register_multi_access_task();
     void register_multi_access_task();
+
+    void create_stuff_mars_task();
+    void stuff_mars_task();
 
 };

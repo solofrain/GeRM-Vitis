@@ -13,7 +13,7 @@
 #include "PsI2c.hpp"
 #include "Dac7678.hpp"
 #include "Tmp100.hpp"
-
+#include "Ad9252.hpp"
 
 
 // const uint16_t LKUPADDRREG       = ?;
@@ -37,16 +37,18 @@ protected:
     TaskHandle_t psi2c_0_task_handler_;
     TaskHandle_t psi2c_1_task_handler_;
     TaskHandle_t psxadc_task_handler_;
+    TaskHandle_t ad9252_task_handler_;
 
     QueueHandle_t psi2c_0_access_req_queue_;
     QueueHandle_t psi2c_1_access_req_queue_;
     QueueHandle_t psxadc_access_req_queue_;
-    QueueHandle_t register_multi_access_req_queue_;
+    QueueHandle_t ad9252_access_req_queue_;
+    //QueueHandle_t register_multi_access_req_queue_;
 
     QueueHandle_t psi2c_access_resp_queue_;
     //QueueHandle_t psi2c_1_access_resp_queue_;
     QueueHandle_t psxadc_access_resp_queue_;
-    QueueHandle_t register_multi_access_resp_queue_;
+    //QueueHandle_t register_multi_access_resp_queue_;
 
 
     std::unique_ptr<Ltc2309<PsI2c<GermaniumRegister>, GermaniumRegister>> ltc2309_0_, ltc2309_1_;
@@ -54,6 +56,7 @@ protected:
     std::unique_ptr<Tmp100<PsI2c<GermaniumRegister>, GermaniumRegister>>  tmp100_0_;
     std::unique_ptr<Tmp100<PsI2c<GermaniumRegister>, GermaniumRegister>>  tmp100_1_;
     std::unique_ptr<Tmp100<PsI2c<GermaniumRegister>, GermaniumRegister>>  tmp100_2_;
+    std::unique_ptr<Ad9252<GermaniumRegister>>                            ad9252_;
 
     int num_chips_;
     int nelm_;
@@ -135,9 +138,6 @@ protected:
 
     void latch_conf();
     void update_loads( char* loads );
-    void send_spi_bit( int chip_sel, int val );
-    void load_ad9252reg( int chip_sel, int addr, int data );
-    int  ad9252_cfg( int chip_num, int addr, int data );
     void zddm_arm( int mode, int val );
 
     void rx_msg_proc(const typename GermaniumNetwork::UdpRxMsg& udp_msg);

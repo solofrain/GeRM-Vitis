@@ -17,6 +17,9 @@ public:
                     , const QueueHandle_t              psi2c_access_resp_queue
                     , const QueueHandle_t              psxadc_access_req_queue
                     , const QueueHandle_t              psxadc_access_resp_queue
+                    , const QueueHandle_t              ad9252_access_req_queue
+                    , const QueueHandle_t              mars_access_req_queue
+                    , const QueueHandle_t              zddm_access_req_queue
                     , const Logger<GermaniumRegister>& logger
                     );
 
@@ -58,9 +61,9 @@ public:
     static constexpr uint16_t FRAME_NO          = 54;
     static constexpr uint16_t COUNT_MODE        = 55;
     static constexpr uint16_t UPDATE_LOADS      = 100;
-    static constexpr uint16_t STUFF_MARS        = 101;
-    static constexpr uint16_t AD9252_CNFG       = 102;
-    static constexpr uint16_t ZDDM_ARM          = 103;
+    //static constexpr uint16_t STUFF_MARS        = 101;
+    //static constexpr uint16_t AD9252_CNFG       = 102;
+    //static constexpr uint16_t ZDDM_ARM          = 103;
     static constexpr uint16_t HV                = 150;  // High voltage
     static constexpr uint16_t HV_CUR            = 151;  // High voltage current
     static constexpr uint16_t TEMP1             = 160;  // Temperature 1
@@ -69,33 +72,47 @@ public:
     static constexpr uint16_t ZTEP              = 170;  // CPU temperature
     static constexpr uint16_t DAC_INT_REF       = 180;  // Dac7678 internal reference
 
+    static constexpr uint16_t STUFF_MARS        = 190;
+    static constexpr uint16_t ADC_CLK_SKEW      = 191;
+    static constexpr uint16_t ZDDM_ARM          = 192;
+
+
     Network<GermaniumNetwork, GermaniumRegister>* base_;
 
     std::map<uint32_t, std::function<void(const UdpRxMsg&)>> rx_instr_map_;
     //===============================================================
     // Data types
     //===============================================================
-    struct Ad9252CfgStruct
+    struct __attribute__((__packed__)) Ad9252CfgStruct
     {
         uint16_t  chip_num;
-        uint16_t  addr;
-        uint32_t  data;
+        //uint16_t  addr;
+        uint16_t  data;
     };
     using Ad9252Cfg = Ad9252CfgStruct;
+    using Ad9252AccessReq = Ad9252CfgStruct;
     //-----------------------------
-    struct ZddmArmStruct
+    struct __attribute__((__packed__)) ZddmArmStruct
     {
         uint16_t  mode;
         uint16_t  val;
     };
     using ZddmArm = ZddmArmStruct;
+    using ZddmAccessReq = ZddmArmStruct;
+    //-----------------------------
+    struct MarsLoadStruct
+    {
+        uint32_t  loads[12][14];
+    };
+    using MarsLoad = MarsLoadStruct;
+    using MarsAccessReq = MarsLoadStruct;
     //-----------------------------
     union UdpRxMsgPayloadStruct
     {
         uint32_t   reg_single_acc_req_data;
-        uint32_t   loads[12][14];
         ZddmArm    zddm_arm_data;
         Ad9252Cfg  ad9252_cfg_data;
+        MarsLoad   mars_load_data;
         uint32_t   i2c_acc_req_data;
         uint32_t   xadc_acc_req_data;
     };
@@ -148,63 +165,14 @@ protected:
     void rx_msg_map_init();
 
     void proc_register_single_access_msg( const UdpRxMsg& msg );
-    void proc_register_multi_access_msg( const UdpRxMsg& msg );
-    void proc_psi2c_access_msg( const UdpRxMsg& msg );
-    void proc_psxadc_access_msg( const UdpRxMsg& msg );
-    void proc_update_loads_msg( const char* loads );
+    //void proc_register_multi_access_msg ( const UdpRxMsg& msg );
+    void proc_psi2c_access_msg          ( const UdpRxMsg& msg );
+    void proc_psxadc_access_msg         ( const UdpRxMsg& msg );
+    //void proc_update_loads_msg          ( const char* loads );
+    void proc_ad9252_access_msg         ( const UdpRxMsg& msg );
+    void proc_mars_access_msg           ( const UdpRxMsg& msg );
+    void proc_zddm_access_msg           ( const UdpRxMsg& msg );
 
-    ////======================================
-    //// Instruction map
-    ////======================================
-    //const std::map<int, std::function<void(UdpRxMsg&)>> rx_instr_map {
-    //    { MARS_CONF_LOAD   , [this](UdpRxMsg& msg) { this->load_mars_conf(msg); } },
-    //    { LEDS             , [this]() { this->load_mars_conf(); } },
-    //    { MARS_CONFIG      , [this]() { this->load_mars_conf(); } },
-    //    { VERSIONREG       , [this]() { this->load_mars_conf(); } },
-    //    { MARS_CALPULSE    , [this]() { this->load_mars_conf(); } },
-    //    { MARS_PIPE_DELAY  , [this]() { this->load_mars_conf(); } },
-    //    { MARS_RDOUT_ENB   , [this]() { this->load_mars_conf(); } },
-    //    { EVENT_TIME_CNTR  , [this]() { this->load_mars_conf(); } },
-    //    { SIM_EVT_SEL      , [this]() { this->load_mars_conf(); } },
-    //    { SIM_EVENT_RATE   , [this]() { this->load_mars_conf(); } },
-    //    { ADC_SPI          , [this]() { this->load_mars_conf(); } },
-    //    { CALPULSE_CNT     , [this]() { this->load_mars_conf(); } },
-    //    { CALPULSE_RATE    , [this]() { this->load_mars_conf(); } },
-    //    { CALPULSE_WIDTH   , [this]() { this->load_mars_conf(); } },
-    //    { CALPULSE_MODE    , [this]() { this->load_mars_conf(); } },
-    //    { TD_CAL           , [this]() { this->load_mars_conf(); } },
-    //    { EVENT_FIFO_DATA  , [this]() { this->load_mars_conf(); } },
-    //    { EVENT_FIFO_CNT   , [this]() { this->load_mars_conf(); } },
-    //    { EVENT_FIFO_CNTRL , [this]() { this->load_mars_conf(); } },
-    //    { DMA_CONTROL      , [this]() { this->load_mars_conf(); } },
-    //    { DMA_STATUS       , [this]() { this->load_mars_conf(); } },
-    //    { DMA_BASEADDR     , [this]() { this->load_mars_conf(); } },
-    //    { DMA_BURSTLEN     , [this]() { this->load_mars_conf(); } },
-    //    { DMA_BUFLEN       , [this]() { this->load_mars_conf(); } },
-    //    { DMA_CURADDR      , [this]() { this->load_mars_conf(); } },
-    //    { DMA_THROTTLE     , [this]() { this->load_mars_conf(); } },
-    //    { UDP_IP_ADDR      , [this]() { this->load_mars_conf(); } },
-    //    { DMA_IRQ_THROTTLE , [this]() { this->load_mars_conf(); } },
-    //    { DMA_IRQ_ENABLE   , [this]() { this->load_mars_conf(); } },
-    //    { DMA_IRQ_COUNT    , [this]() { this->load_mars_conf(); } },
-    //    { TRIG             , [this]() { this->load_mars_conf(); } },
-    //    { COUNT_TIME       , [this]() { this->load_mars_conf(); } },
-    //    { FRAME_NO         , [this]() { this->load_mars_conf(); } },
-    //    { COUNT_MODE       , [this]() { this->load_mars_conf(); } },
-    //    { UPDATE_LOADS     , [this]() { this->load_mars_conf(); } },
-    //    { STUFF_MARS       , [this]() { this->load_mars_conf(); } },
-    //    { AD9252_CNFG      , [this]() { this->load_mars_conf(); } },
-    //    { ZDDM_ARM         , [this]() { this->load_mars_conf(); } },
-    //    { HV               , [this]() { this->load_mars_conf(); } },
-    //    { HV_CUR           , [this]() { this->load_mars_conf(); } },
-    //    { TEMP1            , [this]() { this->load_mars_conf(); } },
-    //    { TEMP2            , [this]() { this->load_mars_conf(); } },
-    //    { TEMP3            , [this]() { this->load_mars_conf(); } },
-    //    { ZTEP             , [this]() { this->load_mars_conf(); } },
-    //    { DAC_INT_REF      , [this]() { this->load_mars_conf(); } }
-    //  };
-
-    //friend Germanium
 private:
 
 
@@ -220,6 +188,9 @@ private:
     QueueHandle_t& psi2c_access_resp_queue_;
     QueueHandle_t& psxadc_access_req_queue_;
     QueueHandle_t& psxadc_access_resp_queue_;
+    QueueHandle_t& ad9252_access_req_queue_;
+    QueueHandle_t& mars_access_req_queue_;
+    QueueHandle_t& zddm_access_req_queue_;
 };
 
 

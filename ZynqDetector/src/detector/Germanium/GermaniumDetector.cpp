@@ -85,11 +85,15 @@ GermaniumDetector::GermaniumDetector()
                                                   , this->logger_
                                                   )
                  )
+    , ad9252_    ( std::make_unique<Ad9252>( *this->reg_
+                                           , ad9252_access_req_queue_
+                                           );
 {
 
     psi2c_0_access_req_queue_ = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
     psi2c_1_access_req_queue_ = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
     psxadc_access_req_queue_  = xQueueCreate( 5, sizeof(PsXadcAccessReq) );
+    ad9252_access_req_queue_  = xQueueCreate( 3, sizeof(Ad9252AccessReq) );
 
     psi2c_access_resp_queue_ = xQueueCreate( 10, sizeof(PsI2cAccessResp) );
     //psi2c_1_access_resp_queue_ = xQueueCreate( 5, sizeof(PsI2cAccessResp) );
@@ -126,6 +130,9 @@ GermaniumDetector::GermaniumDetector()
                                                , psi2c_access_resp_queue_
                                                , psxadc_access_req_queue_
                                                , psxadc_access_resp_queue_
+                                               , ad9252_access_req_queue_
+                                               , mars_access_req_queue_
+                                               , zddm_access_req_queue_
                                                , this->logger_
                                                );
 
@@ -235,6 +242,7 @@ void GermaniumDetector::create_device_access_tasks()
 {
     // Devices managed by Zynq
     this->zynq_->base_->create_device_access_tasks();
+    ad9252_->create_device_access_tasks();
     //this->zynq_->reg_->create_register_single_access_task();
 
 //    psxadc_.create_psxadc_task();
