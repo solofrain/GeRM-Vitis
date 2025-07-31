@@ -9,17 +9,16 @@
 #include "queue.hpp"
 //#include "Logger.hpp"
 
-template<typename Reg> class Logger;
+class Logger;
 
-template <typename DerivedRegister>
 class Register
 {
 public:
 
-    Register( uintptr_t                        base_addr
-            , const QueueHandle_t              single_access_req_queue
-            , const QueueHandle_t              single_access_resp_queue
-            , const Logger<DerivedRegister>&   logger
+    Register( uintptr_t             base_addr
+            , const QueueHandle_t   single_access_req_queue
+            , const QueueHandle_t   single_access_resp_queue
+            , const Logger&         logger
             );
 
     // Regular single access
@@ -38,17 +37,14 @@ public:
     void create_register_access_tasks();
     void create_register_single_access_task();
 
-    const Register<DerivedRegister>* base_;
-
-protected:
-    const Logger<DerivedRegister>& logger_;
+    //const Register* base_;
 
 private:
     uintptr_t base_addr_;
     xSemaphoreHandle  mutex_;
     QueueHandle_t     single_access_req_queue_;
     QueueHandle_t     single_access_resp_queue_;
-
+    const Logger& logger_;
 
     void single_access_task();
 };

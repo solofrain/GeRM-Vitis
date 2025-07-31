@@ -1,41 +1,36 @@
 #include "FreeRTOS.h"
 
-//#include "Register.hpp"
-//#include "GermaniumRegister.hpp"
+#include "Register.hpp"
 #include "PsI2c.hpp"
 #include "PsXadc.hpp"
 //#include "Network.hpp"
 //#include "GermaniumNetwork.hpp"
 
-GermaniumNetwork::GermaniumNetwork( const QueueHandle_t              register_single_access_req_queue
-                                  , const QueueHandle_t              register_single_access_resp_queue
-                                  , const QueueHandle_t              register_multi_access_req_queue
-                                  , const QueueHandle_t              register_multi_access_resp_queue
-                                  , const QueueHandle_t              psi2c0_access_req_queue
-                                  , const QueueHandle_t              psi2c1_access_req_queue
-                                  , const QueueHandle_t              psi2c_access_resp_queue
-                                  , const QueueHandle_t              psxadc_access_req_queue
-                                  , const QueueHandle_t              psxadc_access_resp_queue
-                                  , const QueueHandle_t              ad9252_access_req_queue
-                                  , const QueueHandle_t              mars_access_req_queue
-                                  , const QueueHandle_t              zddm_access_req_queue
-                                  , const Logger<GermaniumRegister>& logger
+GermaniumNetwork::GermaniumNetwork( const QueueHandle_t   register_single_access_req_queue
+                                  , const QueueHandle_t   register_single_access_resp_queue
+                                  , const QueueHandle_t   psi2c0_access_req_queue
+                                  , const QueueHandle_t   psi2c1_access_req_queue
+                                  , const QueueHandle_t   psi2c_access_resp_queue
+                                  , const QueueHandle_t   psxadc_access_req_queue
+                                  , const QueueHandle_t   psxadc_access_resp_queue
+                                  , const QueueHandle_t   ad9252_access_req_queue
+                                  , const QueueHandle_t   mars_access_req_queue
+                                  , const QueueHandle_t   zddm_access_req_queue
+                                  , const Logger&         logger
                                   )
-                                  : Network<GermaniumNetwork, GermaniumRegister> ( logger                            )
-                                  , register_single_access_req_queue_            ( register_single_access_req_queue  )
-                                  , register_single_access_resp_queue_           ( register_single_access_resp_queue )
-                                  , register_multi_access_req_queue_             ( register_multi_access_req_queue   )
-                                  , register_multi_access_resp_queue_            ( register_multi_access_resp_queue  )
-                                  , psi2c0_access_req_queue_                     ( psi2c0_access_req_queue           )
-                                  , psi2c1_access_req_queue_                     ( psi2c1_access_req_queue           )
-                                  , psi2c_access_resp_queue_                     ( psi2c_access_resp_queue           )
-                                  , psxadc_access_req_queue_                     ( psxadc_access_req_queue           )
-                                  , psxadc_access_resp_queue_                    ( psxadc_access_resp_queue          )
-                                  , ad9252_access_resp_queue_                    ( ad9252_access_resp_queue          )
-                                  , mars_access_resp_queue_                      ( mars_access_resp_queue            )
-                                  , zddm_access_resp_queue_                      ( zddm_access_resp_queue            )
-                                  , logger_                                      ( logger                            )
-                                  , base_           ( static_cast<Network<GermaniumNetwork, GermaniumRegister>*>(this)
+                                  : Network<GermaniumNetwork>           ( logger                            )
+                                  , register_single_access_req_queue_   ( register_single_access_req_queue  )
+                                  , register_single_access_resp_queue_  ( register_single_access_resp_queue )
+                                  , psi2c0_access_req_queue_            ( psi2c0_access_req_queue           )
+                                  , psi2c1_access_req_queue_            ( psi2c1_access_req_queue           )
+                                  , psi2c_access_resp_queue_            ( psi2c_access_resp_queue           )
+                                  , psxadc_access_req_queue_            ( psxadc_access_req_queue           )
+                                  , psxadc_access_resp_queue_           ( psxadc_access_resp_queue          )
+                                  , ad9252_access_resp_queue_           ( ad9252_access_resp_queue          )
+                                  , mars_access_resp_queue_             ( mars_access_resp_queue            )
+                                  , zddm_access_resp_queue_             ( zddm_access_resp_queue            )
+                                  , logger_                             ( logger                            )
+                                  , base_           ( static_cast<Network<GermaniumNetwork>*>(this)
 {
     rx_instr_map_init();
 }
@@ -257,7 +252,6 @@ size_t GermaniumNetwork::tx_msg_proc( UdpTxMsg& msg )
     resp_queue_set = xQueueCreateSet(50);
 
     xQueueAddToSet( register_single_access_resp_queue_, resp_queue_set );
-    xQueueAddToSet( register_multi_access_resp_queue_, resp_queue_set );
     xQueueAddToSet( psi2c_resp_queue_, resp_queue_set );
     xQueueAddToSet( psxadc_resp_queue_, resp_queue_set );
 
@@ -278,17 +272,6 @@ size_t GermaniumNetwork::tx_msg_proc( UdpTxMsg& msg )
         return (4+sizeof(msg.reg_single_access_resp_data);
     }
 
-    if ( active_queue == reg_multi_access_resp_queue_ )
-    {
-        RegisterMultiAccessResp reg_multi_access_resp;
-
-        xQueueReceive( reg_multi_access_resp_queue_, &reg_multi_access_resp, 0);
-        msg.op = reg_multi_access_resp.op;
-        msg.reg_multi_access_resp_data = reg_multi_access_resp.data;
-        
-        return (4+sizeof(msg.reg_multi_access_resp_data);
-    }
-            
     if ( active_queue == psi2c_access_resp_queue )
     {
         PsI2cAccessResp psi2c_access_resp;

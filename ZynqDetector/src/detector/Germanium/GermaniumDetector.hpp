@@ -7,7 +7,6 @@
 #include "ZynqDetector.hpp"
 #include "GermaniumNetwork.hpp"
 #include "GermaniumZynq.hpp"
-#include "GermaniumRegister.hpp"
 
 #include "Ltc2309.hpp"
 #include "PsI2c.hpp"
@@ -28,7 +27,6 @@ struct germ_udp_msg_t
 class GermaniumDetector : public ZynqDetector< GermaniumDetector
                                              , GermaniumNetwork
                                              , GermaniumZynq
-                                             , GermaniumRegister
                                              >
 {
 
@@ -43,6 +41,8 @@ protected:
     QueueHandle_t psi2c_1_access_req_queue_;
     QueueHandle_t psxadc_access_req_queue_;
     QueueHandle_t ad9252_access_req_queue_;
+    QueueHandle_t mars_access_req_queue_;
+    QueueHandle_t zddm_access_req_queue_;
     //QueueHandle_t register_multi_access_req_queue_;
 
     QueueHandle_t psi2c_access_resp_queue_;
@@ -51,12 +51,12 @@ protected:
     //QueueHandle_t register_multi_access_resp_queue_;
 
 
-    std::unique_ptr<Ltc2309<PsI2c<GermaniumRegister>, GermaniumRegister>> ltc2309_0_, ltc2309_1_;
-    std::unique_ptr<Dac7678<PsI2c<GermaniumRegister>, GermaniumRegister>> dac7678_;
-    std::unique_ptr<Tmp100<PsI2c<GermaniumRegister>, GermaniumRegister>>  tmp100_0_;
-    std::unique_ptr<Tmp100<PsI2c<GermaniumRegister>, GermaniumRegister>>  tmp100_1_;
-    std::unique_ptr<Tmp100<PsI2c<GermaniumRegister>, GermaniumRegister>>  tmp100_2_;
-    std::unique_ptr<Ad9252<GermaniumRegister>>                            ad9252_;
+    std::unique_ptr<Ltc2309<PsI2c>> ltc2309_0_, ltc2309_1_;
+    std::unique_ptr<Dac7678<PsI2c>> dac7678_;
+    std::unique_ptr<Tmp100<PsI2c>>  tmp100_0_;
+    std::unique_ptr<Tmp100<PsI2c>>  tmp100_1_;
+    std::unique_ptr<Tmp100<PsI2c>>  tmp100_2_;
+    std::unique_ptr<Ad9252>         ad9252_;
 
     int num_chips_;
     int nelm_;
@@ -96,7 +96,7 @@ protected:
     //const uint16_t TEMP3 = 
 
     // DAC process map: <op, <device, channel>>
-    const std::map<uint16_t, std::pair<Dac7678<PsI2c<GermaniumRegister>, GermaniumRegister>*, uint8_t>> dac_instr_map = 
+    const std::map<uint16_t, std::pair<Dac7678<PsI2c>*, uint8_t>> dac_instr_map = 
         {
           { VL0, std::make_pair( dac7678_.get(), 0 ) },
           { VL1, std::make_pair( dac7678_.get(), 1 ) },
@@ -109,7 +109,7 @@ protected:
         };
 
     // ADC process map: <op, <device, channel>>
-    const std::map<uint16_t, std::pair<Ltc2309<PsI2c<GermaniumRegister>, GermaniumRegister>*, uint8_t>> adc_instr_map = 
+    const std::map<uint16_t, std::pair<Ltc2309<PsI2c>*, uint8_t>> adc_instr_map = 
         {
           { TEMP1,   std::make_pair( ltc2309_0_.get(), 0 ) },
           { TEMP2,   std::make_pair( ltc2309_0_.get(), 1 ) },
@@ -124,7 +124,7 @@ protected:
         };
 
     // Temperature process map: <op, <device, channel>>
-    const std::map<uint16_t, Tmp100<PsI2c<GermaniumRegister>, GermaniumRegister>*> temp_instr_map = 
+    const std::map<uint16_t, Tmp100<PsI2c>*> temp_instr_map = 
         {
           { TEMP1, tmp100_0_.get() },
           { TEMP2, tmp100_1_.get() },
@@ -156,7 +156,6 @@ public:
     ZynqDetector< GermaniumDetector
                 , GermaniumNetwork
                 , GermaniumZynq
-                , GermaniumRegister
                 >* base_;
 
 

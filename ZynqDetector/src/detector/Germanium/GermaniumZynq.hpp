@@ -23,30 +23,27 @@
 
 
 class GermaniumDetector;
-class GermaniumRegister;
 
 //=========================================
 // Zynq class
 //=========================================
-class GermaniumZynq : public Zynq<GermaniumZynq, GermaniumRegister>
+class GermaniumZynq : public Zynq<GermaniumZynq>
 {
 
 public:
-    GermaniumZynq( const QueueHandle_t              register_single_access_req_queue
-                 , const QueueHandle_t              register_single_access_resp_queue
-                 , const QueueHandle_t              register_multi_access_req_queue
-                 , const QueueHandle_t              register_multi_access_resp_queue
-                 , const QueueHandle_t              psi2c0_req_queue
-                 //, const QueueHandle_t              psi2c0_resp_queue
-                 , const QueueHandle_t              psi2c1_req_queue
-                 , const QueueHandle_t              psi2c_resp_queue
-                 //, const QueueHandle_t              psi2c1_resp_queue
-                 , const QueueHandle_t              psxadc_req_queue
-                 , const QueueHandle_t              psxadc_resp_queue
-                 , const Logger<GermaniumRegister>& logger
+    GermaniumZynq( const QueueHandle_t    register_single_access_req_queue
+                 , const QueueHandle_t    register_single_access_resp_queue
+                 , const QueueHandle_t    psi2c0_req_queue
+                 //, const QueueHandle_t    psi2c0_resp_queue
+                 , const QueueHandle_t    psi2c1_req_queue
+                 , const QueueHandle_t    psi2c_resp_queue
+                 //, const QueueHandle_t    psi2c1_resp_queue
+                 , const QueueHandle_t    psxadc_req_queue
+                 , const QueueHandle_t    psxadc_resp_queue
+                 , const Logger&          logger
                  );
 
-    Zynq<GermaniumZynq, GermaniumRegister>* base_;
+    Zynq<GermaniumZynq>* base_;
 
 //    GermaniumZynq( uintptr_t base_addr );
 
@@ -62,16 +59,16 @@ public:
 
 protected:
     //Register reg_;
-    std::unique_ptr<PsI2c<GermaniumRegister>>     psi2c0_;
-    std::unique_ptr<PsI2c<GermaniumRegister>>     psi2c1_;
-    std::unique_ptr<PsXadc<GermaniumRegister>>    psxadc_;
-    const Logger<GermaniumRegister>&              logger_;
+    std::unique_ptr<PsI2c>     psi2c0_;
+    std::unique_ptr<PsI2c>     psi2c1_;
+    std::unique_ptr<PsXadc>    psxadc_;
+    const Logger&              logger_;
 
-    //static constexpr uintptr_t REG_BASE_ADDR  = 0x43C00000;
-    //static constexpr uintptr_t PSI2C0_ADDR    = 0x43C00000;
-    //static constexpr uintptr_t PSI2C1_ADDR    = 0x43C00000;
-    //static constexpr uintptr_t XADC_ADDR      = 0xF8007100;
-    //static constexpr uint32_t  PSI2C_CLK_FREQ = 0xF8007100;
+    static constexpr uintptr_t REG_BASE_ADDR    = XPAR_IOBUS_0_BASEADDR;
+    static constexpr uintptr_t PSI2C0_BASE_ADDR = XPAR_I2C0_BASEADDR;
+    static constexpr uintptr_t PSI2C1_BASE_ADDR = XPAR_I2C1_BASEADDR;
+    static constexpr uint32_t  PSI2C0_CLK_FREQ  = XPAR_I2C0_CLOCK_FREQ;
+    static constexpr uint32_t  PSI2C1_CLK_FREQ  = XPAR_I2C1_CLOCK_FREQ;
 
     void device_access_tasks();
 

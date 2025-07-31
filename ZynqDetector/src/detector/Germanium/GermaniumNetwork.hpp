@@ -2,25 +2,21 @@
 
 #include "Network.hpp"
 
-class GermaniumRegister;
 
-class GermaniumNetwork : public Network<GermaniumNetwork, GermaniumRegister>
+class GermaniumNetwork : public Network<GermaniumNetwork>
 {
 public:
-    GermaniumNetwork( const QueueHandle_t              register_single_access_req_queue
-                    , const QueueHandle_t              register_single_access_resp_queue
-                    , const QueueHandle_t              register_multi_access_req_queue
-                    , const QueueHandle_t              register_multi_access_resp_queue
-                    , const QueueHandle_t              psi2c0_access_req_queue
-                    //, const QueueHandle_t              psi2c0_access_resp_queue
-                    , const QueueHandle_t              psi2c1_access_req_queue
-                    , const QueueHandle_t              psi2c_access_resp_queue
-                    , const QueueHandle_t              psxadc_access_req_queue
-                    , const QueueHandle_t              psxadc_access_resp_queue
-                    , const QueueHandle_t              ad9252_access_req_queue
-                    , const QueueHandle_t              mars_access_req_queue
-                    , const QueueHandle_t              zddm_access_req_queue
-                    , const Logger<GermaniumRegister>& logger
+    GermaniumNetwork( const QueueHandle_t   register_single_access_req_queue
+                    , const QueueHandle_t   register_single_access_resp_queue
+                    , const QueueHandle_t   psi2c0_access_req_queue
+                    , const QueueHandle_t   psi2c1_access_req_queue
+                    , const QueueHandle_t   psi2c_access_resp_queue
+                    , const QueueHandle_t   psxadc_access_req_queue
+                    , const QueueHandle_t   psxadc_access_resp_queue
+                    , const QueueHandle_t   ad9252_access_req_queue
+                    , const QueueHandle_t   mars_access_req_queue
+                    , const QueueHandle_t   zddm_access_req_queue
+                    , const Logger&         logger
                     );
 
     //===============================================================
@@ -77,7 +73,7 @@ public:
     static constexpr uint16_t ZDDM_ARM          = 192;
 
 
-    Network<GermaniumNetwork, GermaniumRegister>* base_;
+    Network<GermaniumNetwork>* base_;
 
     std::map<uint32_t, std::function<void(const UdpRxMsg&)>> rx_instr_map_;
     //===============================================================
@@ -176,14 +172,11 @@ protected:
 private:
 
 
-    const Logger<GermaniumRegister>& logger_;
+    const Logger&  logger_;
 
     QueueHandle_t& register_single_access_req_queue_;
     QueueHandle_t& register_single_access_resp_queue_;
-    QueueHandle_t& register_multi_access_req_queue_;
-    QueueHandle_t& register_multi_access_resp_queue_;
     QueueHandle_t& psi2c0_access_req_queue_;
-    //QueueHandle_t& psi2c0_access_resp_queue_;
     QueueHandle_t& psi2c1_access_req_queue_;
     QueueHandle_t& psi2c_access_resp_queue_;
     QueueHandle_t& psxadc_access_req_queue_;

@@ -27,9 +27,7 @@ extern "C" {
 //#include "ZynqDetector.hpp"
 #include "Logger.hpp"
 
-template < typename DerivedNetwork
-         , typename DerivedRegister
-         >
+template < typename DerivedNetwork >
 class Network
 {
 
@@ -75,12 +73,12 @@ public:
     using UdpTxMsg = UdpTxMsgStruct;
 
 
-    explicit Network( const Logger<DerivedRegister>& logger  );
+    explicit Network( const Logger& logger  );
     void network_init();
     void create_network_tasks();
 
 private:
-    const Logger<DerivedRegister>& logger_;
+    const Logger& logger_;
 
 protected:
 

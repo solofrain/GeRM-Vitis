@@ -12,11 +12,10 @@
 #include "Logger.hpp"
 #include "PsXadc.hpp"
 
-template<typename DerivedRegister>
-PsXadc<DerivedRegister>::PsXadc( const std::string                name
+PsXadc::PsXadc( const std::string                name
                                , const QueueHandle_t              req_queue
                                , const QueueHandle_t              resp_queue
-                               , const Logger<DerivedRegister>&   logger_
+                               , const Logger&   logger_
                                )
                                : name_       ( name       )
                                , req_queue_  ( req_queue  )
@@ -45,22 +44,21 @@ PsXadc<DerivedRegister>::PsXadc( const std::string                name
     XAdcPs_SetSequencerMode( &xadc_instance_ptr_, XADCPS_SEQ_MODE_SAFE) ;
 }
 
-//uint16_t PsXadc<DerivedRegister>::read_temperature()
+//uint16_t PsXadc::read_temperature()
 //{
 //    auto temperature_raw_ = XAdcPs_GetAdcData( &xadc_instance_ptr_, XADCPS_CH_TEMP );
 //    //temprature_      = XAdcPs_RawToTemperature( temperature_raw_ );
 //    return temprature_raw;
 //}
 //
-//uint16_t PsXadc<DerivedRegister>::read_vcc()
+//uint16_t PsXadc::read_vcc()
 //{
 //    vcc_raw_ = XAdcPs_GetAdcData( &xadc_instance_ptr_, XADCPS_CH_VCCINT );
 //    //vcc_     = XAdcPs_RawToVoltage( vcc_raw_ );
 //    return vcc_raw;
 //}
 
-template<typename DerivedRegister>
-void PsXadc<DerivedRegister>::task()
+void PsXadc::task()
 {
     PsXadcAccessReq  req;
     PsXadcAccessResp resp;
@@ -77,12 +75,12 @@ void PsXadc<DerivedRegister>::task()
                      , portMAX_DELAY
                      );
         
-        if ( req.op == PsXadc<DerivedRegister>::PSXADC_READ_TEMPERATURE )
+        if ( req.op == PsXadc::PSXADC_READ_TEMPERATURE )
         {
             val = XAdcPs_GetAdcData( &xadc_instance_ptr_, XADCPS_CH_TEMP );
             //read( &resp.data, req.length, req.addr );
         }
-        else if ( req.op == PsXadc<DerivedRegister>::PSXADC_READ_VCC )
+        else if ( req.op == PsXadc::PSXADC_READ_VCC )
         {
             val = XAdcPs_GetAdcData( &xadc_instance_ptr_, XADCPS_CH_VCCINT );
             //read( &resp.data, req.length, req.addr );
@@ -98,8 +96,7 @@ void PsXadc<DerivedRegister>::task()
     }
 }
 
-template<typename DerivedRegister>
-void PsXadc<DerivedRegister>::create_psxadc_task()
+void PsXadc::create_psxadc_task()
 {
     //auto task_func = std::make_unique<std::function<void()>>([this]() { task(); });
     auto task_func = new std::function<void()>([this]() { task(); });

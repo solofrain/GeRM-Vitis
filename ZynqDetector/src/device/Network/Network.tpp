@@ -30,17 +30,17 @@ extern "C" {
 #include "Logger.hpp"
 #include "task_wrap.hpp"
 
-template < typename DerivedNetwork, typename DerivedRegister >
-Network<DerivedNetwork, DerivedRegister>::Network( const Logger<DerivedRegister>& logger )
-	                                             : logger_ ( logger )
+template < typename DerivedNetwork >
+Network<DerivedNetwork>::Network( const Logger& logger )
+	                            : logger_ ( logger )
 {}
 
 //===============================================================
 // Network initialization.
 //===============================================================
 
-template < typename DerivedNetwork, typename DerivedRegister >
-void Network<DerivedNetwork, DerivedRegister>::tcpip_init_done(void *arg)
+template < typename DerivedNetwork >
+void Network<DerivedNetwork>::tcpip_init_done(void *arg)
 {
     if (arg)
     {
@@ -49,8 +49,8 @@ void Network<DerivedNetwork, DerivedRegister>::tcpip_init_done(void *arg)
 }
 
 
-template < typename DerivedNetwork, typename DerivedRegister >
-void Network<DerivedNetwork, DerivedRegister>::network_init()
+template < typename DerivedNetwork >
+void Network<DerivedNetwork>::network_init()
 {
     int setup = 0;
 
@@ -110,8 +110,8 @@ void Network<DerivedNetwork, DerivedRegister>::network_init()
 // - DNS server
 // - MAC address
 //===============================================================
-template < typename DerivedNetwork, typename DerivedRegister >
-void Network<DerivedNetwork, DerivedRegister>::read_network_config( const std::string& filename )
+template < typename DerivedNetwork >
+void Network<DerivedNetwork>::read_network_config( const std::string& filename )
 {
     FATFS fs;    // File system object
     FRESULT res; // Result code
@@ -236,8 +236,8 @@ void Network<DerivedNetwork, DerivedRegister>::read_network_config( const std::s
 //===============================================================
 // Convert a string to an IP/MAC address.
 //===============================================================
-template < typename DerivedNetwork, typename DerivedRegister >
-bool Network<DerivedNetwork, DerivedRegister>::string_to_addr(
+template < typename DerivedNetwork >
+bool Network<DerivedNetwork>::string_to_addr(
     const std::string& addr_str,
     uint8_t* addr
 )
@@ -294,8 +294,8 @@ bool Network<DerivedNetwork, DerivedRegister>::string_to_addr(
 //===============================================================
 // Create Tx and Rx tasks
 //===============================================================
-template < typename DerivedNetwork, typename DerivedRegister >
-void Network<DerivedNetwork, DerivedRegister>::create_network_tasks()
+template < typename DerivedNetwork >
+void Network<DerivedNetwork>::create_network_tasks()
 {
     auto task_func = std::make_unique<std::function<void()>>([this]() { udp_rx_task(); });
     xTaskCreate( task_wrapper, "UDP Rx", 1000, &task_func, 1, &udp_rx_task_handle_ );
@@ -308,8 +308,8 @@ void Network<DerivedNetwork, DerivedRegister>::create_network_tasks()
 //===============================================================
 // UDP receive task.
 //===============================================================
-template < typename DerivedNetwork, typename DerivedRegister >
-void Network<DerivedNetwork, DerivedRegister>::udp_rx_task()
+template < typename DerivedNetwork >
+void Network<DerivedNetwork>::udp_rx_task()
 {
     UdpRxMsg msg;
     int      msg_leng;
@@ -351,8 +351,8 @@ void Network<DerivedNetwork, DerivedRegister>::udp_rx_task()
 //===============================================================
 // UDP transmit task.
 //===============================================================
-template < typename DerivedNetwork, typename DerivedRegister >
-void Network<DerivedNetwork, DerivedRegister>::udp_tx_task()
+template < typename DerivedNetwork >
+void Network<DerivedNetwork>::udp_tx_task()
 {
     struct sockaddr_in remote_addr;
     remote_addr.sin_family = AF_INET;
@@ -387,8 +387,8 @@ void Network<DerivedNetwork, DerivedRegister>::udp_tx_task()
 //===============================================================
 // UDP Rx message processing.
 //===============================================================
-template < typename DerivedNetwork, typename DerivedRegister >
-void Network<DerivedNetwork, DerivedRegister>::rx_msg_proc( UdpRxMsg& msg )
+template < typename DerivedNetwork >
+void Network<DerivedNetwork>::rx_msg_proc( UdpRxMsg& msg )
 {
     //int instr = msg.op && 0x7FFF;
     auto it = static_cast<DerivedNetwork*>(this)->rx_instr_map_.find(((UdpRxMsg)msg).op && 0x7FFF);

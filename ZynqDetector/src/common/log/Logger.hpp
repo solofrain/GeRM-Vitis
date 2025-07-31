@@ -16,7 +16,6 @@
 #define YELLOW_TEXT "\x1b[33m"
 #define RESET_TEXT  "\x1b[0m"
 
-template<typename Reg>
 class Logger {
 public:
     enum LogType {
@@ -27,7 +26,7 @@ public:
 
     //Logger( Register& reg );
 
-    void set_register( Reg* reg_ );
+    void set_register( Register* reg_ );
 
     void set_log_control( uint8_t control );
     uint8_t read_log_control();
@@ -45,7 +44,7 @@ private:
 
     void log_va( LogType type, const char* color, const char *format, va_list args ) const;
 
-    Reg* reg_;
+    Register* reg_;
 
     uint8_t control_word_;
     xSemaphoreHandle mutex_;
@@ -62,4 +61,3 @@ private:
 };
 
 
-#include "Logger.tpp"

@@ -1,6 +1,6 @@
+#include "Ad9252.hpp"
 
-template<typename DerivedRegister>
-Ad9252::Ad9252( const DerivedRegister& reg
+Ad9252::Ad9252( const Register&        reg
               , const QueueHandle_t    ad9252_access_req_queue
               )
               : reg_              ( reg                     )
@@ -8,7 +8,6 @@ Ad9252::Ad9252( const DerivedRegister& reg
 {}
 
 
-template<typename DerivedRegister>
 void Ad9252::set_clk_skew ( int chip_num, int skew )
 {
     ad9252_cnfg( chip_num, 22, skew );  /* clock skew adjust */
@@ -16,7 +15,6 @@ void Ad9252::set_clk_skew ( int chip_num, int skew )
 }
 
 
-template<typename DerivedRegister>
 void Ad9252::ad9252_cnfg( int chip_num, int addr, int val )
 {
     int chip_sel;
@@ -46,7 +44,6 @@ void Ad9252::ad9252_cnfg( int chip_num, int addr, int val )
     reg_.multi_access_end();
 }
 
-template<typename DerivedRegister>
 void Ad9252::load_reg( int chip_sel, int addr, int val )
 {
     int i;
@@ -76,7 +73,6 @@ void Ad9252::load_reg( int chip_sel, int addr, int val )
 }
 
 
-template<typename DerivedRegister>
 void Ad9252::send_spi_bit( int chip_sel, int val )
 {
     int sda;
@@ -97,7 +93,6 @@ void Ad9252::send_spi_bit( int chip_sel, int val )
 }
 
 
-template<typename DerivedRegister>
 void Ad9252::create_device_access_task()
 {
     auto task_func = std::make_unique<std::function<void()>>([this]() { ad9252_cfg_task(); });
@@ -111,7 +106,6 @@ void Ad9252::create_device_access_task()
 }
 
 
-template<typename DerivedRegister>
 void Ad9252::ad9252_cfg_task()
 {
     Ad9252AccessReq  req;

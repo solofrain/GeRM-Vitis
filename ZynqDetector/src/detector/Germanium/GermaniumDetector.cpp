@@ -2,20 +2,23 @@
 #include <iterator>
 #include <portmacro.h>
 #include <memory>
+
 // FreeRTOS includes
 #include "FreeRTOS.h"
 //#include "msg.hpp"
 #include "task.h"
 #include "queue.h"
 #include "timers.h"
+
 // Xilinx includes
 #include "xil_printf.h"
 #include "xparameters.h"
+
 // Project includes
 #include "ZynqDetector.hpp"
 #include "GermaniumDetector.hpp"
 #include "GermaniumZynq.hpp"
-//#include "pynq_ssd_msg.hpp"
+#include "GermaniumNetwork.hpp"
 
 #define TIMER_ID 1
 #define DELAY_10_SECONDS 10000UL
@@ -42,9 +45,8 @@ GermaniumDetector::GermaniumDetector()
     : ZynqDetector< GermaniumDetector
                   , GermaniumNetwork
                   , GermaniumZynq
-                  , GermaniumRegister
                   >()
-    , ltc2309_0_ ( std::make_unique<Ltc2309<PsI2c<GermaniumRegister>, GermaniumRegister>>( /*psi2c_1_
+    , ltc2309_0_ ( std::make_unique<Ltc2309<PsI2c>>( /*psi2c_1_
                                                    , */LTC2309_0_I2C_ADDR
                                                    , true
                                                    , psi2c_1_access_req_queue_
@@ -52,7 +54,7 @@ GermaniumDetector::GermaniumDetector()
                                                    , this->logger_
                                                    )
                  )
-    , ltc2309_1_ ( std::make_unique<Ltc2309<PsI2c<GermaniumRegister>, GermaniumRegister>>( /*psi2c_1_
+    , ltc2309_1_ ( std::make_unique<Ltc2309<PsI2c>>( /*psi2c_1_
                                                    , */LTC2309_1_I2C_ADDR
                                                    , true
                                                    , psi2c_1_access_req_queue_
@@ -60,34 +62,35 @@ GermaniumDetector::GermaniumDetector()
                                                    , this->logger_
                                                    )
                  )
-    , dac7678_   ( std::make_unique<Dac7678<PsI2c<GermaniumRegister>, GermaniumRegister>>( /*psi2c_1_
+    , dac7678_   ( std::make_unique<Dac7678<PsI2c>>( /*psi2c_1_
                                                    , */DAC7678_I2C_ADDR
                                                    , psi2c_1_access_req_queue_
                                                    , chan_assign_
                                                    , this->logger_
                                                    )
                  )
-    , tmp100_0_  ( std::make_unique<Tmp100<PsI2c<GermaniumRegister>, GermaniumRegister>>( /*psi2c_0_
+    , tmp100_0_  ( std::make_unique<Tmp100<PsI2c>>( /*psi2c_0_
                                                   , */TMP100_0_I2C_ADDR
                                                   , psi2c_0_access_req_queue_
                                                   , this->logger_
                                                   )
                  )
-    , tmp100_1_  ( std::make_unique<Tmp100<PsI2c<GermaniumRegister>, GermaniumRegister>>( /*psi2c_0_
+    , tmp100_1_  ( std::make_unique<Tmp100<PsI2c>>( /*psi2c_0_
                                                   , */TMP100_1_I2C_ADDR
                                                   , psi2c_0_access_req_queue_
                                                   , this->logger_
                                                   )
                  )
-    , tmp100_2_  ( std::make_unique<Tmp100<PsI2c<GermaniumRegister>, GermaniumRegister>>( /*psi2c_0_
+    , tmp100_2_  ( std::make_unique<Tmp100<PsI2c>>( /*psi2c_0_
                                                   , */TMP100_2_I2C_ADDR
                                                   , psi2c_0_access_req_queue_
                                                   , this->logger_
                                                   )
                  )
-    , ad9252_    ( std::make_unique<Ad9252>( *this->reg_
+    , ad9252_    ( std::make_unique<Ad9252>( *this->zynq_->base_->reg_
                                            , ad9252_access_req_queue_
-                                           );
+                                           )
+                 )
 {
 
     psi2c_0_access_req_queue_ = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
@@ -107,8 +110,6 @@ GermaniumDetector::GermaniumDetector()
 
     auto z = std::make_unique<GermaniumZynq>( register_single_access_req_queue_
                                             , register_single_access_resp_queue_
-                                            , register_multi_access_req_queue_
-                                            , register_multi_access_resp_queue_
                                             , psi2c_0_access_req_queue_
                                             //, psi2c_0_access_resp_queue_
                                             , psi2c_1_access_req_queue_
@@ -122,8 +123,6 @@ GermaniumDetector::GermaniumDetector()
 
     auto n = std::make_unique<GermaniumNetwork>( register_single_access_req_queue_
                                                , register_single_access_resp_queue_
-                                               , register_multi_access_req_queue_
-                                               , register_multi_access_resp_queue_
                                                , psi2c_0_access_req_queue_
                                                //, psi2c_0_access_resp_queue_
                                                , psi2c_1_access_req_queue_
@@ -386,8 +385,8 @@ void GermaniumDetector::create_device_access_tasks()
 //===============================================================
 void GermaniumDetector::latch_conf()
 {
-    this->zynq_->base_->reg_->write( GermaniumRegister::MARS_CONF_LOAD, 2 );
-    this->zynq_->base_->reg_->write( GermaniumRegister::MARS_CONF_LOAD, 0 );
+    this->zynq_->base_->reg_->write( GermaniumNetwork::MARS_CONF_LOAD, 2 );
+    this->zynq_->base_->reg_->write( GermaniumNetwork::MARS_CONF_LOAD, 0 );
 }
 //===============================================================
 
@@ -399,18 +398,18 @@ void GermaniumDetector::stuff_mars()
 {
     for ( int i = 0; i < 12; i++ )
     {
-        this->zynq_->base_->reg_->write( GermaniumRegister::MARS_CONF_LOAD, 4 );
-        this->zynq_->base_->reg_->write( GermaniumRegister::MARS_CONF_LOAD, 0 );
+        this->zynq_->base_->reg_->write( GermaniumNetwork::MARS_CONF_LOAD, 4 );
+        this->zynq_->base_->reg_->write( GermaniumNetwork::MARS_CONF_LOAD, 0 );
 
         for ( int j = 0; j < 14; j++ )
         {
-            this->zynq_->base_->reg_->write( GermaniumRegister::MARS_CONF_LOAD, loads_[i][j] );
+            this->zynq_->base_->reg_->write( GermaniumNetwork::MARS_CONF_LOAD, loads_[i][j] );
             latch_conf();
             vTaskDelay(pdMS_TO_TICKS(1));;
         }
 
-        this->zynq_->base_->reg_->write( GermaniumRegister::MARS_CONF_LOAD, 0x00010000 << i );
-        this->zynq_->base_->reg_->write( GermaniumRegister::MARS_CONF_LOAD, 0 );
+        this->zynq_->base_->reg_->write( GermaniumNetwork::MARS_CONF_LOAD, 0x00010000 << i );
+        this->zynq_->base_->reg_->write( GermaniumNetwork::MARS_CONF_LOAD, 0 );
         vTaskDelay(pdMS_TO_TICKS(1));
     }
 }
@@ -430,19 +429,19 @@ void GermaniumDetector::send_spi_bit( int chip_sel, int val )
     sda = val & 0x1;
 
     // set sclk low
-    this->zynq_->base_->reg_->write( GermaniumRegister::ADC_SPI, (chip_sel | 0) );
+    this->zynq_->base_->reg_->write( GermaniumNetwork::ADC_SPI, (chip_sel | 0) );
 
     // set data with clock low
-    this->zynq_->base_->reg_->write( GermaniumRegister::ADC_SPI, (chip_sel | sda) );
+    this->zynq_->base_->reg_->write( GermaniumNetwork::ADC_SPI, (chip_sel | sda) );
 
     // set clk high
-    this->zynq_->base_->reg_->write( GermaniumRegister::ADC_SPI, (chip_sel | 0x2 | sda) );
+    this->zynq_->base_->reg_->write( GermaniumNetwork::ADC_SPI, (chip_sel | 0x2 | sda) );
 
     // set clk low
-    this->zynq_->base_->reg_->write( GermaniumRegister::ADC_SPI, (chip_sel | sda) );
+    this->zynq_->base_->reg_->write( GermaniumNetwork::ADC_SPI, (chip_sel | sda) );
 
     // set data low
-    this->zynq_->base_->reg_->write( GermaniumRegister::ADC_SPI, (chip_sel | 0) );
+    this->zynq_->base_->reg_->write( GermaniumNetwork::ADC_SPI, (chip_sel | 0) );
 }
 //===============================================================
 
@@ -481,38 +480,6 @@ void GermaniumDetector::load_ad9252reg( int chip_sel, int addr, int data )
 //===============================================================
 
 
-//===============================================================
-// Configure AD9252.
-//===============================================================
-int GermaniumDetector::ad9252_cfg( int chip_num, int addr, int data )
-{
-
-    int chip_sel;
-
-    switch( chip_num )
-    {
-        case 1:
-            chip_sel = 0b11000;
-            break;
-        case 2:
-            chip_sel = 0b10100;
-            break;
-        case 3:
-            chip_sel = 0b01100;
-            break;
-        default:
-            chip_sel = 0b00000;
-    }
-
-    // Assert CSB
-    this->zynq_->base_->reg_->write( GermaniumRegister::ADC_SPI, chip_sel );
-    load_ad9252reg( chip_sel, addr, data) ;
-    this->zynq_->base_->reg_->write( GermaniumRegister::ADC_SPI, 0b11100 );
-
-    return (0);
-}
-//===============================================================
-
 
 //===============================================================
 // Arm.
@@ -525,12 +492,12 @@ void GermaniumDetector::zddm_arm( int mode, int val )
     {
         if ( val == 1 )
         {
-            resp.data = this->zynq_->base_->reg_->read( GermaniumRegister::FRAME_NO );
-            this->zynq_->base_->reg_->write( GermaniumRegister::TRIG, val );
+            resp.data = this->zynq_->base_->reg_->read( GermaniumNetwork::FRAME_NO );
+            this->zynq_->base_->reg_->write( GermaniumNetwork::TRIG, val );
         }
         if ( val == 0 )
         {
-            static_cast<GermaniumZynq*>(this->zynq_.get())->base_->reg_->write( GermaniumRegister::TRIG, val );
+            static_cast<GermaniumZynq*>(this->zynq_.get())->base_->reg_->write( GermaniumNetwork::TRIG, val );
         }
     }
 
@@ -539,11 +506,11 @@ void GermaniumDetector::zddm_arm( int mode, int val )
         if ( val == 1 )
         {
             RegisterSingleAccessResp resp;
-            resp.data = this->zynq_->base_->reg_->read( GermaniumRegister::FRAME_NO );
+            resp.data = this->zynq_->base_->reg_->read( GermaniumNetwork::FRAME_NO );
         }
         if ( val == 0 )
         {
-            this->zynq_->base_->reg_->write( GermaniumRegister::TRIG, val );
+            this->zynq_->base_->reg_->write( GermaniumNetwork::TRIG, val );
         }
     }
 }

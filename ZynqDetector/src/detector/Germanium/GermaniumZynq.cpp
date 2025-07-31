@@ -13,7 +13,6 @@
 #include "Register.hpp"
 #include "Zynq.hpp"
 #include "GermaniumZynq.hpp"
-#include "GermaniumRegister.hpp"
 
 
 //###################################################
@@ -26,60 +25,47 @@
 GermaniumZynq::GermaniumZynq
     ( const QueueHandle_t              register_single_access_req_queue
     , const QueueHandle_t              register_single_access_resp_queue
-    , const QueueHandle_t              register_multi_access_req_queue
-    , const QueueHandle_t              register_multi_access_resp_queue
     , const QueueHandle_t              psi2c0_req_queue
     //, const QueueHandle_t              psi2c0_resp_queue
     , const QueueHandle_t              psi2c1_req_queue
     , const QueueHandle_t              psi2c_resp_queue
     , const QueueHandle_t              psxadc_req_queue
     , const QueueHandle_t              psxadc_resp_queue
-    , const Logger<GermaniumRegister>& logger
+    , const Logger&                    logger
     )
-    : Zynq< GermaniumZynq
-          , GermaniumRegister
-          >
-          ( XPAR_IOBUS_0_BASEADDR
+    : Zynq< GermaniumZynq >
+          ( REG_BASE_ADDR
           , register_single_access_req_queue
           , register_single_access_resp_queue
           , logger
           )
-    , base_  ( static_cast<Zynq<GermaniumZynq, GermaniumRegister>*>(this) )
-    , psi2c0_( std::make_unique<PsI2c<GermaniumRegister>>( 0
+    , base_  ( static_cast<Zynq<GermaniumZynq>*>(this) )
+    , psi2c0_( std::make_unique<PsI2c>( 0
                                       , "psi2c0"
-                                      , XPAR_I2C0_BASEADDR
-                                      , XPAR_I2C0_CLOCK_FREQ
+                                      , PSI2C0_BASE_ADDR
+                                      , PSI2C0_CLK_FREQ
                                       , psi2c0_req_queue
                                       , psi2c_resp_queue
                                       , logger
                                       )
              )
-    , psi2c1_( std::make_unique<PsI2c<GermaniumRegister>>( 1
+    , psi2c1_( std::make_unique<PsI2c>( 1
                                       , "psi2c1"
-                                      , XPAR_I2C1_BASEADDR
-                                      , XPAR_I2C1_CLOCK_FREQ
+                                      , PSI2C1_BASE_ADDR
+                                      , PSI2C1_CLK_FREQ
                                       , psi2c1_req_queue
                                       , psi2c_resp_queue
                                       , logger
                                       )
              )
-    , psxadc_( std::make_unique<PsXadc<GermaniumRegister>>( "psxadc"
+    , psxadc_( std::make_unique<PsXadc>( "psxadc"
                                        , psxadc_req_queue
                                        , psxadc_resp_queue
                                        , logger
                                        )
              )
     , logger_ ( logger )
-{
-    auto r = std::make_unique<GermaniumRegister>( XPAR_IOBUS_0_BASEADDR
-                                                , register_single_access_req_queue
-                                                , register_single_access_resp_queue
-                                                , register_multi_access_req_queue
-                                                , register_multi_access_resp_queue
-                                                , logger
-                                                );
-    this->set_register( std::move(r) );
-}
+{}
 
 
 

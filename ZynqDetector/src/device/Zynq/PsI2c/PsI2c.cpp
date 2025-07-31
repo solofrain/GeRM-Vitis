@@ -7,9 +7,9 @@
 
 #include "task_wrap.hpp"
 #include "queue.hpp"
+#include "PsI2c.hpp"
 
-template<typename DerivedRegister>
-PsI2c<DerivedRegister>::PsI2c
+PsI2c::PsI2c
     ( const uint8_t       bus_index
     , const std::string   name
     //, const uint32_t      device_id
@@ -17,7 +17,7 @@ PsI2c<DerivedRegister>::PsI2c
     , const uint32_t      clk_freq
     , const QueueHandle_t req_queue
     , const QueueHandle_t resp_queue
-    , const Logger<DerivedRegister>& logger
+    , const Logger& logger
     )
     : bus_index_  ( bus_index  )
     , name_       ( name       )
@@ -75,8 +75,7 @@ PsI2c<DerivedRegister>::PsI2c
 //=========================================
 // Write to I2C bus.
 //=========================================
-template<typename DerivedRegister>
-int PsI2c<DerivedRegister>::write( char* buffer, uint16_t length, uint16_t slave_address )
+int PsI2c::write( char* buffer, uint16_t length, uint16_t slave_address )
 {
     int status = XST_SUCCESS;
 
@@ -98,8 +97,7 @@ int PsI2c<DerivedRegister>::write( char* buffer, uint16_t length, uint16_t slave
 //=========================================
 // Read from I2C bus.
 //=========================================
-template<typename DerivedRegister>
-int PsI2c<DerivedRegister>::read( char* buffer, uint16_t length, uint16_t slave_address ) 
+int PsI2c::read( char* buffer, uint16_t length, uint16_t slave_address ) 
 {
     int status = XST_SUCCESS;
 
@@ -119,8 +117,7 @@ int PsI2c<DerivedRegister>::read( char* buffer, uint16_t length, uint16_t slave_
 }
 
 
-template<typename DerivedRegister>
-void PsI2c<DerivedRegister>::task()
+void PsI2c::task()
 {
     PsI2cAccessReq  req;
     PsI2cAccessResp resp;
@@ -151,8 +148,7 @@ void PsI2c<DerivedRegister>::task()
     }
 }
 
-template<typename DerivedRegister>
-void PsI2c<DerivedRegister>::create_psi2c_task()
+void PsI2c::create_psi2c_task()
 {
     auto task_func = std::make_unique<std::function<void()>>([this]() { task(); });
     xTaskCreate( task_wrapper

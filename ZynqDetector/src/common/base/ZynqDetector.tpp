@@ -50,24 +50,20 @@ static StaticQueue_t xStaticQueue;
 template< typename DerivedDetector
         , typename DerivedNetwork
         , typename DerivedZynq
-        , typename DerivedRegister
         >
 ZynqDetector< DerivedDetector
             , DerivedNetwork
             , DerivedZynq
-            , DerivedRegister
             >::ZynqDetector()
 {}
 
 template< typename DerivedDetector
         , typename DerivedNetwork
         , typename DerivedZynq
-        , typename DerivedRegister
         >
 void ZynqDetector< DerivedDetector
                  , DerivedNetwork
                  , DerivedZynq
-                 , DerivedRegister
                  >::set_zynq(std::unique_ptr<DerivedZynq> z)
 {
     zynq_ = std::move(z);
@@ -76,12 +72,10 @@ void ZynqDetector< DerivedDetector
 template< typename DerivedDetector
         , typename DerivedNetwork
         , typename DerivedZynq
-        , typename DerivedRegister
         >
 void ZynqDetector< DerivedDetector
                  , DerivedNetwork
                  , DerivedZynq
-                 , DerivedRegister
                  >::set_network(std::unique_ptr<DerivedNetwork> n)
 {
     network_ = std::move(n);
@@ -136,12 +130,10 @@ ZynqDetector::ZynqDetector( void )
 //template< typename DerivedDetector
 //        , typename DerivedNetwork
 //        , typename DerivedZynq
-//        , typename DerivedRegister
 //        >
 //void ZynqDetector< DerivedDetector
 //                 , DerivedNetwork
 //                 , DerivedZynq
-//                 , DerivedRegister
 //                 >::register_single_access_request_process( udp_rx_msg_t& msg )
 //{
 //    fast_access_req_t req;
@@ -171,12 +163,10 @@ ZynqDetector::ZynqDetector( void )
 //template< typename DerivedDetector
 //        , typename DerivedNetwork
 //        , typename DerivedZynq
-//        , typename DerivedRegister
 //        >
 //void ZynqDetector< DerivedDetector
 //                 , DerivedNetwork
 //                 , DerivedZynq
-//                 , DerivedRegister
 //                 >::network_init( std::unique_ptr<DerivedNetwork> network )
 //{
 //    network_ = std::move( network );
@@ -190,12 +180,10 @@ ZynqDetector::ZynqDetector( void )
 template< typename DerivedDetector
         , typename DerivedNetwork
         , typename DerivedZynq
-        , typename DerivedRegister
         >
 void ZynqDetector< DerivedDetector
                  , DerivedNetwork
                  , DerivedZynq
-                 , DerivedRegister
                  >::task_init()
 {
     create_network_tasks();
@@ -210,12 +198,10 @@ void ZynqDetector< DerivedDetector
 template< typename DerivedDetector
         , typename DerivedNetwork
         , typename DerivedZynq
-        , typename DerivedRegister
         >
 void ZynqDetector< DerivedDetector
                  , DerivedNetwork
                  , DerivedZynq
-                 , DerivedRegister
                  >::create_network_tasks()
 {
     network_->base_->create_network_tasks();
@@ -228,12 +214,10 @@ void ZynqDetector< DerivedDetector
 template< typename DerivedDetector
         , typename DerivedNetwork
         , typename DerivedZynq
-        , typename DerivedRegister
         >
 void ZynqDetector< DerivedDetector
                  , DerivedNetwork
                  , DerivedZynq
-                 , DerivedRegister
                  >::create_device_access_tasks()
 {
     zynq_->base_->create_device_access_tasks();

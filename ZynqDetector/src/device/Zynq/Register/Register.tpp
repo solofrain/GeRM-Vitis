@@ -10,13 +10,12 @@
 //=========================================
 // Register class
 //=========================================
-template< typename DerivedRegister >
-Register<DerivedRegister>::Register
+Register::Register
     (
       uintptr_t            base_addr
     , const QueueHandle_t  single_access_req_queue
     , const QueueHandle_t  single_access_resp_queue
-    , const Logger<DerivedRegister>&   logger
+    , const Logger&        logger
     )
     : base_addr_ ( static_cast<uintptr_t>( base_addr )              )
     , single_access_req_queue_           ( single_access_req_queue  )
@@ -33,8 +32,7 @@ Register<DerivedRegister>::Register
 //=========================================
 // Register single access
 //=========================================
-template< typename DerivedRegister >
-void Register<DerivedRegister>::write( uint32_t offset, uint32_t value )
+void Register::write( uint32_t offset, uint32_t value )
 {
     if ( xSemaphoreTake( mutex_, portMAX_DELAY ) == pdTRUE )
     {
@@ -43,8 +41,7 @@ void Register<DerivedRegister>::write( uint32_t offset, uint32_t value )
     }
 }
     
-template< typename DerivedRegister >
-uint32_t Register<DerivedRegister>::read( uint32_t offset )
+uint32_t Register::read( uint32_t offset )
 {
     uint32_t value = 0;
     if ( xSemaphoreTake( mutex_, portMAX_DELAY ) == pdTRUE )
@@ -55,8 +52,7 @@ uint32_t Register<DerivedRegister>::read( uint32_t offset )
     return value;
 }
 
-template< typename DerivedRegister >
-void Register<DerivedRegister>::set_status( uint32_t status )
+void Register::set_status( uint32_t status )
 {
     write( 0xC, status );
 }
@@ -64,33 +60,28 @@ void Register<DerivedRegister>::set_status( uint32_t status )
 //=========================================
 // Register multiple access
 //=========================================
-template< typename DerivedRegister >
-void Register<DerivedRegister>::multi_access_start()
+void Register::multi_access_start()
 {
     while( xSemaphoreTake( mutex_, portMAX_DELAY ) == pdFALSE );
 }
 
-template< typename DerivedRegister >
-void Register<DerivedRegister>::multi_access_write( uint32_t offset, uint32_t value )
+void Register::multi_access_write( uint32_t offset, uint32_t value )
 {
     *(volatile uint32_t*)(base_addr_ + offset/4) = value;
 }
     
-template< typename DerivedRegister >
-uint32_t Register<DerivedRegister>::multi_access_read( uint32_t offset )
+uint32_t Register::multi_access_read( uint32_t offset )
 {
     return *(volatile uint32_t*)(base_addr_ + offset/4);
 }
 
-template< typename DerivedRegister >
-void Register<DerivedRegister>::multi_access_end()
+void Register::multi_access_end()
 {
     xSemaphoreGive( mutex_ );
 }
 
 
-template< typename DerivedRegister >
-void Register<DerivedRegister>::single_access_task()
+void Register::single_access_task()
 {
     RegisterSingleAccessReq  req;
     RegisterSingleAccessResp resp;
@@ -124,15 +115,12 @@ void Register<DerivedRegister>::single_access_task()
 }
 
 
-template< typename DerivedRegister >
-void Register<DerivedRegister>::create_register_access_tasks()
+void Register::create_register_access_tasks()
 {
     create_register_single_access_task();
-    static_cast<DerivedRegister*>(this)->create_register_access_tasks_special();
 }
 
-template< typename DerivedRegister >
-void Register<DerivedRegister>::create_register_single_access_task()
+void Register::create_register_single_access_task()
 {
     auto task_func = std::make_unique<std::function<void()>>([this]() { single_access_task(); });
     xTaskCreate( task_wrapper, "Register Single Access", 1000, &task_func, 1, NULL );

@@ -10,6 +10,7 @@
 
 #include "Logger.hpp"
 #include "PsI2c.hpp"
+#include "Register.hpp"
 //#include "PlInterface.hpp"
 
 #define __FREERTOS__
@@ -25,9 +26,7 @@
 //=========================================
 // Zynq class
 //=========================================
-template < typename DerivedZynq
-         , typename DerivedRegister
-         >
+template < typename DerivedZynq >
 class Zynq
 {
 private:
@@ -35,20 +34,20 @@ private:
     const QueueHandle_t  register_single_access_req_queue_;
     const QueueHandle_t  register_single_access_resp_queue_;
 
-    std::vector<PsI2c<DerivedRegister>> ps_i2cs_;
-    const Logger<DerivedRegister>&      logger_;
+    std::vector<PsI2c> ps_i2cs_;
+    const Logger&      logger_;
 
 public:
 
-    Zynq( uintptr_t                       base_addr
-        , const QueueHandle_t             register_single_access_req_queu
-        , const QueueHandle_t             register_single_access_resp_queu
-        , const Logger<DerivedRegister>&  logger
+    Zynq( uintptr_t            base_addr
+        , const QueueHandle_t  register_single_access_req_queu
+        , const QueueHandle_t  register_single_access_resp_queu
+        , const Logger&        logger
         );
 
-    std::unique_ptr<DerivedRegister>    reg_ = nullptr;
+    std::unique_ptr<Register>    reg_ = nullptr;
 
-    void set_register( std::unique_ptr<DerivedRegister> z );
+    void set_register( std::unique_ptr<Register> z );
 
     //auto add_pl_i2c( const std::string& name, uint32_t instr_reg, uint32_t data_reg );
     //auto add_pl_spi( const std::string& name, uint32_t instr_reg, uint32_t data_reg );

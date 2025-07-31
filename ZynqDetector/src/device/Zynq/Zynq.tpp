@@ -20,27 +20,23 @@
 
 
 //-----------------------------------------
-template < typename DerivedZynq
-         , typename DerivedRegister
-         >
-Zynq<DerivedZynq, DerivedRegister>::Zynq
-    ( uintptr_t                      base_addr
-    , const QueueHandle_t            register_single_access_req_queue
-    , const QueueHandle_t            register_single_access_resp_queue
-    , const Logger<DerivedRegister>& logger
+template < typename DerivedZynq >
+Zynq<DerivedZynq>::Zynq
+    ( uintptr_t            base_addr
+    , const QueueHandle_t  register_single_access_req_queue
+    , const QueueHandle_t  register_single_access_resp_queue
+    , const Logger&        logger
     )
-    : register_single_access_req_queue_ ( register_single_access_req_queue   )
+    : reg_ ( std::make_unique<Register>( base_addr
+                                       , register_single_access_req_queue
+                                       , register_single_access_resp_queue
+                                       , logger
+                                       )
+           )
+    , register_single_access_req_queue_  ( register_single_access_req_queue  )
     , register_single_access_resp_queue_ ( register_single_access_resp_queue )
-    , logger_ ( logger )
-{}
-
-
-template < typename DerivedZynq
-         , typename DerivedRegister
-         >
-void Zynq<DerivedZynq, DerivedRegister>::set_register( std::unique_ptr<DerivedRegister> reg )
+    , logger_                            ( logger                            )
 {
-    reg_ = std::move( reg );
 }
 
 
@@ -66,10 +62,8 @@ void Zynq::add_pl_spi( const std::string& name
 }
 */
 
-template < typename DerivedZynq
-         , typename DerivedRegister
-         >
-auto Zynq<DerivedZynq, DerivedRegister>::add_ps_i2c_interface
+template < typename DerivedZynq >
+auto Zynq<DerivedZynq>::add_ps_i2c_interface
     (
         uint8_t       bus_index,
         std::string   name,
@@ -105,13 +99,11 @@ auto Zynq<DerivedZynq, DerivedRegister>::add_ps_i2c_interface
 //=========================================
 
 
-template < typename DerivedZynq
-         , typename DerivedRegister
-         >
-void Zynq<DerivedZynq, DerivedRegister>::create_device_access_tasks()
+template < typename DerivedZynq >
+void Zynq<DerivedZynq>::create_device_access_tasks()
 {
     // Create register access tasks
-    reg_->base_->create_register_access_tasks();
+    reg_->create_register_access_tasks();
 
     // Create derived class specific tasks
     static_cast<DerivedZynq*>(this)->create_device_access_tasks_special();

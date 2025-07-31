@@ -26,7 +26,6 @@
 template< typename DerivedDetector
         , typename DerivedNetwork
         , typename DerivedZynq
-        , typename DerivedRegister
         >
 class ZynqDetector
 {
@@ -125,7 +124,7 @@ protected:
     
 
 public:
-    Logger<DerivedRegister> logger_;
+    Logger logger_;
 
     ZynqDetector();
     ~ZynqDetector();
