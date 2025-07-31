@@ -1,9 +1,8 @@
-#pragma once
-
 #include "xil_printf.h"
 #include <cstdarg>
 #include <cstdio>
 
+#include "Register.hpp"
 #include "Logger.hpp"
 
 //Logger::Logger( Register& reg )

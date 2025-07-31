@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Network.hpp"
-
+#include "PsI2c.hpp"
+#include "PsXadc.hpp"
 
 class GermaniumNetwork : public Network<GermaniumNetwork>
 {
@@ -40,7 +41,7 @@ public:
     static constexpr uint16_t TD_CAL            = 20;
     static constexpr uint16_t EVENT_FIFO_DATA   = 24;
     static constexpr uint16_t EVENT_FIFO_CNT    = 25;
-    static constexpr uint16_t EVENT_FIFO_CNTRL  = 26;
+    static constexpr uint16_t EVENT_FIFO_CTRL   = 26;
     static constexpr uint16_t DMA_CONTROL       = 32;
     static constexpr uint16_t DMA_STATUS        = 33;
     static constexpr uint16_t DMA_BASEADDR      = 34;
@@ -56,7 +57,7 @@ public:
     static constexpr uint16_t COUNT_TIME        = 53;
     static constexpr uint16_t FRAME_NO          = 54;
     static constexpr uint16_t COUNT_MODE        = 55;
-    static constexpr uint16_t UPDATE_LOADS      = 100;
+    //static constexpr uint16_t UPDATE_LOADS      = 100;
     //static constexpr uint16_t STUFF_MARS        = 101;
     //static constexpr uint16_t AD9252_CNFG       = 102;
     //static constexpr uint16_t ZDDM_ARM          = 103;
@@ -65,13 +66,16 @@ public:
     static constexpr uint16_t TEMP1             = 160;  // Temperature 1
     static constexpr uint16_t TEMP2             = 161;  // Temperature 2
     static constexpr uint16_t TEMP3             = 162;  // Temperature 3
-    static constexpr uint16_t ZTEP              = 170;  // CPU temperature
+    static constexpr uint16_t ZTEMP             = 170;  // CPU temperature
     static constexpr uint16_t DAC_INT_REF       = 180;  // Dac7678 internal reference
 
     static constexpr uint16_t STUFF_MARS        = 190;
     static constexpr uint16_t ADC_CLK_SKEW      = 191;
     static constexpr uint16_t ZDDM_ARM          = 192;
 
+    static constexpr uint16_t DETECTOR_TYPE     = 193;
+    static constexpr uint16_t COUNT_TIME_LO     = 194;
+    static constexpr uint16_t COUNT_TIME_HI     = 195;
 
     Network<GermaniumNetwork>* base_;
 
@@ -79,6 +83,7 @@ public:
     //===============================================================
     // Data types
     //===============================================================
+    //-----------------------------
     struct __attribute__((__packed__)) Ad9252CfgStruct
     {
         uint16_t  chip_num;
@@ -105,12 +110,12 @@ public:
     //-----------------------------
     union UdpRxMsgPayloadStruct
     {
-        uint32_t   reg_single_acc_req_data;
-        ZddmArm    zddm_arm_data;
-        Ad9252Cfg  ad9252_cfg_data;
-        MarsLoad   mars_load_data;
-        uint32_t   i2c_acc_req_data;
-        uint32_t   xadc_acc_req_data;
+        RegisterSingleAccessReq  reg_single_acc_req;
+        PsI2cAccessReq           psi2c_access_req;
+        PsXadcAccessReq          psxadc_access_req;
+        ZddmArm                  zddm_arm_data;
+        Ad9252Cfg                ad9252_cfg_data;
+        MarsLoad                 mars_load_data;
     };
     using UdpRxMsgPayload = UdpRxMsgPayloadStruct;
     //-----------------------------
@@ -122,26 +127,44 @@ public:
     //};
     //using UdpRxMsg = UdpRxMsgStruct;
     //-----------------------------
-    union RegisterMultiAccessRequestDataStruct
-    {
-        ZddmArm    zddm_arm_data;
-        Ad9252Cfg  ad9252_cfg_data;
-    };
-    using RegisterMultiAccessRequestData = RegisterMultiAccessRequestDataStruct;
+    //union RegisterMultiAccessRequestDataStruct
+    //{
+    //    ZddmArm    zddm_arm_data;
+    //    Ad9252Cfg  ad9252_cfg_data;
+    //};
+    //using RegisterMultiAccessRequestData = RegisterMultiAccessRequestDataStruct;
     //-----------------------------
-    struct RegisterMultiAccessRequestStruct
+    //struct RegisterMultiAccessRequestStruct
+    //{
+    //    uint16_t                       op;
+    //    RegisterMultiAccessRequestData data;
+    //};
+    //using RegisterMultiAccessRequest = RegisterMultiAccessRequestStruct;
+    ////-----------------------------
+    struct RegisterSingleAccessRespStruct
     {
-        uint16_t                       op;
-        RegisterMultiAccessRequestData data;
+        uint32_t data;
     };
-    using RegisterMultiAccessRequest = RegisterMultiAccessRequestStruct;
+    using RegisterSingleAccessResp = RegisterSingleAccessReqStruct;
+    //-----------------------------
+    struct PsI2cAccessRespStruct
+    {
+        uint32_t data;
+    };
+    using PsI2cAccessResp = PsI2cAccessReqStruct;
+    //-----------------------------
+    struct PsXadcAccessRespStruct
+    {
+        uint32_t data;
+    };
+    using PsXadcAccessResp = PsXadcAccessReqStruct;
     //-----------------------------
     union UdpTxMsgPayloadStruct
     {
-        uint32_t  register_single_access_response_data;
-        uint32_t  register_multi_access_response_data;
-        uint32_t  psi2c_access_response_data;
-        uint32_t  psxadc_access_response_data;
+        uint32_t  register_single_access_resp_data;
+        uint32_t  register_multi_access_resp_data;
+        uint32_t  psi2c_access_resp_data;
+        uint32_t  psxadc_access_resp_data;
     };
     using UdpTxMsgPayload = UdpTxMsgPayloadStruct;
 
@@ -171,19 +194,19 @@ protected:
 
 private:
 
+    const QueueHandle_t& register_single_access_req_queue_;
+    const QueueHandle_t& register_single_access_resp_queue_;
+    const QueueHandle_t& psi2c0_access_req_queue_;
+    const QueueHandle_t& psi2c1_access_req_queue_;
+    const QueueHandle_t& psi2c_access_resp_queue_;
+    const QueueHandle_t& psxadc_access_req_queue_;
+    const QueueHandle_t& psxadc_access_resp_queue_;
+    const QueueHandle_t& ad9252_access_req_queue_;
+    const QueueHandle_t& mars_access_req_queue_;
+    const QueueHandle_t& zddm_access_req_queue_;
 
     const Logger&  logger_;
 
-    QueueHandle_t& register_single_access_req_queue_;
-    QueueHandle_t& register_single_access_resp_queue_;
-    QueueHandle_t& psi2c0_access_req_queue_;
-    QueueHandle_t& psi2c1_access_req_queue_;
-    QueueHandle_t& psi2c_access_resp_queue_;
-    QueueHandle_t& psxadc_access_req_queue_;
-    QueueHandle_t& psxadc_access_resp_queue_;
-    QueueHandle_t& ad9252_access_req_queue_;
-    QueueHandle_t& mars_access_req_queue_;
-    QueueHandle_t& zddm_access_req_queue_;
 };
 
 

@@ -12,15 +12,15 @@
 #include "Logger.hpp"
 #include "PsXadc.hpp"
 
-PsXadc::PsXadc( const std::string                name
-                               , const QueueHandle_t              req_queue
-                               , const QueueHandle_t              resp_queue
-                               , const Logger&   logger_
-                               )
-                               : name_       ( name       )
-                               , req_queue_  ( req_queue  )
-                               , resp_queue_ ( resp_queue )
-                               , logger_     ( logger     )
+PsXadc::PsXadc( const std::string    name
+              , const QueueHandle_t  req_queue
+              , const QueueHandle_t  resp_queue
+              , const Logger&        logger
+              )
+              : name_       ( name       )
+              , req_queue_  ( req_queue  )
+              , resp_queue_ ( resp_queue )
+              , logger_     ( logger     )
 {
     int status;
     

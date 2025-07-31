@@ -13,6 +13,8 @@
 #include "Dac7678.hpp"
 #include "Tmp100.hpp"
 #include "Ad9252.hpp"
+#include "Mars.hpp"
+#include "Zddm.hpp"
 
 
 // const uint16_t LKUPADDRREG       = ?;
@@ -56,7 +58,10 @@ protected:
     std::unique_ptr<Tmp100<PsI2c>>  tmp100_0_;
     std::unique_ptr<Tmp100<PsI2c>>  tmp100_1_;
     std::unique_ptr<Tmp100<PsI2c>>  tmp100_2_;
-    std::unique_ptr<Ad9252>         ad9252_;
+
+    std::unique_ptr<Ad9252<GermaniumNetwork>>  ad9252_;
+    std::unique_ptr<Mars<GermaniumNetwork>>    mars_;
+    std::unique_ptr<Zddm<GermaniumNetwork>>    zddm_;
 
     int num_chips_;
     int nelm_;
