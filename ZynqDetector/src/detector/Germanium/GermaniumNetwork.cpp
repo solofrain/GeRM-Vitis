@@ -97,7 +97,7 @@ void GermaniumNetwork::proc_register_single_access_msg( const UdpRxMsg& msg )
 {
     RegisterSingleAccessReq req;
     req.op = msg.op;
-    req.data = msg.payload.reg_single_acc_req;
+    req.data = msg.payload.single_word.data;
 
     xQueueSend( register_single_access_req_queue_
               , &req
@@ -114,8 +114,9 @@ void GermaniumNetwork::proc_register_single_access_msg( const UdpRxMsg& msg )
 void GermaniumNetwork::proc_ad9252_access_msg( const UdpRxMsg& msg )
 {
     Ad9252AccessReq req;
-    req.chip_num = msg.payload.ad9252_cfg_data.chip_num;
-    req.data     = msg.payload.ad9252_cfg_data.data;
+    req.op       = msg.op;
+    req.chip_num = msg.payload.ad9252_clk_skew.chip_num;
+    req.data     = msg.payload.ad9252_clk_skew.skew;
 
     xQueueSend( ad9252_access_req_queue_
               , &req
@@ -130,7 +131,7 @@ void GermaniumNetwork::proc_ad9252_access_msg( const UdpRxMsg& msg )
 void GermaniumNetwork::proc_mars_access_msg( const UdpRxMsg& msg )
 {
     MarsAccessReq req;
-    std::memcpy( req.loads, msg.payload.mars_load_data.loads, sizeof(req.loads) );
+    std::memcpy( req.loads, msg.payload.stuff_mars.loads, sizeof(req.loads) );
 
     xQueueSend( mars_access_req_queue_
               , &req
@@ -145,8 +146,8 @@ void GermaniumNetwork::proc_mars_access_msg( const UdpRxMsg& msg )
 void GermaniumNetwork::proc_zddm_access_msg( const UdpRxMsg& msg )
 {
     ZddmAccessReq req;
-    req.mode = msg.payload.zddm_arm_data.mode;
-    req.val  = msg.payload.zddm_arm_data.val;
+    req.mode = msg.payload.zddm_arm.mode;
+    req.val  = msg.payload.zddm_arm.val;
 
     xQueueSend( zddm_access_req_queue_
               , &req
@@ -286,9 +287,9 @@ size_t GermaniumNetwork::tx_msg_proc( UdpTxMsg& msg )
 
         xQueueReceive( register_single_access_resp_queue_, &register_single_access_resp, 0);
         msg.op = register_single_access_resp.op;
-        msg.payload.register_single_access_resp = register_single_access_resp;
+        msg.payload.single_word.data = register_single_access_resp.data;
         
-        return (4+sizeof(msg.payload.register_single_access_resp));
+        return ( 4 + sizeof(msg.payload.single_word) );
     }
 
     if ( active_queue == psi2c_access_resp_queue_ )
@@ -297,9 +298,10 @@ size_t GermaniumNetwork::tx_msg_proc( UdpTxMsg& msg )
 
         xQueueReceive( psi2c_access_resp_queue_, &psi2c_access_resp, 0 );
         msg.op = psi2c_access_resp.op;
-        msg.payload.psi2c_access_resp = psi2c_access_resp;
+        msg.payload.psi2c.length = psi2c_access_resp.length;
+        memcpy( msg.payload.psi2c.data, psi2c_access_resp.data, sizeof(psi2c_access_resp.data) );
         
-        return (4+sizeof(msg.payload.psi2c_access_resp));
+        return ( 4 + sizeof(msg.payload.psi2c) );
     }
 
     if ( active_queue == psxadc_access_resp_queue_ )
@@ -308,9 +310,10 @@ size_t GermaniumNetwork::tx_msg_proc( UdpTxMsg& msg )
 
         xQueueReceive( psxadc_access_resp_queue_, &psxadc_access_resp, 0 );
         msg.op = psxadc_access_resp.op;
-        msg.payload.xadc_access_resp = psxadc_access_resp;
+        msg.payload.psxadc.length = psxadc_access_resp.length;
+        memcpy( msg.payload.psxadc.data, psxadc_access_resp.data, sizeof(psxadc_access_resp.data) );
 
-        return (4+sizeof(msg.xdc_access_resp));
+        return ( 4 + sizeof(msg.payload.psxadc) );
     }
 }
 //===============================================================

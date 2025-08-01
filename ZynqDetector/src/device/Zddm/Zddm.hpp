@@ -5,13 +5,15 @@
 #include "Register.hpp"
 #include "task_wrap.hpp"
 
-struct __attribute__((__packed__)) ZddmArmStruct
-{
-    uint16_t  mode;
-    uint16_t  val;
-};
-using ZddmArm = ZddmArmStruct;
-using ZddmAccessReq = ZddmArmStruct;
+#include "queue.hpp"
+
+//struct __attribute__((__packed__)) ZddmArmStruct
+//{
+//    uint16_t  mode;
+//    uint16_t  val;
+//};
+//using ZddmArm = ZddmArmStruct;
+//using ZddmAccessReq = ZddmArmStruct;
 
 template<typename DerivedNetwork>
 class Zddm

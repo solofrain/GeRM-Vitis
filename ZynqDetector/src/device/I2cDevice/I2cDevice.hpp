@@ -18,7 +18,7 @@ class I2cDevice
     using AccessReqType = typename AccessReqTypeSelector<I2cType>::type;
 
 protected:
-    I2cType&                     i2c_;
+//    I2cType&                     i2c_;
     uint8_t                      i2c_addr_;
     
     AccessReqType                req_;
@@ -37,8 +37,8 @@ public:
     //    uint8_t                  chan;
     //};
 
-    I2cDevice( const I2cType&                     i2c
-             , uint8_t                            i2c_addr
+    I2cDevice( /*const I2cType&                     i2c
+             , */uint8_t                            i2c_addr
              , const QueueHandle_t                req_queue
              , const std::map<uint16_t, uint8_t>& chan_assign
              , const Logger&                      logger

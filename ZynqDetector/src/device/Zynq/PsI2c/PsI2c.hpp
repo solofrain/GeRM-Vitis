@@ -10,24 +10,26 @@
 
 #include "Logger.hpp"
 
-struct PsI2cAccessReqStruct
-{
-    uint16_t op;
-    uint8_t  length;
-    uint8_t  addr;
-    uint8_t  read;
-    uint8_t  data[4];
-};
-using PsI2cAccessReq = PsI2cAccessReqStruct;
+#include "queue.hpp"
 
-
-struct PsI2cAccessRespStruct
-{
-    uint16_t op;
-    uint8_t  length;
-    uint8_t  data[4];
-};
-using PsI2cAccessResp = PsI2cAccessRespStruct;
+//struct PsI2cAccessReqStruct
+//{
+//    uint16_t op;
+//    uint8_t  length;
+//    uint8_t  addr;
+//    uint8_t  read;
+//    uint8_t  data[4];
+//};
+//using PsI2cAccessReq = PsI2cAccessReqStruct;
+//
+//
+//struct PsI2cAccessRespStruct
+//{
+//    uint16_t op;
+//    uint8_t  length;
+//    uint8_t  data[4];
+//};
+//using PsI2cAccessResp = PsI2cAccessRespStruct;
 
 
 

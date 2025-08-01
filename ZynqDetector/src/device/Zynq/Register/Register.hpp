@@ -10,22 +10,6 @@
 //#include "Logger.hpp"
 
 
-struct RegisterSingleAccessReqStruct : AccessReq
-{
-    uint16_t op;
-    uint32_t data;
-};
-using RegisterSingleAccessReq = RegisterSingleAccessReqStruct;
-
-
-struct RegisterSingleAccessRespStruct : AccessResp
-{
-    uint16_t op;
-    uint32_t  data;
-};
-using RegisterSingleAccessResp = RegisterSingleAccessRespStruct;
-
-//-----------------------------
 
 class Logger;
 

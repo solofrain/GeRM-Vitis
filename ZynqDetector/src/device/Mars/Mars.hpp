@@ -5,13 +5,15 @@
 #include "Register.hpp"
 #include "task_wrap.hpp"
 
-struct __attribute__((__packed__)) MarsArmStruct
-{
-    uint16_t  mode;
-    uint16_t  val;
-};
-using MarsArm = MarsArmStruct;
-using MarsAccessReq = MarsArmStruct;
+#include "queue.hpp"
+
+//struct __attribute__((__packed__)) MarsArmStruct
+//{
+//    uint16_t  mode;
+//    uint16_t  val;
+//};
+//using MarsArm = MarsArmStruct;
+//using MarsAccessReq = MarsArmStruct;
 
 template<typename DerivedNetwork>
 class Mars
@@ -26,7 +28,7 @@ private:
     Register&            reg_;
     QueueHandle_t const  req_queue_;
 
-    void stuff_mars( const int (&loads)[12][14] );
+    void stuff_mars( const uint32_t (&loads)[12][14] );
     void mars_cfg_task();
 };
 

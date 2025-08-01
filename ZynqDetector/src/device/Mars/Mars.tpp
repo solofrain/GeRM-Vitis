@@ -1,14 +1,21 @@
+//===============================================================
+// Constructor.
+//===============================================================
 template<typename DerivedNetwork>
 Mars<DerivedNetwork>::Mars( Register&            reg
                           , QueueHandle_t const  mars_access_req_queue
                           )
-                          : reg_              ( reg                     )
+                          : reg_       ( reg                   )
                           , req_queue_ ( mars_access_req_queue )
 {}
+//===============================================================
 
 
+//===============================================================
+// Stuff Mars by writing loads.
+//===============================================================
 template<typename DerivedNetwork>
-void Mars<DerivedNetwork>::stuff_mars( const int (&loads)[12][14] )
+void Mars<DerivedNetwork>::stuff_mars( const uint32_t (&loads)[12][14] )
 {
     reg_.multi_access_start();
 
@@ -36,8 +43,12 @@ void Mars<DerivedNetwork>::stuff_mars( const int (&loads)[12][14] )
 
     reg_.multi_access_end();
 }
+//===============================================================
 
 
+//===============================================================
+// Create Mars task.
+//===============================================================
 template<typename DerivedNetwork>
 void Mars<DerivedNetwork>::create_device_access_tasks()
 {
@@ -52,6 +63,9 @@ void Mars<DerivedNetwork>::create_device_access_tasks()
 }
 
 
+//===============================================================
+// MARS task definition.
+//===============================================================
 template<typename DerivedNetwork>
 void Mars<DerivedNetwork>::mars_cfg_task()
 {
@@ -67,4 +81,5 @@ void Mars<DerivedNetwork>::mars_cfg_task()
         stuff_mars( req.loads );
     }
 }
+//===============================================================
 

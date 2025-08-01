@@ -141,11 +141,11 @@ protected:
 
 
 
-    void latch_conf();
-    void update_loads( char* loads );
-    void zddm_arm( int mode, int val );
+    //void latch_conf();
+    //void update_loads( char* loads );
+    //void zddm_arm( int mode, int val );
 
-    void rx_msg_proc(const typename GermaniumNetwork::UdpRxMsg& udp_msg);
+    void rx_msg_proc(const UdpRxMsg& udp_msg);
     //void tx_msg_proc();
 
     //void ps_i2c_access_task();

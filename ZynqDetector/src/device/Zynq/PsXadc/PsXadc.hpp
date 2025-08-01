@@ -2,21 +2,22 @@
 
 #include <xadcps.h>
 
+#include "queue.hpp"
 
 //==================================================
 
-struct PsXadcAccessReqStruct : AccessReq
-{
-    uint32_t data;
-};
-using PsXadcAccessReq= PsXadcAccessReqStruct;
-
-struct PsXadcAccessRespStruct : AccessResp
-{
-    uint8_t  length;
-    uint8_t  data[4];
-};
-using PsXadcAccessResp = PsXadcAccessRespStruct;
+//struct PsXadcAccessReqStruct : AccessReq
+//{
+//    uint32_t data;
+//};
+//using PsXadcAccessReq= PsXadcAccessReqStruct;
+//
+//struct PsXadcAccessRespStruct : AccessResp
+//{
+//    uint8_t  length;
+//    uint8_t  data[4];
+//};
+//using PsXadcAccessResp = PsXadcAccessRespStruct;
 
 //==================================================
 

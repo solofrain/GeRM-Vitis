@@ -33,44 +33,30 @@ class Network
 
 public:
 
-    static constexpr uint32_t UDP_PORT = 0x7000;
-    static constexpr uint32_t UDP_MSG_ID = 0xbeef;
+    static constexpr uint32_t UDP_PORT        = 0x7000;
+    static constexpr uint32_t UDP_REQ_MSG_ID  = 0xCAFE;
+    static constexpr uint32_t UDP_RESP_MSG_ID = 0xBEEF;
     //------------------------------
     // UDP message
     //------------------------------
     static constexpr uint16_t MAX_UDP_MSG_LENG = 4096;
     static constexpr uint16_t MAX_UDP_MSG_DATA_LENG = MAX_UDP_MSG_LENG - 4; // length of message data in bytes
 
-    //struct UdpRxMsgStruct
-    //{
-    //    uint16_t id;
-    //    uint16_t op;
-    //    uint32_t data[MAX_UDP_MSG_DATA_LENG >> 2];
-    //};
-    //using UdpRxMsg = UdpRxMsgStruct;
-
-    //struct UdpTxMsgStruct
-    //{
-    //    uint16_t id;
-    //    uint16_t op;
-    //    uint32_t data[MAX_UDP_MSG_DATA_LENG >> 2];
-    //};
-    //using UdpTxMsg = UdpTxMsgStruct;
-    struct UdpRxMsgStruct
+    struct UdpReqMsg
     {   
-        uint16_t                         id; 
-        uint16_t                         op;
-        DerivedNetwork::UdpRxMsgPayload  payload;
+        uint16_t                           id; 
+        uint16_t                           op;
+        DerivedNetwork::UdpReqMsgPayload   payload;
     };  
-    using UdpRxMsg = UdpRxMsgStruct;
+    using UdpRxMsg = UdpReqMsg;
 
-    struct UdpTxMsgStruct
+    struct UdpRespMsg
     {
-        uint16_t                         id;
-        uint16_t                         op;
-        DerivedNetwork::UdpTxMsgPayload  payload;
+        uint16_t                           id;
+        uint16_t                           op;
+        DerivedNetwork::UdpRespMsgPayload  payload;
     };
-    using UdpTxMsg = UdpTxMsgStruct;
+    using UdpTxMsg = UdpRespMsg;
 
 
     explicit Network( const Logger& logger  );

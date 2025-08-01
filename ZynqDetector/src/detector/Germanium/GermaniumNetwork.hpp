@@ -4,8 +4,12 @@
 #include "PsI2c.hpp"
 #include "PsXadc.hpp"
 
+
 class GermaniumNetwork : public Network<GermaniumNetwork>
 {
+    using UdpRxMsg = typename Network<GermaniumNetwork>::UdpReqMsg;
+    using UdpTxMsg = typename Network<GermaniumNetwork>::UdpRespMsg;
+
 public:
     GermaniumNetwork( const QueueHandle_t   register_single_access_req_queue
                     , const QueueHandle_t   register_single_access_resp_queue
@@ -83,99 +87,67 @@ public:
     //===============================================================
     // Data types
     //===============================================================
+    
+    // UDP request message payload
+    
     //-----------------------------
-    struct __attribute__((__packed__)) Ad9252CfgStruct
-    {
-        uint16_t  chip_num;
-        //uint16_t  addr;
-        uint16_t  data;
-    };
-    using Ad9252Cfg = Ad9252CfgStruct;
-    using Ad9252AccessReq = Ad9252CfgStruct;
-    //-----------------------------
-    struct __attribute__((__packed__)) ZddmArmStruct
-    {
-        uint16_t  mode;
-        uint16_t  val;
-    };
-    using ZddmArm = ZddmArmStruct;
-    using ZddmAccessReq = ZddmArmStruct;
-    //-----------------------------
-    struct MarsLoadStruct
-    {
-        uint32_t  loads[12][14];
-    };
-    using MarsLoad = MarsLoadStruct;
-    using MarsAccessReq = MarsLoadStruct;
-    //-----------------------------
-    union UdpRxMsgPayloadStruct
-    {
-        RegisterSingleAccessReq  reg_single_acc_req;
-        PsI2cAccessReq           psi2c_access_req;
-        PsXadcAccessReq          psxadc_access_req;
-        ZddmArm                  zddm_arm_data;
-        Ad9252Cfg                ad9252_cfg_data;
-        MarsLoad                 mars_load_data;
-    };
-    using UdpRxMsgPayload = UdpRxMsgPayloadStruct;
-    //-----------------------------
-    //struct UdpRxMsgStruct
-    //{
-    //    uint16_t  id;
-    //    uint16_t  op;
-    //    char      payload[sizeof(UdpRxMsgPayload)];
-    //};
-    //using UdpRxMsg = UdpRxMsgStruct;
-    //-----------------------------
-    //union RegisterMultiAccessRequestDataStruct
-    //{
-    //    ZddmArm    zddm_arm_data;
-    //    Ad9252Cfg  ad9252_cfg_data;
-    //};
-    //using RegisterMultiAccessRequestData = RegisterMultiAccessRequestDataStruct;
-    //-----------------------------
-    //struct RegisterMultiAccessRequestStruct
-    //{
-    //    uint16_t                       op;
-    //    RegisterMultiAccessRequestData data;
-    //};
-    //using RegisterMultiAccessRequest = RegisterMultiAccessRequestStruct;
-    ////-----------------------------
-    struct RegisterSingleAccessRespStruct
+    struct SingleWordReqMsgPayload
     {
         uint32_t data;
     };
-    using RegisterSingleAccessResp = RegisterSingleAccessReqStruct;
     //-----------------------------
-    struct PsI2cAccessRespStruct
+    struct AdcClkSkewReqMsgPayload
     {
-        uint32_t data;
+        uint16_t chip_num;
+        uint16_t skew;
     };
-    using PsI2cAccessResp = PsI2cAccessReqStruct;
     //-----------------------------
-    struct PsXadcAccessRespStruct
+    struct StuffMarsReqMsgPayload
     {
-        uint32_t data;
+        uint32_t loads[12][14];
     };
-    using PsXadcAccessResp = PsXadcAccessReqStruct;
     //-----------------------------
-    union UdpTxMsgPayloadStruct
+    struct ZddmArmReqMsgPayload
     {
-        uint32_t  register_single_access_resp_data;
-        uint32_t  register_multi_access_resp_data;
-        uint32_t  psi2c_access_resp_data;
-        uint32_t  psxadc_access_resp_data;
+        uint16_t mode;
+        uint16_t val;
     };
-    using UdpTxMsgPayload = UdpTxMsgPayloadStruct;
+    //-----------------------------
+    union UdpReqMsgPayload
+    {
+        SingleWordReqMsgPayload  single_word;
+        AdcClkSkewReqMsgPayload  ad9252_clk_skew;
+        StuffMarsReqMsgPayload   stuff_mars;
+        ZddmArmReqMsgPayload     zddm_arm;
+    };
+    //===============================================================
+
+    // UDP response message payload
 
     //-----------------------------
-    //struct UdpTxMsgStruct
-    //{
-    //    uint16_t  id;
-    //    uint16_t  op;
-    //    char      payload[sizeof(UdpTxMsgPayload)];
-    //};
-    //using UdpTxMsg = UdpTxMsgStruct;
+    struct SingleWordRespMsgPayload
+    {
+        uint32_t data;
+    };
+    //-----------------------------
+    struct PsI2cRespMsgPayload
+    {
+        uint8_t length;
+        uint8_t data[4];
+    };
+    //-----------------------------
+    struct PsXadcRespMsgPayload
+    {
+        uint8_t length;
+        uint8_t data[4];
+    };
+    union UdpRespMsgPayload
+    {
+        SingleWordRespMsgPayload single_word;
+        PsI2cRespMsgPayload      psi2c;
+        PsXadcRespMsgPayload     psxadc;
+    };
+
     //===============================================================    
 
     size_t tx_msg_proc( UdpTxMsg &msg );
@@ -209,4 +181,5 @@ private:
 
 };
 
-
+using UdpRxMsg = typename Network<GermaniumNetwork>::UdpReqMsg;
+using UdpTxMsg = typename Network<GermaniumNetwork>::UdpRespMsg;

@@ -328,7 +328,7 @@ void Network<DerivedNetwork>::udp_rx_task()
                                              , ( struct sockaddr* ) &remote_addr
                                              , &remote_addr_leng );
 
-        if ( (msg_leng <= 0) || (msg.id != UDP_MSG_ID) )
+        if ( (msg_leng <= 0) || (msg.id != UDP_REQ_MSG_ID) )
         {
             // error report
             continue;
