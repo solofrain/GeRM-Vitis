@@ -52,7 +52,7 @@ void Network<DerivedNetwork>::tcpip_init_done(void *arg)
 template < typename DerivedNetwork >
 void Network<DerivedNetwork>::network_init()
 {
-    int setup = 0;
+    //int setup = 0;
 
         // Initialize lwIP stack (TCP/IP thread + netif)
 
@@ -127,7 +127,7 @@ void Network<DerivedNetwork>::read_network_config( const std::string& filename )
         throw std::runtime_error( "Failed to mount SD card" );
     }
 
-    res = f_open(&file, "filename.txt", FA_READ | FA_WRITE);
+    res = f_open(&file, filename.c_str(), FA_READ | FA_WRITE);
     if (res != FR_OK)
     {
         throw std::runtime_error( "Failed to open config file" );
@@ -184,7 +184,7 @@ void Network<DerivedNetwork>::read_network_config( const std::string& filename )
 
         if ( key == "ip-address" )
         {
-            if ( !inet_aton(value.c_str(), netif_.ip_addr ) )
+            if ( !inet_aton(value.c_str(), &netif_.ip_addr ) )
             {
                 logger_.log_error( "Invalid IP address format", value );
                 break;
@@ -194,7 +194,7 @@ void Network<DerivedNetwork>::read_network_config( const std::string& filename )
         {
             if ( key == "netmask" )
             {
-                if ( !inet_aton( value.c_str(), netif_.netmask ) )
+                if ( !inet_aton( value.c_str(), &netif_.netmask ) )
                 {
                     logger_.log_error( "Invalid netmask format", value );
                     break;
@@ -204,7 +204,7 @@ void Network<DerivedNetwork>::read_network_config( const std::string& filename )
             {
                 if ( key == "gateway" )
                 {
-                    if ( !inet_aton( value.c_str(), netif_.gw ) )
+                    if ( !inet_aton( value.c_str(), &netif_.gw ) )
                     {
                         logger_.log_error( "Invalid gateway format", value );
                         break;
@@ -255,7 +255,7 @@ bool Network<DerivedNetwork>::string_to_addr(
 
     std::string segment;
 
-    int i = 0;
+    //int i = 0;
 
     while ( std::getline ( ss, segment, separator ) )
     {

@@ -17,8 +17,6 @@
 #include "Zddm.hpp"
 
 
-// const uint16_t LKUPADDRREG       = ?;
-
 using Instruction_Handler = std::function<void()>;
 
 struct germ_udp_msg_t
@@ -33,7 +31,6 @@ class GermaniumDetector : public ZynqDetector< GermaniumDetector
 {
 
 protected:
-    // void greate_tasks();
     TaskHandle_t psi2c_0_task_handler_;
     TaskHandle_t psi2c_1_task_handler_;
     TaskHandle_t psxadc_task_handler_;
@@ -45,13 +42,9 @@ protected:
     QueueHandle_t ad9252_access_req_queue_;
     QueueHandle_t mars_access_req_queue_;
     QueueHandle_t zddm_access_req_queue_;
-    //QueueHandle_t register_multi_access_req_queue_;
 
     QueueHandle_t psi2c_access_resp_queue_;
-    //QueueHandle_t psi2c_1_access_resp_queue_;
     QueueHandle_t psxadc_access_resp_queue_;
-    //QueueHandle_t register_multi_access_resp_queue_;
-
 
     std::unique_ptr<Ltc2309<PsI2c>> ltc2309_0_, ltc2309_1_;
     std::unique_ptr<Dac7678<PsI2c>> dac7678_;
@@ -101,62 +94,54 @@ protected:
     //const uint16_t TEMP3 = 
 
     // DAC process map: <op, <device, channel>>
-    const std::map<uint16_t, std::pair<Dac7678<PsI2c>*, uint8_t>> dac_instr_map = 
+    const std::map<uint16_t, std::pair<Dac7678<PsI2c>*, uint8_t>> dac7678_instr_map_ =
         {
-          { VL0, std::make_pair( dac7678_.get(), 0 ) },
-          { VL1, std::make_pair( dac7678_.get(), 1 ) },
-          { VH1, std::make_pair( dac7678_.get(), 2 ) },
-          { VL2, std::make_pair( dac7678_.get(), 3 ) },
-          { VH2, std::make_pair( dac7678_.get(), 4 ) },
-          { HV,  std::make_pair( dac7678_.get(), 5 ) },
-          { P1,  std::make_pair( dac7678_.get(), 6 ) },
-          { P2,  std::make_pair( dac7678_.get(), 7 ) }
+            { VL0, std::make_pair( dac7678_.get(), 0 ) },
+            { VL1, std::make_pair( dac7678_.get(), 1 ) },
+            { VH1, std::make_pair( dac7678_.get(), 2 ) },
+            { VL2, std::make_pair( dac7678_.get(), 3 ) },
+            { VH2, std::make_pair( dac7678_.get(), 4 ) },
+            { HV,  std::make_pair( dac7678_.get(), 5 ) },
+            { P1,  std::make_pair( dac7678_.get(), 6 ) },
+            { P2,  std::make_pair( dac7678_.get(), 7 ) }
         };
 
     // ADC process map: <op, <device, channel>>
-    const std::map<uint16_t, std::pair<Ltc2309<PsI2c>*, uint8_t>> adc_instr_map = 
+    const std::map<uint16_t, std::pair<Ltc2309<PsI2c>*, uint8_t>> ltc2309_instr_map_ =
         {
-          { TEMP1,   std::make_pair( ltc2309_0_.get(), 0 ) },
-          { TEMP2,   std::make_pair( ltc2309_0_.get(), 1 ) },
-          { TEMP3,   std::make_pair( ltc2309_0_.get(), 2 ) },
-          { TEMP4,   std::make_pair( ltc2309_0_.get(), 3 ) },
-          { HV_RBV,  std::make_pair( ltc2309_0_.get(), 4 ) },
-          { HV_CURR, std::make_pair( ltc2309_0_.get(), 5 ) },
-          { P1,      std::make_pair( ltc2309_0_.get(), 6 ) },
-          { P2,      std::make_pair( ltc2309_0_.get(), 7 ) },
-          { ILEAK,   std::make_pair( ltc2309_1_.get(), 0 ) },
-          { P_V,     std::make_pair( ltc2309_1_.get(), 1 ) }
+            { TEMP1,   std::make_pair( ltc2309_0_.get(), 0 ) },
+            { TEMP2,   std::make_pair( ltc2309_0_.get(), 1 ) },
+            { TEMP3,   std::make_pair( ltc2309_0_.get(), 2 ) },
+            { TEMP4,   std::make_pair( ltc2309_0_.get(), 3 ) },
+            { HV_RBV,  std::make_pair( ltc2309_0_.get(), 4 ) },
+            { HV_CURR, std::make_pair( ltc2309_0_.get(), 5 ) },
+            { P1,      std::make_pair( ltc2309_0_.get(), 6 ) },
+            { P2,      std::make_pair( ltc2309_0_.get(), 7 ) },
+            { ILEAK,   std::make_pair( ltc2309_1_.get(), 0 ) },
+            { P_V,     std::make_pair( ltc2309_1_.get(), 1 ) }
         };
 
     // Temperature process map: <op, <device, channel>>
-    const std::map<uint16_t, Tmp100<PsI2c>*> temp_instr_map = 
+    const std::map<uint16_t, Tmp100<PsI2c>*> tmp100_instr_map_ =
         {
-          { TEMP1, tmp100_0_.get() },
-          { TEMP2, tmp100_1_.get() },
-          { TEMP3, tmp100_2_.get() }
+            { TEMP1, tmp100_0_.get() },
+            { TEMP2, tmp100_1_.get() },
+            { TEMP3, tmp100_2_.get() }
         };
 
+    using I2cAccessHandler = std::function<void(const UdpRxMsg&)>;
+    std::map<uint16_t, I2cAccessHandler> i2c_access_dispatch_map_;
 
-    // QueueSetHandle_t resp_queue_set;
-
-
-
-    //void latch_conf();
-    //void update_loads( char* loads );
-    //void zddm_arm( int mode, int val );
+    void create_components();
+    void create_detector_queues();
+    void init_i2c_access_dispatch_map();
 
     void rx_msg_proc(const UdpRxMsg& udp_msg);
-    //void tx_msg_proc();
-
-    //void ps_i2c_access_task();
-    //void ps_xadc_access_task();
 
     //void polling_taski_init();
 
 public:
     static constexpr size_t REGISTER_SINGLE_ACCESS_REQ_QUEUE_LENG = 100;
-
-    //PsI2c<GermaniumRegister> psi2c_0_, psi2c_1_;
 
     ZynqDetector< GermaniumDetector
                 , GermaniumNetwork

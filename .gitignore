@@ -5,6 +5,7 @@ vitis_journal.py
 
 !README.md
 !/.gitignore
+!platform-fix.md
 
 !xsa
 !xsa/*

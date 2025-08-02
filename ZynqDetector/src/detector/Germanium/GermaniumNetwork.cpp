@@ -67,10 +67,7 @@ void GermaniumNetwork::rx_msg_map_init()
     this->rx_instr_map_[EVENT_FIFO_CNT]  = [this]( const UdpRxMsg& msg ) { proc_register_single_access_msg( msg ); };
     this->rx_instr_map_[EVENT_FIFO_DATA] = [this]( const UdpRxMsg& msg ) { proc_register_single_access_msg( msg ); };
 
-    // Local variable update
-    //this->rx_instr_map_[UPDATE_LOADS]    = [this]( const UdpRxMsg& msg ) { proc_update_loads_msg( msg.payload ); };
-
-    // Register multi access
+    // Sensor components access
     this->rx_instr_map_[STUFF_MARS]      = [this]( const UdpRxMsg& msg ) { proc_mars_access_msg( msg ); };
     this->rx_instr_map_[ADC_CLK_SKEW]    = [this]( const UdpRxMsg& msg ) { proc_ad9252_access_msg( msg ); };
     this->rx_instr_map_[ZDDM_ARM]        = [this]( const UdpRxMsg& msg ) { proc_zddm_access_msg( msg ); };
@@ -87,6 +84,16 @@ void GermaniumNetwork::rx_msg_map_init()
     this->rx_instr_map_[ZTEMP]          = [this]( const UdpRxMsg& msg ) { proc_psxadc_access_msg( msg ); };
 }
 
+void GermaniumNetwork::register_i2c_handlers( const std::map<uint16_t, I2cAccessHandler>& handlers)
+{
+    for ( const auto& [op, fn] : handlers )
+    {
+        auto [it, inserted] = i2c_access_dispatch_map_.emplace(op, fn);
+        if (!inserted) {
+            logger_.log_error( "Duplicate opcode ", op, " detected" );
+        }
+    }
+}
 
 
 
@@ -158,82 +165,21 @@ void GermaniumNetwork::proc_zddm_access_msg( const UdpRxMsg& msg )
 
 
 
-////===============================================================
-//// Process register multi access message.
-////===============================================================
-//void GermaniumNetwork::proc_register_multi_access_msg( const UdpRxMsg& msg )
-//{
-//    RegisterMultiAccessRequest req;
-//    size_t data_leng;
-//
-//    req.op = msg.op;
-//    switch( req.op )
-//    {
-//        case AD9252_CNFG:
-//            data_leng  = sizeof( Ad9252Cfg );
-//            break;
-//
-//        case ZDDM_ARM:
-//            data_leng = sizeof( ZddmArm );
-//            break;
-//
-//        default:
-//            ;
-//    }
-//    
-//    memcpy( req.data, msg.payload, data_leng );
-//
-//    xQueueSend( register_multi_access_req_queue_
-//              , req
-//              , 0UL
-//              );
-//}
-////===============================================================
-
 //===============================================================
 // Process I2C bus access message.
 //===============================================================
 void GermaniumNetwork::proc_psi2c_access_msg( const UdpRxMsg& msg )
 {
-    PsI2cAccessReq req;
-    QueueHandle_t  req_queue;
+    auto it = i2c_access_dispatch_map_.find( msg.op );
 
-    req.op = msg.op;
-
-    switch( req.op )
+    if ( it != i2c_access_dispatch_map_.end() )
     {
-        case HV:
-            req_queue = psi2c0_access_req_queue_;
-            break;
-
-        case HV_CUR:
-            req_queue = psi2c0_access_req_queue_;
-            break;
-
-        case TEMP1:
-            req_queue = psi2c0_access_req_queue_;
-            break;
-
-        case TEMP2:
-            req_queue = psi2c0_access_req_queue_;
-            break;
-
-        case TEMP3:
-            req_queue = psi2c0_access_req_queue_;
-            break;
-
-        case DAC_INT_REF:
-            req_queue = psi2c0_access_req_queue_;
-            break;
-
-        default:
-            ;
+        it->second( msg );
     }
-
-    xQueueSend( req_queue
-              , &req
-              , 0UL
-              );
+    else
+    {
+        logger_.log_error( "Unhandled opcode: ", msg.op );
+    }
 }
 //===============================================================
 
@@ -315,5 +261,6 @@ size_t GermaniumNetwork::tx_msg_proc( UdpTxMsg& msg )
 
         return ( 4 + sizeof(msg.payload.psxadc) );
     }
+    return 0;
 }
 //===============================================================

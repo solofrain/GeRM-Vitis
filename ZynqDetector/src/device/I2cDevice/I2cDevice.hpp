@@ -24,7 +24,7 @@ protected:
     AccessReqType                req_;
     QueueHandle_t                req_queue_;
 
-    std::map<uint16_t, uint8_t>  chan_assign_;  // stores <variable:channel>
+    //std::map<uint16_t, uint8_t>  chan_assign_;  // stores <variable:channel>
                                                 // defined by detector and passed to the constructor
 
     const Logger& logger_;
@@ -40,7 +40,7 @@ public:
     I2cDevice( /*const I2cType&                     i2c
              , */uint8_t                            i2c_addr
              , const QueueHandle_t                req_queue
-             , const std::map<uint16_t, uint8_t>& chan_assign
+             //, const std::map<uint16_t, uint8_t>& chan_assign
              , const Logger&                      logger
              );
     //requires IsSameType<T, PlI2c>;

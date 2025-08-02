@@ -10,6 +10,8 @@ class GermaniumNetwork : public Network<GermaniumNetwork>
     using UdpRxMsg = typename Network<GermaniumNetwork>::UdpReqMsg;
     using UdpTxMsg = typename Network<GermaniumNetwork>::UdpRespMsg;
 
+    using I2cAccessHandler = std::function<void(const UdpRxMsg&)>;
+
 public:
     GermaniumNetwork( const QueueHandle_t   register_single_access_req_queue
                     , const QueueHandle_t   register_single_access_resp_queue
@@ -150,6 +152,7 @@ public:
 
     //===============================================================    
 
+    void register_i2c_handlers( const std::map<uint16_t, I2cAccessHandler>& handlers );
     size_t tx_msg_proc( UdpTxMsg &msg );
 
 protected:
@@ -178,6 +181,9 @@ private:
     const QueueHandle_t& zddm_access_req_queue_;
 
     const Logger&  logger_;
+
+    std::map<uint16_t, I2cAccessHandler> i2c_access_dispatch_map_;
+
 
 };
 
