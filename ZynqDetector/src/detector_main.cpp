@@ -4,9 +4,9 @@ int main()
 {
     GermaniumDetector det;
 
-    det.network_init();
-    det.queue_init();
-    det.task_init();
+    //det.base_->network_init();
+    //det.base_->queue_init();
+    det.base_->task_init();
 
     vTaskStartScheduler();
 

@@ -6,6 +6,7 @@
 
 #include "task_wrap.hpp"
 
+#include "Register.hpp"
 
 //=========================================
 // Register class
@@ -32,7 +33,7 @@ Register::Register
 //=========================================
 // Register single access
 //=========================================
-void Register::write( uint32_t offset, uint32_t value )
+void Register::write( uint16_t offset, uint32_t value )
 {
     if ( xSemaphoreTake( mutex_, portMAX_DELAY ) == pdTRUE )
     {
@@ -41,7 +42,7 @@ void Register::write( uint32_t offset, uint32_t value )
     }
 }
     
-uint32_t Register::read( uint32_t offset )
+uint32_t Register::read( uint16_t offset )
 {
     uint32_t value = 0;
     if ( xSemaphoreTake( mutex_, portMAX_DELAY ) == pdTRUE )
@@ -65,12 +66,12 @@ void Register::multi_access_start()
     while( xSemaphoreTake( mutex_, portMAX_DELAY ) == pdFALSE );
 }
 
-void Register::multi_access_write( uint32_t offset, uint32_t value )
+void Register::multi_access_write( uint16_t offset, uint32_t value )
 {
     *(volatile uint32_t*)(base_addr_ + offset/4) = value;
 }
     
-uint32_t Register::multi_access_read( uint32_t offset )
+uint32_t Register::multi_access_read( uint16_t offset )
 {
     return *(volatile uint32_t*)(base_addr_ + offset/4);
 }
@@ -86,7 +87,7 @@ void Register::single_access_task()
     RegisterSingleAccessReq  req;
     RegisterSingleAccessResp resp;
 
-    uint32_t offset;
+    uint16_t offset;
 
     //auto param = static_cast<reg_single_access_task_param_t*>(pvParameters);
 
@@ -96,7 +97,7 @@ void Register::single_access_task()
                      , &req
 					 , portMAX_DELAY );
         
-        offset = static_cast<uint32_t>( req.op & 0x7fff );
+        offset = req.op & 0x7fff;
 
         if ( (req.op & 0x8000) != 0 )
         {
@@ -115,14 +116,16 @@ void Register::single_access_task()
 }
 
 
-void Register::create_register_access_tasks()
-{
-    create_register_single_access_task();
-}
-
 void Register::create_register_single_access_task()
 {
     auto task_func = std::make_unique<std::function<void()>>([this]() { single_access_task(); });
     xTaskCreate( task_wrapper, "Register Single Access", 1000, &task_func, 1, NULL );
 }
+
+
+void Register::create_register_access_tasks()
+{
+    create_register_single_access_task();
+}
+
 //=========================================

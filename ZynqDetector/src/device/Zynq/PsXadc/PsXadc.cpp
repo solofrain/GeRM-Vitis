@@ -1,3 +1,5 @@
+#include <functional>
+
 #include "FreeRTOS.h"
 #include "task.h"
 

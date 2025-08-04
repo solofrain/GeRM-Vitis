@@ -127,7 +127,7 @@ public:
     Logger logger_;
 
     ZynqDetector();
-    ~ZynqDetector();
+    ~ZynqDetector() = default;
 
     //void DummyDetector::create_irq_task_map();
 
