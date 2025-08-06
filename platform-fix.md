@@ -1,6 +1,8 @@
 # BSP Error Fix
 
-# Error:
+## 1. Interrupt priority definition `configUNIQUE_INTERRUPT_PRIORITIES`
+
+Compiling with default BSP:
 
 ```
 In file included from /data/work/fpga/prj/germ/vitis/ZynqDetector/src/detector/Germanium/GermaniumDetector.cpp:3:
@@ -50,3 +52,22 @@ Add:
 for now.
 
 Revisit later!!!
+
+!!! After the revision, at some point the file was reverted and definition was gone! Was that caused by building the platform?
+The file was shown to be modified on Aug 27  2024
+$ ll /data/work/fpga/prj/germ/vitis/GeRM-192-384/export/GeRM-192-384/sw/freertos_ps7_cortexa9_0/include/portmacro.h
+-rw-rw-r-- 1 liji liji 11070 Aug 27  2024 /data/work/fpga/prj/germ/vitis/GeRM-192-384/export/GeRM-192-384/sw/freertos_ps7_cortexa9_0/include/portmacro.h
+
+Changed again:
+$ ll /data/work/fpga/prj/germ/vitis/GeRM-192-384/export/GeRM-192-384/sw/freertos_ps7_cortexa9_0/include/portmacro.h
+-rw-rw-r-- 1 liji liji 11116 Aug  6 11:56 /data/work/fpga/prj/germ/vitis/GeRM-192-384/export/GeRM-192-384/sw/freertos_ps7_cortexa9_0/include/portmacro.h
+
+
+
+## 2. Support static initialization of queues and tasks `configSUPPORT_STATIC_ALLOCATION`
+
+The default BSP doesn't support static initialization of queues and tasks. Thus `xTaskCreateStatic()` is not supported.
+
+To support this feature, `configSUPPORT_STATIC_ALLOCATION` must be defined as 1 (0 by defult).
+
+Edit `./GeRM-192-384/export/GeRM-192-384/sw/freertos_ps7_cortexa9_0/include/FreeRTOSConfig.h`, and modify the definition. Rebuild the platform.

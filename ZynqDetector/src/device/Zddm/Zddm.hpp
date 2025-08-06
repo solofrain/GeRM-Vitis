@@ -28,6 +28,12 @@ private:
     Register&            reg_;
     QueueHandle_t const  req_queue_;
 
+    static constexpr UBaseType_t TASK_PRIORITY = 6;
+    static constexpr uint32_t    TASK_STACK_SIZE = 1000;
+    StaticTask_t                 task_tcb;
+    StackType_t                  task_stack[TASK_STACK_SIZE];
+
+
     void zddm_arm( int mode, int val );
     void zddm_cfg_task();
 };

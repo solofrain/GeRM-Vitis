@@ -56,12 +56,13 @@ template<typename DerivedNetwork>
 void Mars<DerivedNetwork>::create_device_access_tasks()
 {
     auto task_func = std::make_unique<std::function<void()>>([this]() { mars_cfg_task(); });
-    xTaskCreate( task_wrapper
+    xTaskCreateStatic( task_wrapper
                , "MARS Cfg"
-               , 1000
+               , TASK_STACK_SIZE
                , &task_func
                , 1
-               , NULL
+               , task_stack
+               , &task_tcb
                );
 }
 

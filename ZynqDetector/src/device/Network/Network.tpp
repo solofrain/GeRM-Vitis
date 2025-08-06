@@ -298,10 +298,24 @@ template < typename DerivedNetwork >
 void Network<DerivedNetwork>::create_network_tasks()
 {
     auto task_func = std::make_unique<std::function<void()>>([this]() { udp_rx_task(); });
-    xTaskCreate( task_wrapper, "UDP Rx", 1000, &task_func, 1, &udp_rx_task_handle_ );
+    xTaskCreateStatic( task_wrapper
+                     , "UDP Rx"
+                     , RX_TASK_STACK_SIZE
+                     , &task_func
+                     , RX_TASK_PRIORITY
+                     , rx_task_stack
+                     , &rx_task_tcb
+                     ); //udp_rx_task_handle_ );
 
     task_func = std::make_unique<std::function<void()>>([this]() { udp_tx_task(); });
-    xTaskCreate( task_wrapper, "UDP Tx", 1000, &task_func, 1, &udp_tx_task_handle_ );
+    xTaskCreateStatic( task_wrapper
+                     , "UDP Tx"
+                     , TX_TASK_STACK_SIZE
+                     , &task_func
+                     , TX_TASK_PRIORITY
+                     , tx_task_stack
+                     , &tx_task_tcb
+                     ); //&udp_tx_task_handle_ );
 }
 //===============================================================
 

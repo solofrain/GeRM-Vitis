@@ -47,6 +47,11 @@ private:
     QueueHandle_t     single_access_resp_queue_;
     const Logger& logger_;
 
+    static constexpr UBaseType_t TASK_PRIORITY   = 5;
+    static constexpr uint32_t    TASK_STACK_SIZE = 1000;
+    StaticTask_t                 task_tcb;
+    StackType_t                  task_stack[TASK_STACK_SIZE];
+
     void create_register_single_access_task();
     void single_access_task();
 };

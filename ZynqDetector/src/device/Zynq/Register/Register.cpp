@@ -2,6 +2,7 @@
 #include <functional>
 
 #include "FreeRTOS.h"
+#include "task.h"
 #include "xil_printf.h"
 
 #include "task_wrap.hpp"
@@ -119,7 +120,13 @@ void Register::single_access_task()
 void Register::create_register_single_access_task()
 {
     auto task_func = std::make_unique<std::function<void()>>([this]() { single_access_task(); });
-    xTaskCreate( task_wrapper, "Register Single Access", 1000, &task_func, 1, NULL );
+    xTaskCreateStatic( task_wrapper
+                     , "Register Single Access"
+                     , TASK_STACK_SIZE
+                     , &task_func
+                     , TASK_PRIORITY
+                     , task_stack
+                     , &task_tcb );
 }
 
 

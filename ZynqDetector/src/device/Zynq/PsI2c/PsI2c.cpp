@@ -151,11 +151,12 @@ void PsI2c::task()
 void PsI2c::create_psi2c_task()
 {
     auto task_func = std::make_unique<std::function<void()>>([this]() { task(); });
-    xTaskCreate( task_wrapper
+    xTaskCreateStatic( task_wrapper
                , name_.c_str()
-               , 1000
+               , TASK_STACK_SIZE
                , &task_func
-               , 1
-               , NULL
+               , TASK_PRIORITY
+               , task_stack
+               , &task_tcb
                );
 }

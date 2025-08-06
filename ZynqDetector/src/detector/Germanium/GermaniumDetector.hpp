@@ -60,7 +60,7 @@ protected:
     int nelm_;
 
     // ASIC configuration data
-    uint16_t loads[12][14];
+    alignas(32) uint16_t loads[12][14];
   
     const uint8_t LTC2309_0_I2C_ADDR = 0x08;
     const uint8_t LTC2309_1_I2C_ADDR = 0x0A;

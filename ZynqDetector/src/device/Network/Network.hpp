@@ -68,6 +68,16 @@ private:
 
 protected:
 
+    static constexpr UBaseType_t  RX_TASK_PRIORITY   = 10;
+    static constexpr uint32_t     RX_TASK_STACK_SIZE = 1000;
+    StaticTask_t                  rx_task_tcb;
+    StackType_t                   rx_task_stack[RX_TASK_STACK_SIZE];
+
+    static constexpr uint32_t     TX_TASK_PRIORITY   = 9;
+    static constexpr uint32_t     TX_TASK_STACK_SIZE = 1000;
+    StaticTask_t                  tx_task_tcb;
+    StackType_t                   tx_task_stack[RX_TASK_STACK_SIZE];
+
     struct netif netif_;
     int    sock_;
     struct sockaddr_in local_addr_;

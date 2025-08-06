@@ -33,12 +33,12 @@
 #if (configSUPPORT_STATIC_ALLOCATION == 1)
 #define QUEUE_BUFFER_SIZE 100
 
-uint8_t ucQueueStorageArea[QUEUE_BUFFER_SIZE];
-StackType_t xStack1[configMINIMAL_STACK_SIZE];
-StackType_t xStack2[configMINIMAL_STACK_SIZE];
-StaticTask_t xTxBuffer, xRxBuffer;
-StaticTimer_t xTimerBuffer;
-static StaticQueue_t xStaticQueue;
+//uint8_t ucQueueStorageArea[QUEUE_BUFFER_SIZE];
+//StackType_t xStack1[configMINIMAL_STACK_SIZE];
+//StackType_t xStack2[configMINIMAL_STACK_SIZE];
+//StaticTask_t xTxBuffer, xRxBuffer;
+//StaticTimer_t xTimerBuffer;
+//static StaticQueue_t xStaticQueue;
 #endif
 
 GermaniumDetector::GermaniumDetector()

@@ -30,12 +30,13 @@ template<typename DerivedNetwork>
 void Zddm<DerivedNetwork>::create_device_access_tasks()
 {
     auto task_func = std::make_unique<std::function<void()>>([this]() { zddm_cfg_task(); });
-    xTaskCreate( task_wrapper
+    xTaskCreateStatic( task_wrapper
                , "ZDDM Cfg"
-               , 1000
+               , TASK_STACK_SIZE
                , &task_func
-               , 1
-               , NULL
+               , TASK_PRIORITY
+               , task_stack
+               , &task_tcb
                );
 }
 

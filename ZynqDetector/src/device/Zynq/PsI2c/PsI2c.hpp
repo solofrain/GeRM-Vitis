@@ -12,26 +12,6 @@
 
 #include "queue.hpp"
 
-//struct PsI2cAccessReqStruct
-//{
-//    uint16_t op;
-//    uint8_t  length;
-//    uint8_t  addr;
-//    uint8_t  read;
-//    uint8_t  data[4];
-//};
-//using PsI2cAccessReq = PsI2cAccessReqStruct;
-//
-//
-//struct PsI2cAccessRespStruct
-//{
-//    uint16_t op;
-//    uint8_t  length;
-//    uint8_t  data[4];
-//};
-//using PsI2cAccessResp = PsI2cAccessRespStruct;
-
-
 
 class PsI2c
 {
@@ -59,6 +39,11 @@ private:
     QueueHandle_t  req_queue_;
     QueueHandle_t  resp_queue_;
     
+    static constexpr UBaseType_t TASK_PRIORITY   = 2;
+    static constexpr uint32_t    TASK_STACK_SIZE = 1000;
+    StaticTask_t                 task_tcb;
+    StackType_t                  task_stack[TASK_STACK_SIZE];
+
     xSemaphoreHandle mutex_;
 
     const Logger& logger_;

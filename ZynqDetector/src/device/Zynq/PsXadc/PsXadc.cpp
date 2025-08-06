@@ -103,5 +103,12 @@ void PsXadc::create_psxadc_task()
     //auto task_func = std::make_unique<std::function<void()>>([this]() { task(); });
     auto task_func = new std::function<void()>([this]() { task(); });
 
-    xTaskCreate( task_wrapper, name_.c_str(), 1000, &task_func, 1, NULL );
+    xTaskCreateStatic( task_wrapper
+                     , name_.c_str()
+                     , 1000
+                     , &task_func
+                     , TASK_PRIORITY
+                     , task_stack
+                     , &task_tcb
+                     );
 }
