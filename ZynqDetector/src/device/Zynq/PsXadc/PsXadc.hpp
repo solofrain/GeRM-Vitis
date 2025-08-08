@@ -31,8 +31,9 @@ private:
 
     static constexpr UBaseType_t TASK_PRIORITY   = 5;
     static constexpr uint32_t    TASK_STACK_SIZE = 1000;
-    StaticTask_t                 task_tcb;
-    StackType_t                  task_stack[TASK_STACK_SIZE];
+    StaticTask_t                 task_tcb_;
+    StackType_t                  task_stack_[TASK_STACK_SIZE];
+    TaskConfig                   task_cfg_;
 
     XAdcPs         xadc_instance_ptr_;
     XAdcPs_Config* xadc_config_;

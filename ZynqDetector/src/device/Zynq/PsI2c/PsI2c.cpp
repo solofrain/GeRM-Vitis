@@ -28,20 +28,6 @@ PsI2c::PsI2c
     , resp_queue_ ( resp_queue )
     , logger_     ( logger     )
 {
-    //if ( bus_index == 0 )
-    //{
-    //    base_address_ = I2C0_BASE_ADDRESS;
-    //}
-    //else if( bus_index == 1 )
-    //{
-    //    base_address_ = I2C1_BASE_ADDRESS;
-    //}
-    //else
-    //{
-    //    log_error( "Invalid I2C bus index: %d", bus_index );
-    //    return;
-    //}
-
     // Initialize I2C
     i2cps_config_ptr_ = XIicPs_LookupConfig( base_addr_ );
     if ( i2cps_config_ptr_ == NULL )
@@ -122,9 +108,6 @@ void PsI2c::task()
     PsI2cAccessReq  req;
     PsI2cAccessResp resp;
 
-    //char rd_data[4];
-    //char wr_data[4];
-
     while(1)
     {
         xQueueReceive( req_queue_
@@ -150,13 +133,16 @@ void PsI2c::task()
 
 void PsI2c::create_psi2c_task()
 {
-    auto task_func = std::make_unique<std::function<void()>>([this]() { task(); });
+    task_cfg_ = { .entry = [](void* ctx) { static_cast<PsI2c*>(ctx)->task(); }
+                , .context = this
+                };
+
     xTaskCreateStatic( task_wrapper
-               , name_.c_str()
-               , TASK_STACK_SIZE
-               , &task_func
-               , TASK_PRIORITY
-               , task_stack
-               , &task_tcb
-               );
+                     , name_.c_str()
+                     , TASK_STACK_SIZE
+                     , &task_cfg_
+                     , 1
+                     , task_stack_
+                     , &task_tcb_
+                     );
 }

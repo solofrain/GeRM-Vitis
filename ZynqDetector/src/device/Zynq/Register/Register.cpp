@@ -119,14 +119,17 @@ void Register::single_access_task()
 
 void Register::create_register_single_access_task()
 {
-    auto task_func = std::make_unique<std::function<void()>>([this]() { single_access_task(); });
+    task_cfg_ = { .entry = [](void* ctx) { static_cast<Register*>(ctx)->single_access_task(); },
+                  .context = this
+                };
+
     xTaskCreateStatic( task_wrapper
                      , "Register Single Access"
                      , TASK_STACK_SIZE
-                     , &task_func
+                     , &task_cfg_
                      , TASK_PRIORITY
-                     , task_stack
-                     , &task_tcb );
+                     , task_stack_
+                     , &task_tcb_ );
 }
 
 

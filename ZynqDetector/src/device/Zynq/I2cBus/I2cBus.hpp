@@ -36,9 +36,9 @@ protected:
     xSemaphoreHandle  mutex_;
 
     static constexpr uint32_t TASK_STACK_SIZE = 1000;
-    StaticTask_t              task_tcb;
-    StackType_t               task_stack[TASK_STACK_SIZE];
-
+    StaticTask_t              task_tcb_;
+    StackType_t               task_stack_[TASK_STACK_SIZE];
+    TaskConfig                task_cfg_;
 
     int write( char* buffer, uint16_t length, uint16_t slave_address );
     int read( char* buffer, uint16_t length, uint16_t slave_address );

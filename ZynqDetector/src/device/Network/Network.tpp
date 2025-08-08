@@ -52,7 +52,7 @@ void Network<DerivedNetwork>::tcpip_init_done(void *arg)
 template < typename DerivedNetwork >
 void Network<DerivedNetwork>::network_init()
 {
-    //int setup = 0;
+    int sock;
 
         // Initialize lwIP stack (TCP/IP thread + netif)
 
@@ -80,7 +80,7 @@ void Network<DerivedNetwork>::network_init()
     read_network_config( "config" );
 
 
-    if ( ( sock_ = socket( AF_INET, SOCK_DGRAM, 0 ) ) < 0 )
+    if ( ( sock = socket( AF_INET, SOCK_DGRAM, 0 ) ) < 0 )
     {
         logger_.log_error( "Failed to create socket." );
         return;
@@ -91,10 +91,10 @@ void Network<DerivedNetwork>::network_init()
     local_addr_.sin_port        = htons(UDP_PORT);
     local_addr_.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    if ( bind( sock_, (struct sockaddr *)&local_addr_, sizeof(local_addr_) != ERR_OK) )
+    if ( bind( sock, (struct sockaddr *)&local_addr_, sizeof(local_addr_) != ERR_OK) )
     {
         logger_.log_error( "Error on bind" );
-        close( sock_ );
+        close( sock );
         return;
     }
 
@@ -297,25 +297,31 @@ bool Network<DerivedNetwork>::string_to_addr(
 template < typename DerivedNetwork >
 void Network<DerivedNetwork>::create_network_tasks()
 {
-    auto task_func = std::make_unique<std::function<void()>>([this]() { udp_rx_task(); });
+    rx_task_cfg_ = { .entry = [](void* ctx) { static_cast<Network<DerivedNetwork>*>(ctx)->udp_rx_task(); },
+                     .context = this
+                   };
+
     xTaskCreateStatic( task_wrapper
                      , "UDP Rx"
                      , RX_TASK_STACK_SIZE
-                     , &task_func
+                     , &rx_task_cfg_
                      , RX_TASK_PRIORITY
-                     , rx_task_stack
-                     , &rx_task_tcb
-                     ); //udp_rx_task_handle_ );
+                     , rx_task_stack_
+                     , &rx_task_tcb_
+                     );
 
-    task_func = std::make_unique<std::function<void()>>([this]() { udp_tx_task(); });
+    tx_task_cfg_ = { .entry = [](void* ctx) { static_cast<Network<DerivedNetwork>*>(ctx)->udp_tx_task(); },
+                     .context = this
+                   };
+
     xTaskCreateStatic( task_wrapper
                      , "UDP Tx"
                      , TX_TASK_STACK_SIZE
-                     , &task_func
+                     , &tx_task_cfg_
                      , TX_TASK_PRIORITY
-                     , tx_task_stack
-                     , &tx_task_tcb
-                     ); //&udp_tx_task_handle_ );
+                     , tx_task_stack_
+                     , &tx_task_tcb_
+                     );
 }
 //===============================================================
 
@@ -397,22 +403,28 @@ void Network<DerivedNetwork>::udp_tx_task()
 }
 //===============================================================
 
+template< typename DerivedNetwork >
+size_t Network<DerivedNetwork>::tx_msg_proc( UdpTxMsg& msg )
+{
+    return static_cast<DerivedNetwork*>(this)->tx_msg_proc_special( msg );
+}
 
 //===============================================================
 // UDP Rx message processing.
 //===============================================================
 template < typename DerivedNetwork >
-void Network<DerivedNetwork>::rx_msg_proc( UdpRxMsg& msg )
+void Network<DerivedNetwork>::rx_msg_proc( const UdpRxMsg& msg )
 {
-    //int instr = msg.op && 0x7FFF;
-    auto it = static_cast<DerivedNetwork*>(this)->rx_instr_map_.find(((UdpRxMsg)msg).op && 0x7FFF);
-    if (it != static_cast<DerivedNetwork*>(this)->rx_instr_map_.end())
-    {
-        it->second(msg);  // Call the corresponding function
-    }
-    else
-    {
-        logger_.log_error( "Unknown instruction: ", ((UdpRxMsg)msg).op );
-    }
+    static_cast<DerivedNetwork*>(this)->rx_msg_proc_special( msg );
+    ////int instr = msg.op && 0x7FFF;
+    //auto it = static_cast<DerivedNetwork*>(this)->rx_instr_map_.find(((UdpRxMsg)msg).op && 0x7FFF);
+    //if (it != static_cast<DerivedNetwork*>(this)->rx_instr_map_.end())
+    //{
+    //    it->second(msg);  // Call the corresponding function
+    //}
+    //else
+    //{
+    //    logger_.log_error( "Unknown instruction: ", ((UdpRxMsg)msg).op );
+    //}
 }
 //===============================================================

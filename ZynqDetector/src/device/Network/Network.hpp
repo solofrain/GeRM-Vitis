@@ -66,53 +66,37 @@ public:
 private:
     const Logger& logger_;
 
-protected:
+    struct netif netif_;
+    struct sockaddr_in local_addr_;
+    int32_t udp_socket_;
+    uint8_t mac_addr_[6];
+    alignas(64) std::atomic<uint32_t> remote_ip_addr_;
 
     static constexpr UBaseType_t  RX_TASK_PRIORITY   = 10;
     static constexpr uint32_t     RX_TASK_STACK_SIZE = 1000;
-    StaticTask_t                  rx_task_tcb;
-    StackType_t                   rx_task_stack[RX_TASK_STACK_SIZE];
+    StaticTask_t                  rx_task_tcb_;
+    StackType_t                   rx_task_stack_[RX_TASK_STACK_SIZE];
+    TaskConfig                    rx_task_cfg_;
 
     static constexpr uint32_t     TX_TASK_PRIORITY   = 9;
     static constexpr uint32_t     TX_TASK_STACK_SIZE = 1000;
-    StaticTask_t                  tx_task_tcb;
-    StackType_t                   tx_task_stack[RX_TASK_STACK_SIZE];
-
-    struct netif netif_;
-    int    sock_;
-    struct sockaddr_in local_addr_;
-
-    //uint8_t ip_addr_[4];
-    //uint8_t netmask_[4];
-    //uint8_t gateway_[4];
-    //uint8_t dns_[4];
-    uint8_t mac_addr_[6];
-
-//    socket_t xUDPSocket;
-
-    alignas(64) std::atomic<uint32_t> remote_ip_addr_;
-
-    int32_t udp_socket_;
-
-    using MessageHandler = std::function<void(std::any&)>;
-    std::map<int, MessageHandler> rx_msg_map_;
-
-    void msg_map_init();
-
-    void read_network_config( const std::string& filename );
-    static void tcpip_init_done( void *arg );
-    bool string_to_addr( const std::string& addr_str, uint8_t* addr );
+    StaticTask_t                  tx_task_tcb_;
+    StackType_t                   tx_task_stack_[RX_TASK_STACK_SIZE];
+    TaskConfig                    tx_task_cfg_;
 
     TaskHandle_t udp_rx_task_handle_;
     TaskHandle_t udp_tx_task_handle_;
     
+    void read_network_config( const std::string& filename );
+    static void tcpip_init_done( void *arg );
+    bool string_to_addr( const std::string& addr_str, uint8_t* addr );
+
     //void create_network_tasks();
     void udp_rx_task();
     void udp_tx_task();
 
-    void rx_msg_proc( UdpRxMsg& msg );
-    //virtual void tx_msg_proc() = 0;
-    
+    void rx_msg_proc( const UdpRxMsg& msg );
+    size_t tx_msg_proc( UdpTxMsg& msg );
 
 };
  

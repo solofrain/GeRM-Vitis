@@ -149,10 +149,10 @@ public:
     //===============================================================    
 
     void register_i2c_handlers( const std::map<uint16_t, I2cAccessHandler>& handlers );
-    size_t tx_msg_proc( UdpTxMsg &msg );
+    size_t tx_msg_proc_special( UdpTxMsg &msg );
+    void rx_msg_proc_special( const UdpRxMsg& msg );
 
 protected:
-    void rx_msg_map_init();
 
     void proc_register_single_access_msg( const UdpRxMsg& msg );
     //void proc_register_multi_access_msg ( const UdpRxMsg& msg );

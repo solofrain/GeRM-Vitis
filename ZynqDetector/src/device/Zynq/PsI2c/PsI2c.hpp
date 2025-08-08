@@ -9,24 +9,13 @@
 #include "xparameters.h"
 
 #include "Logger.hpp"
-
+#include "task_wrap.hpp"
 #include "queue.hpp"
 
 
 class PsI2c
 {
 private:
-
-    //decltype(XPAR_XIICPS_0_DEVICE_ID) I2C0_DEVICE_ID XPAR_XIICPS_0_DEVICE_ID; // or use the base address if no device ID
-    //decltype(XPAR_XIICPS_1_DEVICE_ID) I2C1_DEVICE_ID XPAR_XIICPS_1_DEVICE_ID; // or use the base address if no device ID
-
-    //// Define I2C base addresses from device tree
-    //decltype(0xe0004000) I2C0_BASE_ADDRESS 0xe0004000;
-    //decltype(0xe0005000) I2C1_BASE_ADDRESS 0xe0005000;
-
-    //// Define I2C clock frequency.
-    //// 0x61a80 in hex is 400000; 100000 is 100KHz.
-    //decltype(100000) I2C_CLOCK_FREQUENCY 100000
 
     XIicPs_Config* i2cps_config_ptr_;
     XIicPs         i2c_ps_;
@@ -43,6 +32,12 @@ private:
     static constexpr uint32_t    TASK_STACK_SIZE = 1000;
     StaticTask_t                 task_tcb;
     StackType_t                  task_stack[TASK_STACK_SIZE];
+
+    StaticTask_t task_tcb_;
+    StackType_t task_stack_[1000];  // match your xTaskCreate() stack size
+
+    TaskConfig task_cfg_;
+
 
     xSemaphoreHandle mutex_;
 

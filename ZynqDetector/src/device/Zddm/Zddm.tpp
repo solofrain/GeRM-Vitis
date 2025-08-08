@@ -29,20 +29,23 @@ void Zddm<DerivedNetwork>::zddm_arm( int mode, int val )
 template<typename DerivedNetwork>
 void Zddm<DerivedNetwork>::create_device_access_tasks()
 {
-    auto task_func = std::make_unique<std::function<void()>>([this]() { zddm_cfg_task(); });
+    task_cfg_ = { .entry = [](void* ctx) { static_cast<Zddm<DerivedNetwork>*>(ctx)->task(); }
+                , .context = this
+                };
+
     xTaskCreateStatic( task_wrapper
                , "ZDDM Cfg"
                , TASK_STACK_SIZE
-               , &task_func
+               , &task_cfg_
                , TASK_PRIORITY
-               , task_stack
-               , &task_tcb
+               , task_stack_
+               , &task_tcb_
                );
 }
 
 
 template<typename DerivedNetwork>
-void Zddm<DerivedNetwork>::zddm_cfg_task()
+void Zddm<DerivedNetwork>::task()
 {
     ZddmAccessReq  req;
 

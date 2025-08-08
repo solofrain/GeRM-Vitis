@@ -55,14 +55,17 @@ void Mars<DerivedNetwork>::stuff_mars( const uint32_t (&loads)[12][14] )
 template<typename DerivedNetwork>
 void Mars<DerivedNetwork>::create_device_access_tasks()
 {
-    auto task_func = std::make_unique<std::function<void()>>([this]() { mars_cfg_task(); });
+    task_cfg_ = { .entry = [](void* ctx) { static_cast<Mars<DerivedNetwork>*>(ctx)->task(); },
+                  .context = this
+                };
+
     xTaskCreateStatic( task_wrapper
                , "MARS Cfg"
                , TASK_STACK_SIZE
-               , &task_func
+               , &task_cfg_
                , 1
-               , task_stack
-               , &task_tcb
+               , task_stack_
+               , &task_tcb_
                );
 }
 
@@ -71,7 +74,7 @@ void Mars<DerivedNetwork>::create_device_access_tasks()
 // MARS task definition.
 //===============================================================
 template<typename DerivedNetwork>
-void Mars<DerivedNetwork>::mars_cfg_task()
+void Mars<DerivedNetwork>::task()
 {
     MarsAccessReq  req;
 

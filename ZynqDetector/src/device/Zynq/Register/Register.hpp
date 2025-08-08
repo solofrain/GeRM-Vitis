@@ -7,9 +7,7 @@
 #include "semphr.h"
 
 #include "queue.hpp"
-//#include "Logger.hpp"
-
-
+#include "task_wrap.hpp"
 
 class Logger;
 
@@ -49,8 +47,9 @@ private:
 
     static constexpr UBaseType_t TASK_PRIORITY   = 5;
     static constexpr uint32_t    TASK_STACK_SIZE = 1000;
-    StaticTask_t                 task_tcb;
-    StackType_t                  task_stack[TASK_STACK_SIZE];
+    StaticTask_t                 task_tcb_;
+    StackType_t                  task_stack_[TASK_STACK_SIZE];
+    TaskConfig                   task_cfg_;
 
     void create_register_single_access_task();
     void single_access_task();

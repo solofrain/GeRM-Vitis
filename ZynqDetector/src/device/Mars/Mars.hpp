@@ -29,12 +29,12 @@ private:
     QueueHandle_t const  req_queue_;
 
     static constexpr uint32_t TASK_STACK_SIZE = 1000;
-    StaticTask_t              task_tcb;
-    StackType_t               task_stack[TASK_STACK_SIZE];
-
+    StaticTask_t              task_tcb_;
+    StackType_t               task_stack_[TASK_STACK_SIZE];
+    TaskConfig                task_cfg_;
 
     void stuff_mars( const uint32_t (&loads)[12][14] );
-    void mars_cfg_task();
+    void task();
 };
 
 #include "Mars.tpp"
