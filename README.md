@@ -14,46 +14,52 @@ This repository contains the scripts and source files to create FreeRTOS platfor
   - `ZynqDetector/src/device/`
   - `ZynqDetector/src/detector/`
 
-- Copy the following content to `ZynqDetector/src/UserConfig.cmake` (replace the empty list):
+- Add the following lines to `ZynqDetector/src/UserConfig.cmake` (replace the empty list):
+
 
 ```
 set(USER_INCLUDE_DIRECTORIES
 ${CMAKE_CURRENT_SOURCE_DIR}
 ${CMAKE_CURRENT_SOURCE_DIR}/common/base
+${CMAKE_CURRENT_SOURCE_DIR}/common/concepts
 ${CMAKE_CURRENT_SOURCE_DIR}/common/log
 ${CMAKE_CURRENT_SOURCE_DIR}/common/queue
 ${CMAKE_CURRENT_SOURCE_DIR}/common/task_wrap
-${CMAKE_CURRENT_SOURCE_DIR}/device/I2C/ADC
-${CMAKE_CURRENT_SOURCE_DIR}/device/I2C/DAC
-${CMAKE_CURRENT_SOURCE_DIR}/device/I2C/I2CDevice
-${CMAKE_CURRENT_SOURCE_DIR}/device/I2C/TMP100
+${CMAKE_CURRENT_SOURCE_DIR}/device/Adc/Ad9252
+${CMAKE_CURRENT_SOURCE_DIR}/device/Adc/Ltc2309
+${CMAKE_CURRENT_SOURCE_DIR}/device/Dac/Dac7678
+${CMAKE_CURRENT_SOURCE_DIR}/device/I2cDevice
+${CMAKE_CURRENT_SOURCE_DIR}/device/Mars
+${CMAKE_CURRENT_SOURCE_DIR}/device/Zddm
+${CMAKE_CURRENT_SOURCE_DIR}/device/Temperature/Tmp100
 ${CMAKE_CURRENT_SOURCE_DIR}/device/Network
-${CMAKE_CURRENT_SOURCE_DIR}/device/ZYNQ/I2CBus
-${CMAKE_CURRENT_SOURCE_DIR}/device/ZYNQ/PSI2C
-${CMAKE_CURRENT_SOURCE_DIR}/device/ZYNQ/PSXADC
-${CMAKE_CURRENT_SOURCE_DIR}/device/ZYNQ/Register
+${CMAKE_CURRENT_SOURCE_DIR}/device/Zynq
+${CMAKE_CURRENT_SOURCE_DIR}/device/Zynq/PsI2c
+${CMAKE_CURRENT_SOURCE_DIR}/device/Zynq/PsXadc
+${CMAKE_CURRENT_SOURCE_DIR}/device/Zynq/Register
 ${CMAKE_CURRENT_SOURCE_DIR}/detector/Germanium
 )
 
 set(USER_COMPILE_SOURCES
-detector_main.cpp
-#"common/log/Logger.cpp"
-#"common/task_wrap/task_wrap.cpp"
-#"device/I2C/ADC/LTC2309.cpp"
-#"device/I2C/DAC/DAC7678.cpp"
-#"device/I2C/I2CDevice/I2CDevice.cpp"
-#"device/I2C/TMP100/TMP100.cpp"
-#"device/ZYNQ/I2CBus/I2CBus.cpp"
-#"device/ZYNQ/PSI2C/PSI2C.cpp"
-#"device/ZYNQ/PSXADC/PSXADC.cpp"
-#"device/ZYNQ/Zynq.cpp"
-#"detector/Germanium/GermaniumDetector.cpp"
-#"detector/Germanium/GermaniumNetwork.cpp"
-#"detector/Germanium/GermaniumRegister.cpp"
-#"detector/Germanium/GermaniumZYNQ.cpp"
+"detector_main.cpp"
+"common/log/Logger.cpp"
+"device/Zynq/Register/Register.cpp"
+"device/Zynq/PsI2c/PsI2c.cpp"
+"device/Zynq/PsXadc/PsXadc.cpp"
+"detector/Germanium/GermaniumDetector.cpp"
+"detector/Germanium/GermaniumNetwork.cpp"
+"detector/Germanium/GermaniumZynq.cpp"
 )
 ```
 
+- Add the following lines to `CMakeList.txt` to support C++20 support
+
+```
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+```
 
 ## 2. Build the app
 

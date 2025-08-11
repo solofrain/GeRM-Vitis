@@ -155,10 +155,8 @@ public:
 protected:
 
     void proc_register_single_access_msg( const UdpRxMsg& msg );
-    //void proc_register_multi_access_msg ( const UdpRxMsg& msg );
     void proc_psi2c_access_msg          ( const UdpRxMsg& msg );
     void proc_psxadc_access_msg         ( const UdpRxMsg& msg );
-    //void proc_update_loads_msg          ( const char* loads );
     void proc_ad9252_access_msg         ( const UdpRxMsg& msg );
     void proc_mars_access_msg           ( const UdpRxMsg& msg );
     void proc_zddm_access_msg           ( const UdpRxMsg& msg );

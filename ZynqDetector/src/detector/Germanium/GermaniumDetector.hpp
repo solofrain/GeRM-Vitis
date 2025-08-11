@@ -93,7 +93,7 @@ protected:
     //const uint16_t TEMP2 = 
     //const uint16_t TEMP3 = 
 
-    // DAC process map: <op, <device, channel>>
+    ///< DAC process map: <op, <device, channel>>
     const std::map<uint16_t, std::pair<Dac7678<PsI2c>*, uint8_t>> dac7678_instr_map_ =
         {
             { VL0, std::make_pair( dac7678_.get(), 0 ) },
@@ -106,7 +106,7 @@ protected:
             { P2,  std::make_pair( dac7678_.get(), 7 ) }
         };
 
-    // ADC process map: <op, <device, channel>>
+    ///< ADC process map: <op, <device, channel>>
     const std::map<uint16_t, std::pair<Ltc2309<PsI2c>*, uint8_t>> ltc2309_instr_map_ =
         {
             { TEMP1,   std::make_pair( ltc2309_0_.get(), 0 ) },
@@ -121,7 +121,7 @@ protected:
             { P_V,     std::make_pair( ltc2309_1_.get(), 1 ) }
         };
 
-    // Temperature process map: <op, <device, channel>>
+    ///< Temperature process map: <op, <device, channel>>
     const std::map<uint16_t, Tmp100<PsI2c>*> tmp100_instr_map_ =
         {
             { TEMP1, tmp100_0_.get() },
@@ -132,8 +132,6 @@ protected:
     using I2cAccessHandler = std::function<void(const UdpRxMsg&)>;
     std::map<uint16_t, I2cAccessHandler> i2c_access_dispatch_map_;
 
-    void create_components();
-    void create_detector_queues();
     void init_i2c_access_dispatch_map();
 
     void rx_msg_proc(const UdpRxMsg& udp_msg);
@@ -141,23 +139,26 @@ protected:
     //void polling_taski_init();
 
 public:
-    static constexpr size_t REGISTER_SINGLE_ACCESS_REQ_QUEUE_LENG = 100;
+    static constexpr size_t REGISTER_SINGLE_ACCESS_REQ_QUEUE_LENG  = 100;
+    static constexpr size_t REGISTER_SINGLE_ACCESS_RESP_QUEUE_LENG = 100;
 
     ZynqDetector< GermaniumDetector
                 , GermaniumNetwork
                 , GermaniumZynq
                 >* base_;
 
-
-    //struct RegisterSingleAccessReqStruct
-    //{
-    //    uint16_t op;
-    //    uint32_t reg_addr;
-    //};
-    //using RegisterSingleAccessReq = RegisterSingleAccessReqStruct;
-
     GermaniumDetector();
 
+    /*
+     * @brief Create tasks to acess GermaniumDetector specific devices.
+     */
     void create_device_access_tasks();
+
+    /*
+     * @brief Create GermaniumDetector specific queues.
+     */
+    void create_queues_special();
+
+    void create_components_special();
     //void do_task_init();
 };

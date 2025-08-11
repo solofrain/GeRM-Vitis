@@ -47,7 +47,7 @@ GermaniumDetector::GermaniumDetector()
                   , GermaniumZynq
                   >()
 {
-    create_detector_queues();
+    create_queues();
 
     create_components();
 
@@ -58,7 +58,7 @@ GermaniumDetector::GermaniumDetector()
 }
 //===============================================================
 
-void GermaniumDetector::create_components()
+void GermaniumDetector::create_components_special()
 {
     auto z = std::make_unique<GermaniumZynq>( register_single_access_req_queue_
                                             , register_single_access_resp_queue_
@@ -174,10 +174,10 @@ void GermaniumDetector::init_i2c_access_dispatch_map()
 //===============================================================
 // Create tasks for device access.
 //===============================================================
-void GermaniumDetector::create_device_access_tasks()
+void GermaniumDetector::create_device_access_tasks_special()
 {
     // Tasks to access devices on Zynq: register, I2C, XADC
-    this->zynq_->base_->create_device_access_tasks();
+    //this->zynq_->base_->create_device_access_tasks();
 
     // Tasks to access sensor components
     ad9252_->create_device_access_tasks();
@@ -192,7 +192,7 @@ void GermaniumDetector::create_device_access_tasks()
 //===============================================================
 // Germanium queue creation.
 //===============================================================
-void GermaniumDetector::create_detector_queues()
+void GermaniumDetector::create_queues_special()
 {
   psi2c_0_access_req_queue_ = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
   psi2c_1_access_req_queue_ = xQueueCreate( 5, sizeof(PsI2cAccessReq) );
