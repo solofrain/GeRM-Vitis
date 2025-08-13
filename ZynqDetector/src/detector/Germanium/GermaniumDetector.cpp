@@ -59,11 +59,9 @@ GermaniumDetector::GermaniumDetector()
 //===========================================================================//
 
 /**
- * @briefe
- * Create GermaniumDetectors specific components, as well as zynq
- * and network for which only GermaniumDetector/DerivedDetector
- * knows how to properly create.
- * 
+ * @briefe Create GermaniumDetectors specific components.
+ * @details Zynq and Network objects are created here since only
+ * GermaniumDetector/DerivedDetector knows how to properly create them.
  */
 void GermaniumDetector::create_components_special()
 {

@@ -1,3 +1,16 @@
+/**
+ * @file Zddm.cpp
+ * @brief Member function definitions of `Zddm`.
+ *
+ * @author Ji Li <liji@bnl.gov>
+ * @date 08/11/2025
+ * @copyright
+ * Copyright (c) 2025 Brookhaven National Laboratory
+ * @license BSD 3-Clause License. See LICENSE file for details.
+ */
+
+//===========================================================================//
+
 #include <cstring>
 
 #include "FreeRTOS.h"
@@ -8,6 +21,8 @@
 #include "PsXadc.hpp"
 //#include "Network.hpp"
 #include "GermaniumNetwork.hpp"
+
+//===========================================================================//
 
 GermaniumNetwork::GermaniumNetwork( const QueueHandle_t   register_single_access_req_queue
                                   , const QueueHandle_t   register_single_access_resp_queue
@@ -37,9 +52,12 @@ GermaniumNetwork::GermaniumNetwork( const QueueHandle_t   register_single_access
 {}
 
 
-//===============================================================
-// Initialize Rx message process handling map.
-//===============================================================
+//===========================================================================//
+
+/**
+ * @brief Rx message process.
+ * @param msg Received UDP message.
+ */
 void GermaniumNetwork::rx_msg_proc_special( const UdpRxMsg& msg )
 {
     switch( msg.op & 0x8000 )
@@ -144,7 +162,15 @@ void GermaniumNetwork::rx_msg_proc_special( const UdpRxMsg& msg )
     }
 }
 
-void GermaniumNetwork::register_i2c_handlers( const std::map<uint16_t, I2cAccessHandler>& handlers)
+//===========================================================================//
+
+/**
+ * @brief Register I2C access message handlers.
+ * @param handlers I2C access message handlers, created by GermaniumDetector.
+ */
+void GermaniumNetwork::register_i2c_handlers( const std::map<uint16_t
+                                            , I2cAccessHandler>& handlers
+                                            )
 {
     for ( const auto& [op, fn] : handlers )
     {
@@ -155,11 +181,12 @@ void GermaniumNetwork::register_i2c_handlers( const std::map<uint16_t, I2cAccess
     }
 }
 
+//===========================================================================//
 
-
-//===============================================================
-// Process register single access message.
-//===============================================================
+/**
+ * @brief Process register single access message.
+ * @param msg Reference to the received message.
+ */
 void GermaniumNetwork::proc_register_single_access_msg( const UdpRxMsg& msg )
 {
     RegisterSingleAccessReq req;
@@ -171,13 +198,13 @@ void GermaniumNetwork::proc_register_single_access_msg( const UdpRxMsg& msg )
               , 0UL
               );
 }
-//===============================================================
 
+//===========================================================================//
 
-
-//===============================================================
-// Process AD9252 access message.
-//===============================================================
+/**
+ * @brief Process AD9252 access message.
+ * @param msg Reference to the received message.
+ */
 void GermaniumNetwork::proc_ad9252_access_msg( const UdpRxMsg& msg )
 {
     Ad9252AccessReq req;
@@ -190,11 +217,13 @@ void GermaniumNetwork::proc_ad9252_access_msg( const UdpRxMsg& msg )
               , 0UL
               );
 }
-//===============================================================
 
-//===============================================================
-// Process MARS access message.
-//===============================================================
+//===========================================================================//
+
+/**
+ * @brief Process MARS access message.
+ * @param msg Reference to the received message.
+ */
 void GermaniumNetwork::proc_mars_access_msg( const UdpRxMsg& msg )
 {
     MarsAccessReq req;
@@ -205,11 +234,13 @@ void GermaniumNetwork::proc_mars_access_msg( const UdpRxMsg& msg )
               , 0UL
               );
 }
-//===============================================================
 
-//===============================================================
-// Process ZDDM access message.
-//===============================================================
+//===========================================================================//
+
+/**
+ * @brief Process ZDDM access message.
+ * @param msg Reference to the received message.
+ */
 void GermaniumNetwork::proc_zddm_access_msg( const UdpRxMsg& msg )
 {
     ZddmAccessReq req;
@@ -221,13 +252,13 @@ void GermaniumNetwork::proc_zddm_access_msg( const UdpRxMsg& msg )
               , 0UL
               );
 }
-//===============================================================
 
+//===========================================================================//
 
-
-//===============================================================
-// Process I2C bus access message.
-//===============================================================
+/**
+ * @brief Process I2C bus access message.
+ * @param msg Reference to the received message.
+ */
 void GermaniumNetwork::proc_psi2c_access_msg( const UdpRxMsg& msg )
 {
     auto it = i2c_access_dispatch_map_.find( msg.op );
@@ -241,11 +272,13 @@ void GermaniumNetwork::proc_psi2c_access_msg( const UdpRxMsg& msg )
         logger_.log_error( "Unhandled opcode: ", msg.op );
     }
 }
-//===============================================================
 
-//===============================================================
-// Process XADC access message.
-//===============================================================
+//===========================================================================//
+
+/**
+ * @brief Process XADC access message.
+ * @param msg Reference to the received message.
+ */
 void GermaniumNetwork::proc_psxadc_access_msg( const UdpRxMsg& msg )
 {
     PsXadcAccessReq req;
@@ -266,12 +299,13 @@ void GermaniumNetwork::proc_psxadc_access_msg( const UdpRxMsg& msg )
               , 0UL
               );
 }
-//===============================================================
 
+//===========================================================================//
 
-//===============================================================
-// Compose Tx message.
-//===============================================================
+/**
+ * @brief Process message to be sent.
+ * @param msg Reference to the message to be sent.
+ */
 size_t GermaniumNetwork::tx_msg_proc_special( UdpTxMsg& msg )
 {
     QueueSetHandle_t resp_queue_set;
@@ -282,8 +316,6 @@ size_t GermaniumNetwork::tx_msg_proc_special( UdpTxMsg& msg )
     xQueueAddToSet( psxadc_access_resp_queue_, resp_queue_set );
 
     QueueSetMemberHandle_t active_queue;
-
-    //uint16_t msg_leng;
 
     active_queue = (QueueHandle_t)xQueueSelectFromSet(resp_queue_set, portMAX_DELAY);
 
@@ -323,4 +355,6 @@ size_t GermaniumNetwork::tx_msg_proc_special( UdpTxMsg& msg )
     }
     return 0;
 }
-//===============================================================
+
+//===========================================================================//
+

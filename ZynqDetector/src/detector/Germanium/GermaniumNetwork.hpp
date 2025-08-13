@@ -1,9 +1,22 @@
+/**
+ * @file GermaniumNetwork.hpp
+ * @brief Class template definition of `GermaniumNetwork`.
+ *
+ * @author Ji Li <liji@bnl.gov>
+ * @date 08/11/2025
+ * @copyright
+ * Copyright (c) 2025 Brookhaven National Laboratory
+ * @license BSD 3-Clause License. See LICENSE file for details.
+ */
 #pragma once
+
+//===========================================================================//
 
 #include "Network.hpp"
 #include "PsI2c.hpp"
 #include "PsXadc.hpp"
 
+//===========================================================================//
 
 class GermaniumNetwork : public Network<GermaniumNetwork>
 {
@@ -26,9 +39,7 @@ public:
                     , const Logger&         logger
                     );
 
-    //===============================================================
-    // Message/operation IDs
-    //===============================================================
+    ///< Message/operation IDs
     static constexpr uint16_t MARS_CONF_LOAD    = 0;
     static constexpr uint16_t LEDS              = 1;
     static constexpr uint16_t MARS_CONFIG       = 2;
@@ -82,11 +93,8 @@ public:
     Network<GermaniumNetwork>* base_;
 
     std::map<uint32_t, std::function<void(const UdpRxMsg&)>> rx_instr_map_;
-    //===============================================================
-    // Data types
-    //===============================================================
-    
-    // UDP request message payload
+
+    ///< Data types
     
     //-----------------------------
     struct SingleWordReqMsgPayload
@@ -118,9 +126,6 @@ public:
         StuffMarsReqMsgPayload   stuff_mars;
         ZddmArmReqMsgPayload     zddm_arm;
     };
-    //===============================================================
-
-    // UDP response message payload
 
     //-----------------------------
     struct SingleWordRespMsgPayload
@@ -146,10 +151,19 @@ public:
         PsXadcRespMsgPayload     psxadc;
     };
 
-    //===============================================================    
-
+    /**
+     * @brief Register I2C access message handlers.
+     */
     void register_i2c_handlers( const std::map<uint16_t, I2cAccessHandler>& handlers );
+
+    /**
+     * @brief Tx message process.
+     */
     size_t tx_msg_proc_special( UdpTxMsg &msg );
+
+    /**
+     * @brief Rx message process.
+     */
     void rx_msg_proc_special( const UdpRxMsg& msg );
 
 protected:
@@ -177,9 +191,12 @@ private:
     const Logger&  logger_;
 
     std::map<uint16_t, I2cAccessHandler> i2c_access_dispatch_map_;
-
-
 };
+
+//===========================================================================//
 
 using UdpRxMsg = typename Network<GermaniumNetwork>::UdpReqMsg;
 using UdpTxMsg = typename Network<GermaniumNetwork>::UdpRespMsg;
+
+//===========================================================================//
+

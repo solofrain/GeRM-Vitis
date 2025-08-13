@@ -1,3 +1,13 @@
+/**
+ * @file Network.tpp
+ * @brief Member function definitions of `Network`.
+ *
+ * @author Ji Li <liji@bnl.gov>
+ * @date 08/11/2025
+ * @copyright
+ * Copyright (c) 2025 Brookhaven National Laboratory
+ * @license BSD 3-Clause License. See LICENSE file for details.
+ */
 #pragma once
 
 extern "C" {
@@ -11,7 +21,7 @@ extern "C" {
 
 #include "ff.h"  // FatFS
 
-//#include "platform.h"
+//===========================================================================//
 
 
 // To resolve the conflictions of read/write definition in socket.h and sstream
@@ -30,43 +40,39 @@ extern "C" {
 #include "Logger.hpp"
 #include "task_wrap.hpp"
 
+//===========================================================================//
+
+/**
+ * @brief Network constructor.
+ * @param logger Reference to the logger.
+ */
 template < typename DerivedNetwork >
 Network<DerivedNetwork>::Network( const Logger& logger )
 	                            : logger_ ( logger )
 {}
 
-//===============================================================
-// Network initialization.
-//===============================================================
+//===========================================================================//
 
-template < typename DerivedNetwork >
-void Network<DerivedNetwork>::tcpip_init_done(void *arg)
-{
-    if (arg)
-    {
-        *((char *)arg) = 1;
-    }
-}
-
-
+/**
+ * @brief Network initialization.
+ */
 template < typename DerivedNetwork >
 void Network<DerivedNetwork>::network_init()
 {
     int sock;
 
-        // Initialize lwIP stack (TCP/IP thread + netif)
-
+    ///< Initialize lwIP stack (TCP/IP thread + netif)
     lwip_init();
     //platform_init();
 
 
-    /* Add network interface to the netif_list, and set it as default */
+    ///< Add network interface to the netif_list, and set it as default.
     if (!xemac_add( &netif_,
                     NULL,
                     NULL,
                     NULL,
                     mac_addr_,
-                    XPAR_XEMACPS_0_BASEADDR )) //PLATFORM_EMAC_BASEADDR) )
+                    XPAR_XEMACPS_0_BASEADDR ))
     {
         xil_printf("Error adding network interface\r\n");
         return;
@@ -74,7 +80,7 @@ void Network<DerivedNetwork>::network_init()
 
     netif_set_default( &netif_ );
 
-    /* specify that the network if is up */
+    ///< Specify that the network if is up.
     netif_set_up( &netif_ );
 
     read_network_config( "config" );
@@ -99,16 +105,18 @@ void Network<DerivedNetwork>::network_init()
     }
 
 }
-//==============================================================
 
+//===========================================================================//
 
-//===============================================================
-// Read network parameters from file:
-// - IP address
-// - Netmask
-// - Gateway
-// - DNS server
-// - MAC address
+/**
+ * @brief Read network configuration parameters from file.
+ * @details Read the following parameters:
+ *             - IP address
+ *             - Netmask
+ *             - Gateway
+ *             - MAC address
+ * @param filename Name of the configuration file.
+ */
 //===============================================================
 template < typename DerivedNetwork >
 void Network<DerivedNetwork>::read_network_config( const std::string& filename )
@@ -230,11 +238,17 @@ void Network<DerivedNetwork>::read_network_config( const std::string& filename )
     f_close( &file );
     f_mount(NULL, "", 1);
 }
-//===============================================================
 
+//===========================================================================//
 
+/**
+ * @brief Convert a string to an IP/MAC address.
+ * @param addr_str The string containing address.
+ * @param addr The address from the string.
+ * @return If the string contains a valid address.
+ */
 //===============================================================
-// Convert a string to an IP/MAC address.
+//
 //===============================================================
 template < typename DerivedNetwork >
 bool Network<DerivedNetwork>::string_to_addr(
@@ -254,8 +268,6 @@ bool Network<DerivedNetwork>::string_to_addr(
     }
 
     std::string segment;
-
-    //int i = 0;
 
     while ( std::getline ( ss, segment, separator ) )
     {
@@ -288,12 +300,13 @@ bool Network<DerivedNetwork>::string_to_addr(
 
     return true;
 }
-//===============================================================
 
+//===========================================================================//
 
-//===============================================================
-// Create Tx and Rx tasks
-//===============================================================
+/**
+ * @brief Create network tasks (Rx and Tx).
+ * @param
+ */
 template < typename DerivedNetwork >
 void Network<DerivedNetwork>::create_network_tasks()
 {
@@ -323,11 +336,12 @@ void Network<DerivedNetwork>::create_network_tasks()
                      , &tx_task_tcb_
                      );
 }
-//===============================================================
 
-//===============================================================
-// UDP receive task.
-//===============================================================
+//===========================================================================//
+
+/**
+ * @brief UDP Rx task function.
+ */
 template < typename DerivedNetwork >
 void Network<DerivedNetwork>::udp_rx_task()
 {
@@ -341,23 +355,23 @@ void Network<DerivedNetwork>::udp_rx_task()
 
     while(1)
     {
-        msg_leng = recvfrom/*lwip_recvfrom*//*FreeRTOS_recvfrom*/( udp_socket_
-                                             , &msg
-                                             , sizeof( msg )
-                                             , 0
-                                             , ( struct sockaddr* ) &remote_addr
-                                             , &remote_addr_leng );
+        msg_leng = recvfrom( udp_socket_
+                           , &msg
+                           , sizeof( msg )
+                           , 0
+                           , ( struct sockaddr* ) &remote_addr
+                           , &remote_addr_leng );
 
         if ( (msg_leng <= 0) || (msg.id != UDP_REQ_MSG_ID) )
         {
-            // error report
+            logger_.log_error( "Invalid UDP message received. Message ID = ", msg.id );
             continue;
         }
 
         remote_ip_addr_tmp = remote_addr.sin_addr.s_addr;
         if ( remote_ip_addr_tmp != remote_ip_addr )
         {
-            // update server IP address
+            ///< update server IP address
             remote_ip_addr = remote_ip_addr_tmp;
             remote_ip_addr_.store( remote_ip_addr_tmp, std::memory_order_relaxed );
         }
@@ -365,12 +379,12 @@ void Network<DerivedNetwork>::udp_rx_task()
         rx_msg_proc( msg );
     }
 }
-//===============================================================
 
+//===========================================================================//
 
-//===============================================================
-// UDP transmit task.
-//===============================================================
+/**
+ * @brief UDP Tx task function.
+ */
 template < typename DerivedNetwork >
 void Network<DerivedNetwork>::udp_tx_task()
 {
@@ -401,30 +415,29 @@ void Network<DerivedNetwork>::udp_tx_task()
         }
     }
 }
-//===============================================================
 
+//===========================================================================//
+
+/**
+ * @brief UDP Tx message process.
+ * @param msg UDP message to be sent.
+ */
 template< typename DerivedNetwork >
 size_t Network<DerivedNetwork>::tx_msg_proc( UdpTxMsg& msg )
 {
     return static_cast<DerivedNetwork*>(this)->tx_msg_proc_special( msg );
 }
 
-//===============================================================
-// UDP Rx message processing.
-//===============================================================
+//===========================================================================//
+
+/**
+ * @brief UDP Rx message processing.
+ * @param msg Received UDP message.
+ */
 template < typename DerivedNetwork >
 void Network<DerivedNetwork>::rx_msg_proc( const UdpRxMsg& msg )
 {
     static_cast<DerivedNetwork*>(this)->rx_msg_proc_special( msg );
-    ////int instr = msg.op && 0x7FFF;
-    //auto it = static_cast<DerivedNetwork*>(this)->rx_instr_map_.find(((UdpRxMsg)msg).op && 0x7FFF);
-    //if (it != static_cast<DerivedNetwork*>(this)->rx_instr_map_.end())
-    //{
-    //    it->second(msg);  // Call the corresponding function
-    //}
-    //else
-    //{
-    //    logger_.log_error( "Unknown instruction: ", ((UdpRxMsg)msg).op );
-    //}
 }
-//===============================================================
+
+//===========================================================================//

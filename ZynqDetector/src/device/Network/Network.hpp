@@ -1,4 +1,16 @@
+/**
+ * @file Network.hpp
+ * @brief Class template definition of `Network`.
+ *
+ * @author Ji Li <liji@bnl.gov>
+ * @date 08/11/2025
+ * @copyright
+ * Copyright (c) 2025 Brookhaven National Laboratory
+ * @license BSD 3-Clause License. See LICENSE file for details.
+ */
 #pragma once
+
+//===========================================================================//
 
 #include <cstdint>
 #include <memory>
@@ -12,20 +24,14 @@ extern "C" {
 #include "lwip/netif.h"
 #include "lwip/inet.h"
 
-//#include "lwipopts.h"
-//#include "lwip/ip_addr.h"
-//#include "lwip/err.h"
-//#include "lwip/udp.h"
-//#include "lwip/sys.h"
-//#include "lwip/init.h"
-
 #include "netif/xadapter.h"
 #include "errno.h"
 #include "xparameters.h"
 }
 
-//#include "ZynqDetector.hpp"
 #include "Logger.hpp"
+
+//===========================================================================//
 
 template < typename DerivedNetwork >
 class Network
@@ -33,6 +39,7 @@ class Network
 
 public:
 
+    ///< UDP and message
     static constexpr uint32_t UDP_PORT        = 0x7000;
     static constexpr uint32_t UDP_REQ_MSG_ID  = 0xCAFE;
     static constexpr uint32_t UDP_RESP_MSG_ID = 0xBEEF;
@@ -60,7 +67,15 @@ public:
 
 
     explicit Network( const Logger& logger  );
+
+    /**
+     * @brief Network initialization
+     */
     void network_init();
+
+    /**
+     * @brief Create network tasks (Rx/Tx)
+     */
     void create_network_tasks();
 
 private:
@@ -87,15 +102,39 @@ private:
     TaskHandle_t udp_rx_task_handle_;
     TaskHandle_t udp_tx_task_handle_;
     
+    /**
+     * @brief Read network configuration parameters from file.
+     */
     void read_network_config( const std::string& filename );
+
+    /**
+     * @brief Check if TCP/IP initialization is done.
+     */
     static void tcpip_init_done( void *arg );
+
+    /**
+     * @brief Convert a string to an IP/MAC address.
+     */
     bool string_to_addr( const std::string& addr_str, uint8_t* addr );
 
-    //void create_network_tasks();
+    /**
+     * @brief UDP Rx task function.
+     */
     void udp_rx_task();
+    
+    /**
+     * @brief UDP Tx task function.
+     */
     void udp_tx_task();
 
+    /**
+     * @brief UDP Rx message process.
+     */
     void rx_msg_proc( const UdpRxMsg& msg );
+
+    /**
+     * @brief UDP Tx message process.
+     */
     size_t tx_msg_proc( UdpTxMsg& msg );
 
 };

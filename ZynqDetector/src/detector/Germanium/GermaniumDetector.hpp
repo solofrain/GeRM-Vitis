@@ -165,8 +165,10 @@ public:
      */
     void create_queues_special();
 
+    /**
+     * @brief Create GermaniumDetector specific components.
+     */
     void create_components_special();
-    //void do_task_init();
 };
 
 //===========================================================================//
