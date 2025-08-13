@@ -1,19 +1,23 @@
+/**
+ * @file Zddm.hpp
+ * @brief Class template definition of `Zddm`.
+ *
+ * @author Ji Li <liji@bnl.gov>
+ * @date 08/11/2025
+ * @copyright
+ * Copyright (c) 2025 Brookhaven National Laboratory
+ * @license BSD 3-Clause License. See LICENSE file for details.
+ */
 #pragma once
+
+//===========================================================================//
 
 #include "FreeRTOS.h"
 
 #include "Register.hpp"
 #include "task_wrap.hpp"
 
-#include "queue.hpp"
-
-//struct __attribute__((__packed__)) ZddmArmStruct
-//{
-//    uint16_t  mode;
-//    uint16_t  val;
-//};
-//using ZddmArm = ZddmArmStruct;
-//using ZddmAccessReq = ZddmArmStruct;
+//===========================================================================//
 
 template<typename DerivedNetwork>
 class Zddm
@@ -37,5 +41,7 @@ private:
     void zddm_arm( int mode, int val );
     void task();
 };
+
+//===========================================================================//
 
 #include "Zddm.tpp"

@@ -1,4 +1,16 @@
+/**
+ * @file GermaniumDetector.hpp
+ * @brief Class definition of `PsI2c`.
+ *
+ * @author Ji Li <liji@bnl.gov>
+ * @date 08/11/2025
+ * @copyright
+ * Copyright (c) 2025 Brookhaven National Laboratory
+ * @license BSD 3-Clause License. See LICENSE file for details.
+ */
 #pragma once
+
+//===========================================================================//
 
 #include <string>
 
@@ -12,6 +24,7 @@
 #include "task_wrap.hpp"
 #include "queue.hpp"
 
+//===========================================================================//
 
 class PsI2c
 {
@@ -30,14 +43,9 @@ private:
     
     static constexpr UBaseType_t TASK_PRIORITY   = 2;
     static constexpr uint32_t    TASK_STACK_SIZE = 1000;
-    StaticTask_t                 task_tcb;
-    StackType_t                  task_stack[TASK_STACK_SIZE];
-
-    StaticTask_t task_tcb_;
-    StackType_t task_stack_[1000];  // match your xTaskCreate() stack size
-
-    TaskConfig task_cfg_;
-
+    StaticTask_t                 task_tcb_;
+    StackType_t                  task_stack_[TASK_STACK_SIZE];
+    TaskConfig                   task_cfg_;
 
     xSemaphoreHandle mutex_;
 
@@ -52,7 +60,6 @@ public:
   
     PsI2c( const uint8_t                  bus_index
          , const std::string              name
-         //, const uint32_t                 device_id
          , const uint32_t                 base_addr
          , const uint32_t                 clk_freq
          , const QueueHandle_t            req_queue
@@ -62,4 +69,6 @@ public:
 
     void create_psi2c_task();
 };
+
+//===========================================================================//
 

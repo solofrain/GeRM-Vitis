@@ -1,15 +1,22 @@
+/**
+ * @file I2cDevice.hpp
+ * @brief Class definition of `I2cDevice`.
+ *
+ * @author Ji Li <liji@bnl.gov>
+ * @date 08/11/2025
+ * @copyright
+ * Copyright (c) 2025 Brookhaven National Laboratory
+ * @license BSD 3-Clause License. See LICENSE file for details.
+ */
 #pragma once
 
-#include <map>
-#include <cstdint>
-#include <variant>
-#include <memory>
+//===========================================================================//
 
 #include "concepts.hpp"
 #include "queue.hpp"
 #include "Logger.hpp"
 
-//class PlI2c;
+//===========================================================================//
 
 template< typename I2cType >
 class I2cDevice
@@ -18,7 +25,6 @@ class I2cDevice
     using AccessReqType = typename AccessReqTypeSelector<I2cType>::type;
 
 protected:
-//    I2cType&                     i2c_;
     uint8_t                      i2c_addr_;
     
     AccessReqType                req_;
@@ -28,16 +34,16 @@ protected:
 
 public:
 
-    I2cDevice( /*const I2cType&                     i2c
-             , */uint8_t                            i2c_addr
-             , const QueueHandle_t                req_queue
-             //, const std::map<uint16_t, uint8_t>& chan_assign
-             , const Logger&                      logger
+    I2cDevice( uint8_t              i2c_addr
+             , const QueueHandle_t  req_queue
+             , const Logger&        logger
              );
     //requires IsSameType<T, PlI2c>;
 
     ~I2cDevice() = default;
 
 };
+
+//===========================================================================//
 
 #include "I2cDevice.tpp"

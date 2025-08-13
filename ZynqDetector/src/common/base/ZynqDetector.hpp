@@ -2,8 +2,7 @@
  * @file ZynqDetector.hpp
  * @brief Class declration of `ZynqDetector`.
  * @details
- * This file declares defines an object of `GermaniumDetector` class,
- * does initialization, and wait forever.
+ * This file defines `ZynqDetector` class template.
  *
  * @author Ji Li <liji@bnl.gov>
  * @date 08/11/2025
